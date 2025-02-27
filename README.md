@@ -24,6 +24,13 @@ This Turborepo includes the following packages/apps:
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
+## AI Collaboration System
+
+- All projects contain an `AI_CONTEXT.md` file documenting:
+  - Service boundaries and architecture patterns
+  - AI interaction guidelines
+  - Infrastructure-as-Code conventions
+
 ### Utilities
 
 This Turborepo has some additional tools already setup for you:
@@ -40,6 +47,12 @@ To build all apps and packages, run the following command:
 cd my-turborepo
 pnpm build
 ```
+
+## Development Practices
+
+- Follow atomic commit rules defined in [AI_CONTEXT.md](./AI_CONTEXT.md#commit-strategy)
+- Changes must reference relevant documentation sections
+- Prefer small, focused commits over large changesets
 
 ### Develop
 
