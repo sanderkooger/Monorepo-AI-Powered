@@ -1,5 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
 
+## AI Documentation
+
+This project follows the monorepo's AI collaboration guidelines documented in:
+
+- [AI_CONTEXT.md](./AI_CONTEXT.md) (project-specific rules)
+- [Root AI_CONTEXT.md](../../AI_CONTEXT.md) (monorepo-wide standards)
+
 ## Getting Started
 
 First, run the development server:
