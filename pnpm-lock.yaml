@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      cline:
+        specifier: ^0.8.2
+        version: 0.8.2
       prettier:
         specifier: ^3.5.0
         version: 3.5.0
@@ -699,6 +702,10 @@ packages:
 
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
+
+  cline@0.8.2:
+    resolution: {integrity: sha512-xcRdiR3vm9XdLmsMkK3XkKOHzOmKxl8eVTO739O6KinC0kRdCGV4jYnItccNMReymKYhQ9obOlMscic5spP3mQ==}
+    engines: {node: '>=0.8.x'}
 
   clone@1.0.4:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
@@ -2676,6 +2683,8 @@ snapshots:
   cli-width@3.0.0: {}
 
   client-only@0.0.1: {}
+
+  cline@0.8.2: {}
 
   clone@1.0.4: {}
 
