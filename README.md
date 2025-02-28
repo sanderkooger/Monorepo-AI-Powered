@@ -10,13 +10,15 @@
 
 ## Vision Statement
 
-A production-grade monorepo template for full-stack applications with built-in DevOps capabilities, combining:
+A production-ready monorepo platform for multi-language/technology systems with integrated DevOps capabilities, featuring:
 
-- Modern web development (Next.js)
+- Full-stack application development (Next.js + TypeScript)
 - Infrastructure-as-Code (OpenTofu/Ansible)
-- Shared component library
-- CI/CD pipelines
-- Multi-environment management
+- Cross-platform component libraries
+- End-to-end CI/CD pipelines
+- Multi-environment deployment strategies
+- Integrated testing frameworks
+- Secret management with self-hosted Vault
 
 ## Current Capabilities ✅
 
@@ -68,7 +70,7 @@ gantt
    - Canary release configurations
 
 3. 🔒 **Security Foundations**
-   - Secret management integration
+   - Self-hosted HashiCorp Vault integration
    - Infrastructure hardening scripts
    - Compliance as Code templates
 
