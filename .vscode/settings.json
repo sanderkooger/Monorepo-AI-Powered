@@ -3,5 +3,7 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "flashpost.saveDataToWorkspace": true,
+  "roo-cline.vsCodeLmModelSelector": {}
 }

@@ -95,7 +95,7 @@ gantt
 
 ```bash
 # Clone & install
-git clone https://github.com/your-org/devops-monorepo.git
+git clone  https://github.com/sanderkooger/Monorepo-AI-Powered.git
 cd devops-monorepo
 pnpm install
 

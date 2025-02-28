@@ -1,27 +1,48 @@
-# Monorepo AI Collaboration Guide
+# AI Collaboration Framework
 
-## Core Principles
+## Cline Integration
 
-- All projects must include their own AI_CONTEXT.md
-- Infrastructure-as-Code patterns using OpenTofu
-- Ansible configuration management standards
+### Installation & Configuration
 
-## Commit Strategy
+1. Install the [Cline VSCode Extension](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev)
+2. Configure OpenRouter API key:
 
-### Atomic Changes
+```bash
+pnpm exec cline config set openrouter.key YOUR_API_KEY
+```
 
-- Each commit must address a single logical change
-- Maximum change scope per commit:
-  - 1 file type (e.g., config/docs/code)
-  - 1 functional area
-  - 1 documentation section
+3. Context storage location: `/home/sander/.vscode-server/data/User/globalStorage/saoudrizwan.claude-dev/context`
 
-### Documentation Requirements
+## Context Management
 
-- Commit messages must reference affected AI_CONTEXT.md sections
-- Multi-file changes require a commit summary table:
+- **Global Context**: Root-level AI_CONTEXT.md
+  - Architecture decisions
+  - Cross-service contracts
+  - Environment policies
+- **Service Context**: Per-project AI_CONTEXT.md
+  - Component boundaries
+  - API specifications
+  - Data flow diagrams
 
-| File | Change Description | Context Reference |
-| ---- | ------------------ | ----------------- |
+## Infrastructure Monitoring
 
-## Documentation Map
+```mermaid
+graph LR
+    MCP[MCP Server] -->|Watches| IaC[Infrastructure Code]
+    IaC -->|Changes| Trigger[Update Context]
+    Trigger --> CLI[Run pnpm exec cline context update]
+    CLI -->|Updates| Docs[Environment Documentation]
+```
+
+## Collaboration Guidelines
+
+1. Infrastructure changes require:
+
+```bash
+pnpm infra:docs && pnpm exec cline context update --scope infrastructure
+```
+
+2. Service updates must reference:
+   - Related architecture decisions
+   - Impacted data flows
+   - Version compatibility matrix
