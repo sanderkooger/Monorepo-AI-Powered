@@ -1,0 +1,22 @@
+# Architecture Mode Requirements
+
+## Design Principles
+
+1. Prefer hexagonal architecture for service boundaries
+2. Validate infrastructure changes against ADRs
+3. Maintain explicit interface contracts between modules
+
+## Documentation Standards
+
+```mermaid
+graph TD
+    ADR[Architecture Decision] -->|influences| Service[Service Design]
+    Service -->|generates| Contract[Interface Contracts]
+    Contract -->|validates| Deployment[Infra Deployment]
+```
+
+## Decision Records
+
+- Use MADR format for all architectural decisions
+- Link decisions to impacted services in AI_CONTEXT.md
+- Review quarterly for relevance
