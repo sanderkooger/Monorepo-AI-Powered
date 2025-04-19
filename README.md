@@ -87,7 +87,12 @@ gantt
 │   └── typescript-config # TS base configurations
 ├── infrastructure/
 │   ├── ansible         # Configuration management
-│   └── opentofu        # Cloud provisioning
+│   │   └── playbooks/
+│   │       └── setup-local-dev.yml # Playbook for dev tool installation
+│   ├── opentofu        # Cloud provisioning
+│   └── packer          # VM Image building (e.g., Proxmox Ubuntu) -> [See Details](./infrastructure/packer/)
+├── scripts/
+│   └── setup-dev-env.sh # Script to bootstrap dev environment
 ├── .clinerules         # Repository-wide development standards
 ├── .clinerules-architect # Architecture-specific rules
 ├── AI_CONTEXT.md       # Infrastructure context
@@ -122,6 +127,17 @@ gantt
 git clone  https://github.com/sanderkooger/Monorepo-AI-Powered.git
 cd devops-monorepo
 pnpm install
+
+# Set up local development environment tools
+# This script ensures required tools are installed via Ansible:
+# - Ansible (installed by script if missing)
+# - NVM (v0.39.7)
+# - Node.js (Latest LTS via NVM)
+# - Packer (v1.10.3)
+# - OpenTofu (v1.7.2)
+# It also enables Corepack to manage pnpm (using version from package.json).
+# Note: The script may prompt for sudo password for installations.
+pnpm dev-init
 
 # Start development servers
 pnpm dev
