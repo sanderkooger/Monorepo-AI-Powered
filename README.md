@@ -70,9 +70,23 @@ gantt
    - Canary release configurations
 
 3. 🔒 **Security Foundations**
-   - Self-hosted HashiCorp Vault integration
+   - Bring Your Own HashiCorp Vault implementation ([ADR](./docs/architecture/decisions/2025-04-20-bring-your-own-vault.md))
    - Infrastructure hardening scripts
    - Compliance as Code templates
+   - Example Helm configuration for development:
+     ```yaml
+     # infrastructure/ansible/examples/vault-helm-values.yaml
+     server:
+       enabled: true
+       ha:
+         enabled: true
+         replicas: 3
+     global:
+       tlsDisable: true # Enable TLS in production
+     storage:
+       file:
+         path: "/vault/data"
+     ```
 
 ## Project Structure
 

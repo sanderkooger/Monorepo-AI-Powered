@@ -12,6 +12,8 @@
     nvm_version: "0.39.7" # Check latest NVM version
     packer_version: "1.10.3" # Check latest stable version
     opentofu_version: "1.7.2" # Check latest stable version
+    kubectl_version: "1.29.3" # Check latest stable version
+    # Helm version is usually handled by the install script (latest v3)
     # Determine NVM directory (adjust if user modifies $XDG_CONFIG_HOME)
     nvm_dir: "{{ ansible_env.HOME }}/.nvm"
     nvm_script: "{{ nvm_dir }}/nvm.sh"
@@ -26,7 +28,14 @@
         - name: Update package cache (Debian/Ubuntu)
           ansible.builtin.apt:
             update_cache: yes
-            cache_valid_time: 3600 # Update only if cache is older than 1 hour
+            cache_valid_time: 3600
+            force_apt_get: yes
+          register: apt_update
+          until: apt_update is succeeded
+          retries: 3
+          delay: 10
+          ignore_errors: true
+          failed_when: false
           when: ansible_os_family == "Debian"
           changed_when: false # Don't report cache updates as changes
 
@@ -109,6 +118,49 @@
             state: absent
           when: tofu_check.rc != 0
 
+        # --- Kubectl ---
+        - name: Check if kubectl exists
+          ansible.builtin.stat:
+            path: /usr/local/bin/kubectl
+          register: kubectl_stat
+
+        - name: Download kubectl binary
+          ansible.builtin.get_url:
+            url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl"
+            dest: /usr/local/bin/kubectl
+            mode: '0755'
+            owner: root
+            group: root
+          when: ansible_os_family != "Darwin" and not kubectl_stat.stat.exists # Assuming Linux for now
+
+        # Add macOS kubectl download if needed later
+
+        # --- Helm ---
+        - name: Check if helm exists
+          ansible.builtin.stat:
+            path: /usr/local/bin/helm
+          register: helm_stat
+
+        - name: Download Helm install script
+          ansible.builtin.get_url:
+            url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+            dest: /tmp/get_helm.sh
+            mode: '0755'
+          when: not helm_stat.stat.exists
+
+        - name: Install Helm using script
+          ansible.builtin.command:
+            cmd: /tmp/get_helm.sh
+            creates: /usr/local/bin/helm # Make it idempotent
+          changed_when: true # Assume changed if script runs
+          when: not helm_stat.stat.exists
+
+        - name: Clean up Helm install script
+          ansible.builtin.file:
+            path: /tmp/get_helm.sh
+            state: absent
+          when: not helm_stat.stat.exists # Only clean up if we downloaded it
+
         # --- Add other sudo tasks as needed ---
 
     # ===========================================
@@ -143,125 +195,4 @@
     # ===========================================
     - name: Display final message
       ansible.builtin.debug:
-        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu) should now be installed/updated."
-
-# --- Removed original Node.js install tasks ---
-
-    # --- Packer ---
-    - name: Check if Packer is installed
-      ansible.builtin.command: packer --version
-      register: packer_check
-      ignore_errors: true
-      changed_when: false
-
-    - name: Install unzip (dependency for Packer install)
-      ansible.builtin.package:
-        name: unzip
-        state: present
-      when: packer_check is failed
-
-    - name: Download Packer binary
-      ansible.builtin.get_url:
-        url: "https://releases.hashicorp.com/packer/{{ packer_version }}/packer_{{ packer_version }}_linux_amd64.zip"
-        dest: "/tmp/packer_{{ packer_version }}_linux_amd64.zip"
-        mode: '0644'
-      when: ansible_os_family != "Darwin" and packer_check.rc != 0
-
-    - name: Download Packer binary (macOS)
-      ansible.builtin.get_url:
-        url: "https://releases.hashicorp.com/packer/{{ packer_version }}/packer_{{ packer_version }}_darwin_amd64.zip"
-        dest: "/tmp/packer_{{ packer_version }}_darwin_amd64.zip"
-        mode: '0644'
-      when: ansible_os_family == "Darwin" and packer_check.rc != 0
-
-    - name: Unzip Packer binary
-      ansible.builtin.unarchive:
-        src: "/tmp/packer_{{ packer_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
-        dest: "/usr/local/bin/"
-        remote_src: yes
-        mode: '0755'
-        owner: root
-        group: root
-      when: packer_check.rc != 0
-
-    - name: Clean up Packer zip file
-      ansible.builtin.file:
-        path: "/tmp/packer_{{ packer_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
-        state: absent
-      when: packer_check.rc != 0
-
-    # --- OpenTofu ---
-    - name: Check if OpenTofu is installed
-      ansible.builtin.command: tofu --version
-      register: tofu_check
-      ignore_errors: true
-      changed_when: false
-
-    - name: Download OpenTofu binary
-      ansible.builtin.get_url:
-        url: "https://github.com/opentofu/opentofu/releases/download/v{{ opentofu_version }}/tofu_{{ opentofu_version }}_linux_amd64.zip"
-        dest: "/tmp/tofu_{{ opentofu_version }}_linux_amd64.zip"
-        mode: '0644'
-      when: ansible_os_family != "Darwin" and tofu_check.rc != 0
-
-    - name: Download OpenTofu binary (macOS)
-      ansible.builtin.get_url:
-        url: "https://github.com/opentofu/opentofu/releases/download/v{{ opentofu_version }}/tofu_{{ opentofu_version }}_darwin_amd64.zip"
-        dest: "/tmp/tofu_{{ opentofu_version }}_darwin_amd64.zip"
-        mode: '0644'
-      when: ansible_os_family == "Darwin" and tofu_check.rc != 0
-
-    - name: Unzip OpenTofu binary
-      ansible.builtin.unarchive:
-        src: "/tmp/tofu_{{ opentofu_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
-        dest: "/usr/local/bin/"
-        remote_src: yes
-        mode: '0755'
-        owner: root
-        group: root
-      when: tofu_check.rc != 0
-
-    - name: Clean up OpenTofu zip file
-      ansible.builtin.file:
-        path: "/tmp/tofu_{{ opentofu_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
-        state: absent
-      when: tofu_check.rc != 0
-
-    # --- Add other tools as needed ---
-    # Example: Docker client (assuming Docker daemon is managed separately)
-    # - name: Install Docker client dependencies (Debian/Ubuntu)
-    #   ansible.builtin.apt:
-    #     name: ["apt-transport-https", "ca-certificates", "curl", "gnupg", "lsb-release"]
-    #     state: present
-    #   when: ansible_os_family == "Debian"
-
-    # - name: Add Docker GPG key (Debian/Ubuntu)
-    #   ansible.builtin.get_url:
-    #     url: https://download.docker.com/linux/ubuntu/gpg
-    #     dest: /etc/apt/keyrings/docker.gpg
-    #     mode: '0644'
-    #   when: ansible_os_family == "Debian"
-
-    # - name: Add Docker repository (Debian/Ubuntu)
-    #   ansible.builtin.apt_repository:
-    #     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-    #     filename: docker
-    #     state: present
-    #     update_cache: yes
-    #   when: ansible_os_family == "Debian"
-
-    # - name: Install Docker client packages (Debian/Ubuntu)
-    #   ansible.builtin.apt:
-    #     name: ["docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"]
-    #     state: present
-    #   when: ansible_os_family == "Debian"
-
-    # - name: Install Docker client (macOS - using Homebrew)
-    #   community.general.homebrew_cask:
-    #     name: docker
-    #     state: present
-    #   when: ansible_os_family == "Darwin"
-
-    - name: Display final message
-      ansible.builtin.debug:
-        msg: "Development environment tools (Node.js, pnpm, Packer, OpenTofu) should now be installed/updated."
+        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu, kubectl, Helm) should now be installed/updated."
