@@ -7,6 +7,7 @@
 3. Maintain explicit interface contracts between modules
 
 ## Documentation Standards
+- Ensure secret management follows best practices: production secrets should not be bootstrapped locally but managed via centralized CI/CD pipelines.
 
 ```mermaid
 graph TD

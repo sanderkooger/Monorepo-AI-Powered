@@ -219,39 +219,27 @@ REPO_NAME=$(basename "$REPO_TOP")
 echo "Repository name detected: $REPO_NAME"
 
 # Check if KV engine exists.
-if vault secrets list -format=json | jq -e --arg path "kv/${REPO_NAME}/" '.[] | select(.path==$path)' > /dev/null; then
-  echo "KV engine at kv/${REPO_NAME} already exists. Skipping enable step."
-else
-  echo "Enabling KV engine at kv/${REPO_NAME}..."
-  kv_output=$(vault secrets enable -path="kv/${REPO_NAME}" kv-v2 2>&1 || true)
-  if echo "$kv_output" | grep -qi "path is already in use"; then
-    echo "KV engine at kv/${REPO_NAME} already exists. Skipping enable step."
-  elif echo "$kv_output" | grep -qi "Success"; then
-    echo "KV engine enabled successfully."
+if ! vault secrets list -format=json | jq -e --arg path "kv/${REPO_NAME}" '.[] | select(.path==$path)' > /dev/null; then
+  echo "KV engine at kv/${REPO_NAME} not found. Triggering OpenTofu provisioning..."
+  if command -v docker > /dev/null; then
+    cd $(git rev-parse --show-toplevel)/infrastructure/opentofu && make apply && cd -
   else
-    echo "Error enabling KV engine:"
-    echo "$kv_output"
-    exit 1
+    echo "Docker not available. Skipping OpenTofu provisioning for KV engine."
   fi
+else
+  echo "KV engine at kv/${REPO_NAME} exists."
 fi
 
-# Create policies directory if it does not exist.
-mkdir -p policies
-
-# Check if the policy already exists.
-if vault policy read "$REPO_NAME" > /dev/null 2>&1; then
-  echo "Policy '$REPO_NAME' already exists. Skipping policy creation."
+# Check if the policy exists.
+if ! vault policy read "$REPO_NAME" > /dev/null 2>&1; then
+  echo "Policy '$REPO_NAME' not found. Triggering OpenTofu provisioning for policies..."
+  if command -v docker > /dev/null; then
+    cd $(git rev-parse --show-toplevel)/infrastructure/opentofu && make apply && cd -
+  else
+    echo "Docker not available. Skipping OpenTofu provisioning for policies."
+  fi
 else
-  # Write policy file.
-  POLICY_FILE="policies/${REPO_NAME}-policy.hcl"
-  cat > "$POLICY_FILE" <<EOF
-path "kv/${REPO_NAME}/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-EOF
-  echo "Writing policy from $POLICY_FILE..."
-  vault policy write "$REPO_NAME" "$POLICY_FILE"
-  echo "Policy applied successfully."
+  echo "Policy '$REPO_NAME' exists."
 fi
 
 echo "Vault bootstrap process complete."

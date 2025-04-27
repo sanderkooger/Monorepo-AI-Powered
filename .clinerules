@@ -30,4 +30,10 @@
 
 - Terraform changes require:
   - Updated module READMEs
+# API Key Storage Note:
+Always store API keys in Vault using the following convention:
+  kv/REPO_NAME/env/secret-key
+For example, the Proxmox API key should be stored at:
+  kv/Monorepo-AI-Powered/prod/proxmox-api-key
+  - Do not bootstrap production secrets via local scripts; use CI/CD for secret injection.
   - Version compatibility checks

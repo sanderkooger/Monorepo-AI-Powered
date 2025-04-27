@@ -59,6 +59,8 @@ kv/<REPO_NAME>/prod/<secret-key>
 
 ### Storing Secrets
 
+**Note:** Avoid bootstrapping secrets in production via local scripts. Instead, manage secret injection through a centralized CI/CD pipeline.
+
 ```bash
 vault kv put "kv/$REPO_NAME/dev/db-credentials" \
   username="user" password="pass"

@@ -1,4 +1,4 @@
 FROM ghcr.io/opentofu/opentofu:latest
-COPY infrastructure/opentofu/ /app/infrastructure/
+COPY . /app/infrastructure/
 WORKDIR /app/infrastructure
 ENTRYPOINT ["tofu"]
