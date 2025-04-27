@@ -1,86 +1,76 @@
-# HashiCorp Vault Helm Deployment
+# HashiCorp Vault Repository Tools
 
-This directory contains the configuration for deploying HashiCorp Vault using the official Helm chart.
+This directory contains scripts and configuration for deploying and integrating HashiCorp Vault into your environment. Vault deployment is optional; you can bring your own Vault.
 
-## Prerequisites
+## Optional Vault Deployment
 
-- Helm v3+ installed
-- Kubernetes cluster access configured (`kubectl` context set)
-- Nginx Ingress Controller installed in the cluster
-- Cert-Manager installed in the cluster (for automatic TLS via Let's Encrypt)
-- Local Path Provisioner (or similar) configured for persistent storage
+### Add the HashiCorp Helm Repository
 
-## Deployment Steps
-
-1.  **Add HashiCorp Helm Repository:**
-    ```bash
-    helm repo add hashicorp https://helm.releases.hashicorp.com
-    helm repo update
-    ```
-
-2.  **Customize `values.yaml`:**
-    Review and adjust the `values.yaml` file in this directory to match your specific environment requirements (e.g., storage class, ingress host, cluster issuer). Pay close attention to the placeholder values marked with `IMPORTANT:`.
-
-3.  **Deploy Vault:**
-    This command will install Vault into the `vault` namespace, creating the namespace if it doesn't exist.
-    ```bash
-    helm install vault hashicorp/vault --namespace vault --create-namespace -f values.yaml
-    ```
-
-4.  **Initialize and Unseal Vault:**
-    Follow the post-installation steps, typically involving exec-ing into the Vault pod to initialize and unseal it. Refer to the official Vault Helm chart documentation for details.
-
-## Configuration Details
-
-- **UI:** Enabled
-- **Storage:** Configured to use a PersistentVolumeClaim with local path provisioner
-- **HA:** Disabled (single replica)
-- **Ingress:** Nginx with TLS via Cert-Manager
-- **Auth Methods:**
-  - Kubernetes (default)
-  - AppRole (CLI access)
-- **Namespaces:**
-  - dev
-  - staging
-  - prod
-
-## CLI Authentication via AppRole
-
-1. Create policy for CLI access:
 ```bash
-vault policy write cli-policy - <<EOF
-path "dev/secrets/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-EOF
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update
 ```
 
-2. Configure AppRole auth method:
+### Install Vault with Helm
+
 ```bash
-vault auth enable -path=cli approle
-vault write auth/cli/role/cli-role \
-  token_policies="cli-policy" \
-  token_ttl=1h \
-  token_max_ttl=24h
+helm install vault hashicorp/vault \
+  -f repository-tools/hashicorpVault/values.yaml \
+  --namespace vault \
+  --create-namespace
 ```
 
-3. Retrieve credentials:
+#### Key `values.yaml` Configuration
+
+- `global.externalVaultAddr`: If set, the chart skips server deployment and uses an existing Vault.
+- `global.tlsDisable`: Disable TLS for development.
+- `server.enabled`: Enable (`true`) or disable (`false`) the Vault server component.
+- `ingress.enabled`: Configure ingress for external access.
+- Update image tags, resources, and ingress hosts as needed.
+
+## Bring Your Own Vault
+
+If you already have a Vault server, follow these steps to configure it for your repository.
+
+### Prerequisites
+
+- Vault CLI installed and configured with `VAULT_ADDR`.
+- Appropriate authentication method (token, AppRole, etc.).
+
+### Enable KV Secrets Engine
+
+Enable a KV v2 secrets engine at a path named after your repository:
+
 ```bash
-ROLE_ID=$(vault read -field=role_id auth/cli/role/cli-role/role-id)
-SECRET_ID=$(vault write -f -field=secret_id auth/cli/role/cli-role/secret-id)
+export REPO_NAME=<your-repo-name>
+vault secrets enable -path="kv/$REPO_NAME" kv-v2
 ```
 
-4. Authenticate with Vault CLI:
-```bash
-vault write auth/cli/login role_id=$ROLE_ID secret_id=$SECRET_ID
+### KV Store Structure
+
+We store secrets under a KV store keyed by repository and environment:
+
+```
+kv/<REPO_NAME>/dev/<secret-key>
+kv/<REPO_NAME>/test/<secret-key>
+kv/<REPO_NAME>/accept/<secret-key>
+kv/<REPO_NAME>/prod/<secret-key>
 ```
 
-## Kubernetes Integration
-Pods authenticate using service accounts:
+### Storing Secrets
+
 ```bash
-vault write auth/kubernetes/role/app-role \
-  bound_service_account_names=default \
-  bound_service_account_namespaces=default \
-  policies=default-policy \
-  ttl=1h
+vault kv put "kv/$REPO_NAME/dev/db-credentials" \
+  username="user" password="pass"
 ```
+
+### Retrieving Secrets
+
+```bash
+vault kv get "kv/$REPO_NAME/prod/db-credentials"
+```
+
+### Next Steps
+
+- Create and apply policies to control access to each environment path.
+- Integrate Vault into your CI/CD pipeline.

@@ -12,6 +12,7 @@
     nvm_version: "0.39.7" # Check latest NVM version
     packer_version: "1.10.3" # Check latest stable version
     opentofu_version: "1.7.2" # Check latest stable version
+    vault_version: "1.15.2" # HashiCorp Vault LTS
     kubectl_version: "1.29.3" # Check latest stable version
     # Helm version is usually handled by the install script (latest v3)
     # Determine NVM directory (adjust if user modifies $XDG_CONFIG_HOME)
@@ -161,7 +162,53 @@
             state: absent
           when: not helm_stat.stat.exists # Only clean up if we downloaded it
 
-        # --- Add other sudo tasks as needed ---
+       # --- Vault CLI ---
+    - name: Check if Vault is installed
+      ansible.builtin.command: vault --version
+      register: vault_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Download Vault binary (Linux)
+      ansible.builtin.get_url:
+        url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+        dest: "/tmp/vault_{{ vault_version }}_linux_amd64.zip"
+        mode: '0644'
+      when: ansible_os_family != "Darwin" and vault_check.rc != 0
+
+    - name: Download Vault binary (macOS)
+      ansible.builtin.get_url:
+        url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_darwin_amd64.zip"
+        dest: "/tmp/vault_{{ vault_version }}_darwin_amd64.zip"
+        mode: '0644'
+      when: ansible_os_family == "Darwin" and vault_check.rc != 0
+
+    - name: Debug Vault installation variables
+      ansible.builtin.debug:
+        msg:
+          - "Vault Version: {{ vault_version }}"
+          - "OS Family: {{ ansible_os_family }}"
+          - "Vault Check Result: {{ vault_check }}"
+          - "Expected Zip Path: /tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+      when: vault_check.rc != 0 # Only show debug if we intend to install
+
+    - name: Unzip Vault binary
+      become: true # Explicitly add become here as well
+      ansible.builtin.unarchive:
+        src: "/tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+        dest: "/usr/local/bin/"
+        remote_src: yes
+        mode: '0755'
+        owner: root
+        group: root
+      when: vault_check.rc != 0
+
+    - name: Clean up Vault zip file
+      ansible.builtin.file:
+        path: "/tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+        state: absent
+      when: vault_check.rc != 0
+       # --- Add other sudo tasks as needed ---
 
     # ===========================================
     # NVM and Node.js Installation (as user)
@@ -195,4 +242,4 @@
     # ===========================================
     - name: Display final message
       ansible.builtin.debug:
-        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu, kubectl, Helm) should now be installed/updated."
+        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu, Vault, kubectl, Helm) should now be installed/updated."
