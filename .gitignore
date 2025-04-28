@@ -33,6 +33,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Terraform / OpenTofu
+*.tfvars
+*.tfstate
+*.tfstate.*
 # Misc
 .DS_Store
 *.pem
