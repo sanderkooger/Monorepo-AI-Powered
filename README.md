@@ -18,7 +18,7 @@ A production-ready monorepo platform for multi-language/technology systems with 
 - End-to-end CI/CD pipelines
 - Multi-environment deployment strategies
 - Integrated testing frameworks
-- Secret management with self-hosted Vault
+- Secret management Vault
 
 ## Current Capabilities ✅
 
@@ -70,9 +70,23 @@ gantt
    - Canary release configurations
 
 3. 🔒 **Security Foundations**
-   - Self-hosted HashiCorp Vault integration
+   - Bring Your Own HashiCorp Vault implementation ([ADR](./docs/architecture/decisions/2025-04-20-bring-your-own-vault.md))
    - Infrastructure hardening scripts
    - Compliance as Code templates
+   - Example Helm configuration for development:
+     ```yaml
+     # infrastructure/ansible/examples/vault-helm-values.yaml
+     server:
+       enabled: true
+       ha:
+         enabled: true
+         replicas: 3
+     global:
+       tlsDisable: true # Enable TLS in production
+     storage:
+       file:
+         path: "/vault/data"
+     ```
 
 ## Project Structure
 
@@ -87,9 +101,38 @@ gantt
 │   └── typescript-config # TS base configurations
 ├── infrastructure/
 │   ├── ansible         # Configuration management
-│   └── opentofu        # Cloud provisioning
+│   │   └── playbooks/
+│   │       └── setup-local-dev.yml # Playbook for dev tool installation
+│   ├── opentofu        # Cloud provisioning
+│   └── packer          # VM Image building (e.g., Proxmox Ubuntu) -> [See Details](./infrastructure/packer/)
+├── scripts/
+│   └── setup-dev-env.sh # Script to bootstrap dev environment
+├── .clinerules         # Repository-wide development standards
+├── .clinerules-architect # Architecture-specific rules
+├── AI_CONTEXT.md       # Infrastructure context
 └── turbo.json          # Build pipeline config
 ```
+
+### Preferred Way of Working
+
+- **Branching:** For new features, create a branch from the main branch. Use atomic commits within these branches to document changes effectively.
+- **Commits:** Ensure commits are small, focused, and descriptive to enhance the project's documentation through git history.
+
+## AI Implementation
+
+- **.clinerules:** Contains repository-wide development standards for code style, testing, documentation, and infrastructure practices. **Use this file to set standards that apply across all projects in the monorepo.**
+- **.clinerules-architect:** Specifies architecture-specific rules for design principles, documentation standards, and decision records. **Use this file to define architecture patterns and practices for the architect mode.**
+- **AI Context Files:** Use AI context files to provide additional context to AI tools. These files should be in the root of the project with additional files on a per-subproject basis in the respective directory. They can include:
+  - Project-specific guidelines
+  - Code snippets for reference
+  - Architectural decisions
+  - Any other relevant information for AI tools to understand the project better
+
+**Usage:**
+
+- **.clinerules:** Use this file to set standards that apply across all projects in the monorepo. **Ensure your code adheres to these standards for consistency and quality.**
+- **.clinerules-architect:** Use this file to define architecture patterns and practices for the architect mode. **This helps maintain architectural integrity across the project.**
+- **AI Context Files:** Use these files to provide context to AI tools. **Place them in the root of the project with additional files on a per-subproject basis in the respective directory.**
 
 ## Getting Started
 
@@ -98,6 +141,17 @@ gantt
 git clone  https://github.com/sanderkooger/Monorepo-AI-Powered.git
 cd devops-monorepo
 pnpm install
+
+# Set up local development environment tools
+# This script ensures required tools are installed via Ansible:
+# - Ansible (installed by script if missing)
+# - NVM (v0.39.7)
+# - Node.js (Latest LTS via NVM)
+# - Packer (v1.10.3)
+# - OpenTofu (v1.7.2)
+# It also enables Corepack to manage pnpm (using version from package.json).
+# Note: The script may prompt for sudo password for installations.
+pnpm dev-init
 
 # Start development servers
 pnpm dev

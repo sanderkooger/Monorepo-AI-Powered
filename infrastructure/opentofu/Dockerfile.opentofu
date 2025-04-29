@@ -1,0 +1,4 @@
+FROM ghcr.io/opentofu/opentofu:latest
+COPY . /app/infrastructure/
+WORKDIR /app/infrastructure
+ENTRYPOINT ["tofu"]

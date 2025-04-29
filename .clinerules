@@ -1,0 +1,39 @@
+# Repository-wide Development Standards
+
+## Code Style
+
+- This is a multi-language repository. When JavaScript is used, prefer TypeScript in strict mode
+- 2-space indentation for all file types
+- Prefer functional components in React
+- Write JSDoc for public APIs
+
+## Commit Strategy
+
+- **Atomic Commits:** Ensure commits are small, focused, and descriptive to enhance the project's documentation through git history.
+
+## Testing
+
+- Testing framework not yet implemented
+
+## Documentation
+
+- Update README.md for all new modules
+- Keep ADRs in docs/architecture/decisions
+- Generate typedoc for public APIs
+- **AI Context Files**: Use AI context files to provide additional context to AI tools. These files should be in the root of the project with additional files on a per-subproject basis in the respective directory. They can include:
+  - Project-specific guidelines
+  - Code snippets for reference
+  - Architectural decisions
+  - Any other relevant information for AI tools to understand the project better
+
+## Infrastructure
+
+- Terraform changes require:
+  - Updated module READMEs
+# API Key Storage Note:
+Always store API keys in Vault using the following convention:
+  kv/REPO_NAME/env/secret-key
+For example, the Proxmox API key should be stored at:
+  kv/Monorepo-AI-Powered/prod/proxmox-api-key
+  - Do not bootstrap production secrets via local scripts; use CI/CD for secret injection.
+  - Version compatibility checks

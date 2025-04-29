@@ -1,0 +1,245 @@
+---
+- name: Setup Local Development Environment
+  hosts: localhost
+  connection: local
+  # Run most tasks with sudo, but NVM tasks need to run as the user
+  become: false
+  gather_facts: true
+
+  vars:
+    # Define desired versions (adjust as needed)
+    node_version: "lts/*" # Use NVM alias for latest LTS
+    nvm_version: "0.39.7" # Check latest NVM version
+    packer_version: "1.10.3" # Check latest stable version
+    opentofu_version: "1.7.2" # Check latest stable version
+    vault_version: "1.15.2" # HashiCorp Vault LTS
+    kubectl_version: "1.29.3" # Check latest stable version
+    # Helm version is usually handled by the install script (latest v3)
+    # Determine NVM directory (adjust if user modifies $XDG_CONFIG_HOME)
+    nvm_dir: "{{ ansible_env.HOME }}/.nvm"
+    nvm_script: "{{ nvm_dir }}/nvm.sh"
+
+  tasks:
+    # ===========================================
+    # Tasks requiring root/sudo privileges
+    # ===========================================
+    - name: Run tasks requiring sudo
+      become: true
+      block:
+        - name: Update package cache (Debian/Ubuntu)
+          ansible.builtin.apt:
+            update_cache: yes
+            cache_valid_time: 3600
+            force_apt_get: yes
+          register: apt_update
+          until: apt_update is succeeded
+          retries: 3
+          delay: 10
+          ignore_errors: true
+          failed_when: false
+          when: ansible_os_family == "Debian"
+          changed_when: false # Don't report cache updates as changes
+
+        - name: Install common prerequisites (curl, git, unzip)
+          ansible.builtin.package:
+            name: ["curl", "git", "unzip"] # Added git as NVM install script might use it
+            state: present
+
+        # --- Packer ---
+        - name: Check if Packer is installed (as root for /usr/local/bin check)
+          ansible.builtin.command: packer --version
+          register: packer_check
+          ignore_errors: true
+          changed_when: false
+
+        - name: Download Packer binary
+          ansible.builtin.get_url:
+            url: "https://releases.hashicorp.com/packer/{{ packer_version }}/packer_{{ packer_version }}_linux_amd64.zip"
+            dest: "/tmp/packer_{{ packer_version }}_linux_amd64.zip"
+            mode: '0644'
+          when: ansible_os_family != "Darwin" and packer_check.rc != 0
+
+        - name: Download Packer binary (macOS)
+          ansible.builtin.get_url:
+            url: "https://releases.hashicorp.com/packer/{{ packer_version }}/packer_{{ packer_version }}_darwin_amd64.zip"
+            dest: "/tmp/packer_{{ packer_version }}_darwin_amd64.zip"
+            mode: '0644'
+          when: ansible_os_family == "Darwin" and packer_check.rc != 0
+
+        - name: Unzip Packer binary to /usr/local/bin
+          ansible.builtin.unarchive:
+            src: "/tmp/packer_{{ packer_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+            dest: "/usr/local/bin/"
+            remote_src: yes
+            mode: '0755'
+            owner: root
+            group: root
+          when: packer_check.rc != 0
+
+        - name: Clean up Packer zip file
+          ansible.builtin.file:
+            path: "/tmp/packer_{{ packer_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+            state: absent
+          when: packer_check.rc != 0
+
+        # --- OpenTofu ---
+        - name: Check if OpenTofu is installed (as root for /usr/local/bin check)
+          ansible.builtin.command: tofu --version
+          register: tofu_check
+          ignore_errors: true
+          changed_when: false
+
+        - name: Download OpenTofu binary
+          ansible.builtin.get_url:
+            url: "https://github.com/opentofu/opentofu/releases/download/v{{ opentofu_version }}/tofu_{{ opentofu_version }}_linux_amd64.zip"
+            dest: "/tmp/tofu_{{ opentofu_version }}_linux_amd64.zip"
+            mode: '0644'
+          when: ansible_os_family != "Darwin" and tofu_check.rc != 0
+
+        - name: Download OpenTofu binary (macOS)
+          ansible.builtin.get_url:
+            url: "https://github.com/opentofu/opentofu/releases/download/v{{ opentofu_version }}/tofu_{{ opentofu_version }}_darwin_amd64.zip"
+            dest: "/tmp/tofu_{{ opentofu_version }}_darwin_amd64.zip"
+            mode: '0644'
+          when: ansible_os_family == "Darwin" and tofu_check.rc != 0
+
+        - name: Unzip OpenTofu binary to /usr/local/bin
+          ansible.builtin.unarchive:
+            src: "/tmp/tofu_{{ opentofu_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+            dest: "/usr/local/bin/"
+            remote_src: yes
+            mode: '0755'
+            owner: root
+            group: root
+          when: tofu_check.rc != 0
+
+        - name: Clean up OpenTofu zip file
+          ansible.builtin.file:
+            path: "/tmp/tofu_{{ opentofu_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+            state: absent
+          when: tofu_check.rc != 0
+
+        # --- Kubectl ---
+        - name: Check if kubectl exists
+          ansible.builtin.stat:
+            path: /usr/local/bin/kubectl
+          register: kubectl_stat
+
+        - name: Download kubectl binary
+          ansible.builtin.get_url:
+            url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl"
+            dest: /usr/local/bin/kubectl
+            mode: '0755'
+            owner: root
+            group: root
+          when: ansible_os_family != "Darwin" and not kubectl_stat.stat.exists # Assuming Linux for now
+
+        # Add macOS kubectl download if needed later
+
+        # --- Helm ---
+        - name: Check if helm exists
+          ansible.builtin.stat:
+            path: /usr/local/bin/helm
+          register: helm_stat
+
+        - name: Download Helm install script
+          ansible.builtin.get_url:
+            url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+            dest: /tmp/get_helm.sh
+            mode: '0755'
+          when: not helm_stat.stat.exists
+
+        - name: Install Helm using script
+          ansible.builtin.command:
+            cmd: /tmp/get_helm.sh
+            creates: /usr/local/bin/helm # Make it idempotent
+          changed_when: true # Assume changed if script runs
+          when: not helm_stat.stat.exists
+
+        - name: Clean up Helm install script
+          ansible.builtin.file:
+            path: /tmp/get_helm.sh
+            state: absent
+          when: not helm_stat.stat.exists # Only clean up if we downloaded it
+
+       # --- Vault CLI ---
+    - name: Check if Vault is installed
+      ansible.builtin.command: vault --version
+      register: vault_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Download Vault binary (Linux)
+      ansible.builtin.get_url:
+        url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+        dest: "/tmp/vault_{{ vault_version }}_linux_amd64.zip"
+        mode: '0644'
+      when: ansible_os_family != "Darwin" and vault_check.rc != 0
+
+    - name: Download Vault binary (macOS)
+      ansible.builtin.get_url:
+        url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_darwin_amd64.zip"
+        dest: "/tmp/vault_{{ vault_version }}_darwin_amd64.zip"
+        mode: '0644'
+      when: ansible_os_family == "Darwin" and vault_check.rc != 0
+
+    - name: Debug Vault installation variables
+      ansible.builtin.debug:
+        msg:
+          - "Vault Version: {{ vault_version }}"
+          - "OS Family: {{ ansible_os_family }}"
+          - "Vault Check Result: {{ vault_check }}"
+          - "Expected Zip Path: /tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+      when: vault_check.rc != 0 # Only show debug if we intend to install
+
+    - name: Unzip Vault binary
+      become: true # Explicitly add become here as well
+      ansible.builtin.unarchive:
+        src: "/tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+        dest: "/usr/local/bin/"
+        remote_src: yes
+        mode: '0755'
+        owner: root
+        group: root
+      when: vault_check.rc != 0
+
+    - name: Clean up Vault zip file
+      ansible.builtin.file:
+        path: "/tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
+        state: absent
+      when: vault_check.rc != 0
+       # --- Add other sudo tasks as needed ---
+
+    # ===========================================
+    # NVM and Node.js Installation (as user)
+    # ===========================================
+    - name: Check if NVM script exists
+      ansible.builtin.stat:
+        path: "{{ nvm_script }}"
+      register: nvm_stat
+
+    - name: Download and install NVM
+      ansible.builtin.shell: >
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh | bash
+      args:
+        creates: "{{ nvm_script }}" # Makes the task idempotent
+      when: not nvm_stat.stat.exists
+      changed_when: true # Assume changed if NVM wasn't installed
+
+    - name: Install Node.js version {{ node_version }} using NVM and enable corepack
+      ansible.builtin.shell: |
+        set -e
+        . "{{ nvm_script }}"
+        nvm install {{ node_version }}
+        nvm alias default {{ node_version }}
+        # Ensure corepack is enabled with the NVM-installed Node
+        corepack enable
+      args: {} # Removed 'creates' as exact version path isn't known with lts/*
+      changed_when: true # Assume changed if NVM install runs (it's idempotent for aliases)
+
+    # ===========================================
+    # Final Message
+    # ===========================================
+    - name: Display final message
+      ansible.builtin.debug:
+        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu, Vault, kubectl, Helm) should now be installed/updated."

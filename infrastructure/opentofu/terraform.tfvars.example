@@ -1,0 +1,12 @@
+# Example configuration values for OpenTofu
+# Copy this file to terraform.tfvars and fill in your actual values.
+# DO NOT commit terraform.tfvars to version control.
+
+# Vault server address
+vault_addr = "https://vault.thisisfashion.tv" # Replace with your Vault address
+
+# Repository name (used for Vault path)
+repo_name = "Monorepo-AI-Powered" # Replace if your repo name is different
+
+# Note: vault_token should be provided via the TF_VAR_vault_token environment variable
+# export TF_VAR_vault_token="YOUR_VAULT_TOKEN"

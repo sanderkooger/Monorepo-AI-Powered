@@ -1,0 +1,5 @@
+#cloud-config
+# Simple meta-data for nocloud datasource
+
+instance-id: iid-${template_name}-${timestamp()} # Generate a unique instance ID
+local-hostname: ${hostname}
