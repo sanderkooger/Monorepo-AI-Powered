@@ -10,18 +10,6 @@ variable "repo_name" {
   type = string
 }
 
-variable "proxmox_url" {
-  type        = string
-  description = "Proxmox endpoint (dev: local, prod: Vault)"
-  default     = "http://dev-pve.local"
-}
-
-variable "proxmox_api_key" {
-  type        = string
-  sensitive   = true
-  description = "Proxmox API token (dev: local, prod: Vault)"
-  default     = "dev-token"
-}
 
 variable "environment" {
   type        = string
