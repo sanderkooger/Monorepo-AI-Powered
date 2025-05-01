@@ -1,29 +1,29 @@
 variable "mount_path" {
-  description = "KV v2 mount path, e.g. 'kv/Monorepo-AI-Powered'"
-  type        = string
-}
-
-variable "environment" {
-  description = "Environment name, e.g. 'prod' or 'dev'"
-  type        = string
+  type    = string
+  default = "secret"
 }
 
 variable "secret_keys" {
-  description = "List of secret keys to grant read access, e.g. ['proxmox-api-key']"
-  type        = list(string)
+  type    = list(string)
+  default = ["api-key", "db-credentials"]
 }
 
 variable "approle_name" {
-  description = "Name for the AppRole, e.g. 'proxmox-read-role'"
-  type        = string
+  type    = string
+  default = "monorepo-approle"
+}
+
+variable "TF_ENV" {
+  type    = string
+  default = "dev"
 }
 
 variable "token_ttl" {
-  description = "Token TTL, e.g. '20m'"
-  type        = string
+  type    = string
+  default = "24h"
 }
 
 variable "token_max_ttl" {
-  description = "Token maximum TTL, e.g. '1h'"
-  type        = string
+  type    = string
+  default = "48h"
 }

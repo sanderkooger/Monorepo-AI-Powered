@@ -6,8 +6,10 @@ variable "vault_token" {
   type = string
 }
 
-variable "repo_name" {
-  type = string
+
+variable "TF_ENV" {
+  type    = string
+  default = "dev"
 }
 
 module "vault" {
@@ -15,4 +17,5 @@ module "vault" {
   vault_addr  = var.vault_addr
   vault_token = var.vault_token
   repo_name   = var.repo_name
+  environment = var.environment
 }

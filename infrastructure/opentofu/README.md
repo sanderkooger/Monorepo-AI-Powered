@@ -2,19 +2,18 @@
 
 This directory contains infrastructure-as-code definitions for provisioning and managing resources using OpenTofu.
 
-## Workspace Management
-We use Terraform workspaces for environment isolation:
+## Environment Management
+We use the TF_ENV variable for environment isolation (default: dev). Valid environments:
+- dev
+- production
+- accept
 
 ```bash
-# List workspaces
-tofu workspace list
+# Plan infrastructure changes
+TF_ENV=dev make plan
 
-# Create new workspace
-tofu workspace new dev
-tofu workspace new prod
-
-# Select workspace
-tofu workspace select dev
+# Apply changes
+TF_ENV=production make apply
 ```
 
 ## Variable Handling

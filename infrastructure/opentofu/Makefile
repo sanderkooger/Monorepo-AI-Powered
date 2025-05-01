@@ -14,15 +14,17 @@ check-docker:
 init:
 	@$(TOFU_CMD) init -input=false
 
+TF_ENV ?= dev
+
 plan:
-	@$(TOFU_CMD) plan
+	@$(TOFU_CMD) plan 
 
 build:
 	@docker build -f Dockerfile.opentofu -t $(TOFU_IMAGE) .
 
 apply: build
-	@$(TOFU_CMD) init -input=false -var "vault_addr=$(VAULT_ADDR)" -var "vault_token=$(VAULT_TOKEN)" -var "repo_name=$(REPO_NAME)"
-	@$(TOFU_CMD) apply -auto-approve -var "vault_addr=$(VAULT_ADDR)" -var "vault_token=$(VAULT_TOKEN)" -var "repo_name=$(REPO_NAME)"
+	@$(TOFU_CMD) init -input=false
+	@$(TOFU_CMD) apply -auto-approve
 
 destroy:
 	@$(TOFU_CMD) destroy -auto-approve

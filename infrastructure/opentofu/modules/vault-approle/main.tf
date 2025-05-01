@@ -14,7 +14,7 @@ resource "vault_policy" "secrets" {
   for_each = toset(var.secret_keys)
   name     = "${var.approle_name}-${each.value}"
   policy   = <<-EOF
-    path "${var.mount_path}/${var.environment}/${each.value}" {
+    path "${var.mount_path}/${var.TF_ENV}/${each.value}" {
       capabilities = ["read"]
     }
   EOF

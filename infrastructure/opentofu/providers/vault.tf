@@ -1,11 +1,25 @@
 provider "vault" {
   address = var.vault_addr
   token   = var.vault_token
+
+  auth_login {
+    path = "auth/approle/login"
+    parameters = {
+      role_id   = vault_approle_auth_backend_role.agent.role_id
+      secret_id = vault_kv_secret_v2.proxmox_api_key.data.secret-id
+    }
+  }
 }
 
-resource "vault_auth_backend" "userpass" {
-  type = "userpass"
+resource "vault_kv_secret_v2" "proxmox_api_key" {
+  mount      = "kv"
+  name       = "${var.repo_name}/${var.environment}/proxmox-api-key"
+  data_json  = jsonencode({
+    "secret-id" = "dummy-value" # Will be replaced during CI/CD secret injection
+  })
 }
+
+
 
 resource "vault_policy" "admin" {
   name = "admin-policy"
@@ -14,7 +28,7 @@ path "sys/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
-path "kv/Monorepo-AI-Powered/*" {
+path "kv/${var.repo_name}/${var.environment}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 
@@ -22,19 +36,4 @@ path "auth/userpass/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 EOT
-}
-
-data "vault_generic_secret" "sander_password" {
-  path = "kv/Monorepo-AI-Powered/env/sander-password"
-}
-
-resource "vault_generic_endpoint" "sander_user" {
-  depends_on           = [vault_auth_backend.userpass]
-  path                 = "auth/userpass/users/sander"
-  ignore_absent_fields = true
-
-  data_json = jsonencode({
-    policies = ["admin-policy"]
-    password = data.vault_generic_secret.sander_password.data["value"]
-  })
 }

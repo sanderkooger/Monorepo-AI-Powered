@@ -7,17 +7,11 @@ variable "vault_token" {
 }
 
 variable "repo_name" {
-  type = string
+  type        = string
+  description = "Repository name for Vault path construction"
 }
-
 
 variable "environment" {
   type        = string
-  description = "Workspace environment (dev/prod)"
-  default     = "dev"
-  
-  validation {
-    condition     = contains(["dev", "prod"], var.environment)
-    error_message = "Valid values: dev, prod"
-  }
+  description = "Deployment environment (dev/accept/production)"
 }
