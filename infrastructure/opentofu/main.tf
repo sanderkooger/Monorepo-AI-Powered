@@ -12,8 +12,8 @@ variable "TF_ENV" {
   default = "dev"
 }
 
-module "vault" {
-  source      = "./providers"
+module "vault_provider" {
+  source      = "./providers/vault"
   vault_addr  = var.vault_addr
   vault_token = var.vault_token
   repo_name   = var.repo_name

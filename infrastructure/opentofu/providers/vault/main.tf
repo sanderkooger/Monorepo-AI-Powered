@@ -1,14 +1,6 @@
 provider "vault" {
   address = var.vault_addr
   token   = var.vault_token
-
-  auth_login {
-    path = "auth/approle/login"
-    parameters = {
-      role_id   = vault_approle_auth_backend_role.agent.role_id
-      secret_id = vault_kv_secret_v2.proxmox_api_key.data.secret-id
-    }
-  }
 }
 
 resource "vault_kv_secret_v2" "proxmox_api_key" {
