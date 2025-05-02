@@ -6,7 +6,7 @@ REPO_NAME := $(shell basename $(REPO_ROOT))
 	@:
 
 TOFU_IMAGE := monorepo-tofu
-TOFU_CMD := docker run --rm -v $(shell pwd):/app/infrastructure -w /app/infrastructure $(TOFU_IMAGE)
+TOFU_CMD := docker run --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd):/app/infrastructure -w /app/infrastructure $(TOFU_IMAGE)
 
 check-docker:
 	@$(REPO_ROOT)/repository-tools/helper-scripts/check-docker.sh || (echo "Docker required for infrastructure operations"; exit 1)
