@@ -1,1 +1,0 @@
-{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"vault","Source":"./providers","Dir":"providers"},{"Key":"vault_provider","Source":"./providers/vault","Dir":"providers/vault"}]}
