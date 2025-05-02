@@ -35,10 +35,26 @@ infrastructure/opentofu/
 
 ## Environment Management
 
-Set your target environment using the `ENV` variable:
+OpenTofu workspaces are used for environment isolation. The environment variable follows this format:
+
+- `prod` (default)
+- `accept`
+- `dev-<username>` (for developer-specific environments)
+
+### Workspace Setup
 ```bash
-export ENV=prod  # or accept/dev
+# Initialize with default prod workspace
+tofu workspace select prod
+
+# Create a developer workspace
+tofu workspace new dev-johndoe
+tofu apply -var="environment=dev-johndoe"
 ```
+
+### Environment Validation
+The environment variable is strictly validated:
+- Must be `prod`, `accept`, or `dev-` followed by lowercase alphanumeric/underscore
+- Example valid names: `dev-mary_smith`, `dev-teamalpha`
 
 ## Providers
 

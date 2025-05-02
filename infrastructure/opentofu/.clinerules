@@ -1,5 +1,11 @@
 # OpenTofu Repository Rules
 
+## Environment Management
+- Environment names must follow: prod|accept|dev-<username>
+- Username must be lowercase alphanumeric with underscores
+- Workspaces must match environment names
+- Default environment: prod
+
 ## Code Style
 - Use 2-space indentation for all files
 - Keep Terraform/OpenTofu files in strict format
