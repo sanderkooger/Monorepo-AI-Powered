@@ -14,7 +14,6 @@ check-docker:
 init:
 	@$(TOFU_CMD) init -input=false
 
-TF_ENV ?= dev
 
 plan:
 	@$(TOFU_CMD) plan 
