@@ -1,0 +1,21 @@
+# OpenTofu Repository Rules
+
+## Code Style
+- Use 2-space indentation for all files
+- Keep Terraform/OpenTofu files in strict format
+- Use consistent naming conventions across all environments
+
+## Commit Strategy
+- Use atomic commits focused on specific infrastructure components
+- Prefix commit messages with the environment affected (prod/accept/dev)
+- Include a brief description of the infrastructure change
+
+## Testing
+- Validate configurations with tofu validate before committing
+- Use tofu plan to review changes before application
+- Implement automated testing for infrastructure changes
+
+## Documentation
+- Keep README.md up to date with repository structure
+- Document all modules with their purpose and usage
+- Maintain provider documentation in the providers directory
