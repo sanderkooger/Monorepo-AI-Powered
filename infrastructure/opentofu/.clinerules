@@ -1,27 +1,39 @@
-# OpenTofu Repository Rules
+# OpenTofu Infrastructure Standards
 
-## Environment Management
-- Environment names must follow: prod|accept|dev-<username>
-- Username must be lowercase alphanumeric with underscores
-- Workspaces must match environment names
-- Default environment: prod
+## Structure
+- Single source of truth for all infrastructure definitions
+- Mandatory directories:
+  - environments/{prod,accept,dev-<user>}
+  - modules/<category>/<name>
+  - providers/<name>
+- Root module must be identical across environments
 
-## Code Style
-- Use 2-space indentation for all files
-- Keep Terraform/OpenTofu files in strict format
-- Use consistent naming conventions across all environments
+## Environments
+- Naming: prod|accept|dev-<lowercase_alphanumeric_user>
+- Workspace names must match environment exactly
+- Topology parity enforced across all environments
+- Environment-specific overrides prohibited in modules
+- Default to prod configuration
 
-## Commit Strategy
-- Use atomic commits focused on specific infrastructure components
-- Prefix commit messages with the environment affected (prod/accept/dev)
-- Include a brief description of the infrastructure change
+## Code
+- 2-space indentation enforced
+- Strict OpenTofu formatting required
+- Consistent resource naming across environments
+- Provider configurations isolated in dedicated blocks
 
-## Testing
-- Validate configurations with tofu validate before committing
-- Use tofu plan to review changes before application
-- Implement automated testing for infrastructure changes
+## Changes
+- Atomic commits prefixed with [prod|accept|dev]
+- Dev environment testing mandatory before prod merges
+- Documentation updates required for topology changes
+
+## Validation
+- tofu validate && tofu fmt check required pre-commit
+- Cross-environment plan parity checks enforced
+- Automated testing required for all module changes
+- All modules must validate in all environments simultaneously
 
 ## Documentation
-- Keep README.md up to date with repository structure
-- Document all modules with their purpose and usage
-- Maintain provider documentation in the providers directory
+- README.md must reflect current structure
+- Module/provider directories require purpose/usage docs
+- Infrastructure diagrams must match deployed state
+- Environment configs must reference documentation
