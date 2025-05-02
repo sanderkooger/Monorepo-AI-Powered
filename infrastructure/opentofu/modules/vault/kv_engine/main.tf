@@ -1,0 +1,5 @@
+resource "vault_mount" "kv_engine" {
+  path        = "kv-${var.repo_name}-${var.environment}"
+  type        = "kv-v2"
+  description = "KV v2 secrets engine for ${var.repo_name} (${var.environment})"
+}
