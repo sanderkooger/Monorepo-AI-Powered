@@ -1,78 +1,62 @@
 # OpenTofu Infrastructure Configuration
 
-This directory contains infrastructure-as-code definitions for provisioning and managing resources using OpenTofu.
+## Overview
+Environment-agnostic infrastructure as code configuration following repository standards:
+- No environment-specific directories
+- Provider isolation
+- Modular architecture
+- Vault integration for secret management
 
-## Environment Management
-We use the TF_ENV variable for environment isolation (default: dev). Valid environments:
-- dev
-- production
-- accept
-
+## Directory Structure
 ```bash
-# Plan infrastructure changes
-TF_ENV=dev make plan
-
-# Apply changes
-TF_ENV=production make apply
+opentofu/
+├── variables.tf          # Core variables (repo_name, env)
+├── versions.tf           # Version constraints
+├── terraform.auto.tfvars # Default variable values
+├── providers/
+│   └── vault/
+│       └── main.tf       # Vault provider configuration
+└── modules/
+    ├── network/          # Networking components
+    │   └── .gitkeep
+    ├── compute/          # Compute resources
+    │   └── .gitkeep
+    ├── vault/            # Vault integrations
+    │   └── .gitkeep
+    └── storage/          # Storage configurations
+        └── .gitkeep
 ```
 
-## Variable Handling
-Variables are managed through multiple files:
+## Core Components
 
-1. **variables.tf** - Base variables with validation
-2. **providers/*.tf** - Provider-specific configurations
-3. **Vault Integration** - Production secrets from HashiCorp Vault
+### Variables
+- `repo_name`: Used for resource naming conventions
+- `environment_name`: Deployment environment (prod/accept/dev-*) (default: prod)
 
-### Variable Precedence
-1. Workspace-specific auto.tfvars
-2. terraform.tfvars
-3. Variable defaults
+### Providers
+- **Vault** (v4.8.0): Configured via environment variables:
+  ```bash
+  export VAULT_ADDR="https://vault.example.com"
+  export VAULT_TOKEN="$(vault login -token-only)"
+  ```
 
-Example variable structure:
-```hcl
-variable "proxmox_url" {
-  type        = string
-  description = "Proxmox endpoint (Vault: kv/Monorepo-AI-Powered/${terraform.workspace}/proxmox/url)"
-  default     = "http://dev-pve.local"
-}
+## Usage
+1. Initialize configuration:
+```bash
+tofu init
+```
+
+2. Plan changes:
+```bash
+tofu plan -var="repo_name=Monorepo-AI-Powered"
 ```
 
 ## Secret Management
-Production secrets are retrieved from Vault:
-```hcl
-data "vault_generic_secret" "proxmox" {
-  count = var.environment == "prod" ? 1 : 0
-  path  = "kv/Monorepo-AI-Powered/${var.environment}/proxmox"
-}
-```
-
-## Provider Configuration
-Providers are configured with workspace-aware settings:
-```hcl
-provider "proxmox" {
-  pm_api_url          = var.environment == "prod" ? data.vault_generic_secret.proxmox[0].data["url"] : var.proxmox_url
-  pm_api_token_id     = var.environment == "prod" ? data.vault_generic_secret.proxmox[0].data["user"] : "terraform@pve"
-  pm_api_token_secret = var.environment == "prod" ? data.vault_generic_secret.proxmox[0].data["api-key"] : var.proxmox_api_key
-}
-```
-
-## Common Commands
-```bash
-# Initialize workspace
-tofu init
-
-# Plan changes
-tofu plan -var-file=environments/${terraform.workspace}.tfvars
-
-# Apply changes
-tofu apply -var-file=environments/${terraform.workspace}.tfvars
-
-# Destroy resources
-tofu destroy -var-file=environments/${terraform.workspace}.tfvars
-```
-
-## Best Practices
-1. Always validate variables using the `validation` block
-2. Mark sensitive variables with `sensitive = true`
-3. Store production secrets in Vault following `kv/REPO_NAME/env/secret-key` format
-4. Update module READMEs when making changes
+Follows repository security policy:
+- Secrets stored in Vault KV engine at `kv/{repo_name}/global`
+- Accessed via Terraform data sources:
+  ```hcl
+  data "vault_kv_secret_v2" "global" {
+    mount = "kv"
+    name  = "${var.repo_name}/global"
+  }
