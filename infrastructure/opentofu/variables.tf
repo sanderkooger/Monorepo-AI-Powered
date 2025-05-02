@@ -1,5 +1,11 @@
 # Global variables
 
+variable "vault_addr" {
+  type        = string
+  description = "Vault server address"
+  default     = "https://vault.thisisfashion.tv"
+}
+
 variable "environment" {
   type        = string
   description = "Environment (prod|accept|dev-<username>)"

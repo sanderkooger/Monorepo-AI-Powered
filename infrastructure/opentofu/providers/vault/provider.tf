@@ -2,12 +2,12 @@ terraform {
   required_providers {
     vault = {
       source = "hashicorp/vault"
-      version = "~> 3.25"
+      version = "~> 4.8"
     }
   }
 }
 
 provider "vault" {
-  address = var.vault_addr
+  address = var.vault_addr  # Using global vault_addr variable
   token   = var.vault_token
 }
