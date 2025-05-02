@@ -1,8 +1,15 @@
 # Global variables
 
+variable "repo_name" {
+  type        = string
+  description = "Repository name from git origin (format: org/repo)"
+  default     = null
+  # Validation handled through local.final_repo_name usage
+}
+
 variable "vault_addr" {
   type        = string
-  description = "Vault server address"
+   description = "Vault server URL (e.g. https://vault.example.com:8200)"
   default     = "https://vault.thisisfashion.tv"
 }
 

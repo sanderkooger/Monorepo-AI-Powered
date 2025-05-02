@@ -7,3 +7,11 @@ terraform {
     }
   }
 }
+
+module "repo_name" {
+  source = "./modules/helpers/repo_name"
+}
+
+locals {
+  final_repo_name = module.repo_name.name
+}
