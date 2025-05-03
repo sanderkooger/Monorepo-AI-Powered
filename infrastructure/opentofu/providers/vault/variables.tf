@@ -1,7 +1,7 @@
 variable "vault_addr" {
   description = "Vault server URL (e.g. https://vault.example.com:8200)"
   type        = string
-  default     = "https://vault.thisisfashion.tv"
+  
 }
 
 variable "vault_token" {
