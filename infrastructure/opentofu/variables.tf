@@ -13,11 +13,11 @@ variable "vault_addr" {
  
 }
 
-variable "environment" {
+variable "workplace_name" {
   type        = string
-  description = "Environment (prod|accept|dev-<username>)"
+  description = "Workplace name for environment segregation (prod|accept|dev-<username>)"
   validation {
-    condition     = can(regex("^(prod|accept|dev-[a-z0-9_]+)$", var.environment))
+    condition     = can(regex("^(prod|accept|dev-[a-z0-9_]+)$", var.workplace_name))
     error_message = "Must be 'prod', 'accept', or 'dev-' followed by lowercase alphanumeric/underscore"
   }
 }

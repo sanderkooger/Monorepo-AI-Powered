@@ -15,7 +15,7 @@ module "get_repo_name" {
 module "kv_engine" {
   source      = "./modules/vault/kv_engine"
   repo_name   = module.get_repo_name.name
-  environment = var.environment
+  workplace_name = var.workplace_name
 }
 
 locals {
