@@ -6,7 +6,8 @@ REPO_NAME := $(shell basename $(REPO_ROOT))
 	@:
 
 TOFU_IMAGE := monorepo-tofu
-TOFU_CMD := docker run --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd):/app/infrastructure -w /app/infrastructure $(TOFU_IMAGE)
+# Allow passing environment variables to container
+TOFU_CMD := docker run --rm -u $(shell id -u):$(shell id -g) $(ENV_VARS) -v $(shell pwd):/app/infrastructure -w /app/infrastructure $(TOFU_IMAGE)
 
 check-docker:
 	@$(REPO_ROOT)/repository-tools/helper-scripts/check-docker.sh || (echo "Docker required for infrastructure operations"; exit 1)
@@ -23,7 +24,7 @@ build:
 
 apply: build
 	@$(TOFU_CMD) init -input=false
-	@$(TOFU_CMD) apply -auto-approve
+	@$(TOFU_CMD) apply -auto-approve $(ARGS)
 
 destroy:
 	@$(TOFU_CMD) destroy -auto-approve
