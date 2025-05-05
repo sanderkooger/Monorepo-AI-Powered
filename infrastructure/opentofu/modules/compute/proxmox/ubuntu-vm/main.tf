@@ -10,7 +10,7 @@ terraform {
 
 ## Ubuntu VM Module
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  name        = "Ubuntu-test-${var.env_name}"
+  name        = "${var.computer_name}-${var.env_name}"
   node_name   = var.node_name
   description = "Ubuntu 24.04 Minimal (${var.env_name})"
   tags        = ["terraform", "ubuntu"]
@@ -57,6 +57,15 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
       
     }
+    ip_config {
+      ipv4 {
+        address = "${var.ip_address}/24"
+        gateway = var.gateway
+      }
+    }
+    dns {
+      servers = ["192.168.1.1","1.1.1.1"]
+      }
   }
 }
 

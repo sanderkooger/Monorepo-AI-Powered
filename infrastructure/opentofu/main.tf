@@ -65,9 +65,9 @@ data "vault_kv_secret_v2" "proxmox_ssh" {
 
 module "ubuntu_test_vm" {
   source = "./modules/compute/proxmox/ubuntu-vm"
-
+  computer_name = "ubuntu-test"
   env_name       = var.env_name
   node_name      = var.proxmox_node_name
   image_url      = "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-amd64.img"
-  ssh_public_key = data.vault_kv_secret_v2.proxmox_ssh.data["pub"]
+  ip_address     = "192.168.1.10"
 }
