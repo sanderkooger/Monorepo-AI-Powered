@@ -3,7 +3,7 @@ variable "repo_name" {
   description = "Repository name from repo_name module output"
 }
 
-variable "workspace_name" {
+variable "env_name" {
   type        = string
-  description = "Workspace name for environment segregation (e.g. dev, staging, prod)"
+  description = "env name for environment segregation (e.g. dev, staging, prod)"
 }

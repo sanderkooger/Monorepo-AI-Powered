@@ -12,8 +12,8 @@ variable "vault_token" {
   sensitive   = true
 }
 
-variable "workspace_name" {
-  description = "Workspace name for environment segregation (prod, accept, or dev-<name>)"
+variable "env_name" {
+  description = "env name for environment segregation (prod, accept, or dev-<name>)"
   type        = string
   default       = null
 }

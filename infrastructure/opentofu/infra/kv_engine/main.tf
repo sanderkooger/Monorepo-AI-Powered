@@ -1,10 +1,3 @@
-# Root module and plumbing
-
-
-module "get_repo_name" {
-  source = "./modules/helpers/get_repo_name"
-  repo_name = var.repo_name
-}
 
 module "kv_engine" {
   source      = "./modules/vault/kv_engine"
