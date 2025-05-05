@@ -1,4 +1,40 @@
+terraform {
+  required_providers {
+    external = {
+      source = "hashicorp/external"
+      version = "~> 2.3.4"
+    }
+    vault = {
+      source = "hashicorp/vault"
+      version = "~> 4.8"
+    }
+    proxmox = {
+      source = "bpg/proxmox"
+      version = "0.77.0"
+    }
+  }
+}
+
 # Root module and plumbing
+
+provider "proxmox" {
+  endpoint  = data.vault_kv_secret_v2.proxmox_creds.data["host"]# "https://192.168.1.4:8006"
+  username = data.vault_kv_secret_v2.proxmox_creds.data["user"]
+  password = data.vault_kv_secret_v2.proxmox_creds.data["password"]
+  insecure  = true
+
+  ssh {
+    agent    = false
+    username = "terraform"
+    private_key = <<-EOF
+    ${data.vault_kv_secret_v2.proxmox_ssh.data["priv"]}
+    EOF
+  }
+    
+    
+    
+
+}
 
 module "get_repo_name" {
   source = "./modules/helpers/get_repo_name"
@@ -12,10 +48,19 @@ module "kv_engine" {
   env_name = var.env_name
 }
 
+data "vault_kv_secret_v2" "proxmox_creds" {
+  mount = "kv-root"
+  name  = "proxmox_creds"
+}
+
 data "vault_kv_secret_v2" "proxmox_ssh" {
   mount = "kv-root"
   name  = "ssh_keys/terraform-proxmox"
 }
+
+
+
+
 ## test VM
 
 module "ubuntu_test_vm" {
