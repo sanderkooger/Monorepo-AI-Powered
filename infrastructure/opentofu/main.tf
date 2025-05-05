@@ -1,13 +1,28 @@
 # Root module and plumbing
 
-
 module "get_repo_name" {
   source = "./modules/helpers/get_repo_name"
   repo_name = var.repo_name
 }
 
+
 module "kv_engine" {
   source      = "./modules/vault/kv_engine"
   repo_name   = module.get_repo_name.name
   env_name = var.env_name
+}
+
+data "vault_kv_secret_v2" "proxmox_ssh" {
+  mount = "kv-root"
+  name  = "ssh_keys/terraform-proxmox"
+}
+## test VM
+
+module "ubuntu_test_vm" {
+  source = "./modules/compute/proxmox/ubuntu-vm"
+
+  env_name       = var.env_name
+  node_name      = var.proxmox_node_name
+  image_url      = "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-amd64.img"
+  ssh_public_key = data.vault_kv_secret_v2.proxmox_ssh.data["pub"]
 }

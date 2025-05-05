@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.77.0" # Verify latest version
+    }
+  }
+}
+
 resource "proxmox_virtual_environment_download_file" "ubuntu_image" {
   content_type = "iso"
   datastore_id = "local"

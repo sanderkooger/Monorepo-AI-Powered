@@ -15,8 +15,15 @@ variable "vault_token" {
 variable "env_name" {
   description = "env name for environment segregation (prod, accept, or dev-<name>)"
   type        = string
-  default       = null
+  default = null
 }
+
+variable "proxmox_node_name" {
+  description = "Name of Proxmox host node for VM deployment"
+  type        = string
+}
+
+ 
 variable "repo_name" {
   type        = string
   description = "Manual repository name override"

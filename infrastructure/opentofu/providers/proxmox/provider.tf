@@ -1,26 +1,26 @@
 terraform {
   required_providers {
     proxmox = {
-      source = "bpg/proxmox"
-      version = "0.77.0"
+      source  = "bpg/proxmox"
+      version = "0.77.0" # Verify latest version
     }
   }
 }
 
-data "vault_kv_secret_v2" "proxmox" {
-  mount = "kv-Monorepo-AI-Powered-prod"
-  name  = "proxmox"
+data "vault_kv_secret_v2" "proxmox_creds" {
+  mount = "kv-root"
+  name  = "/v1/kv-root/data/proxmox_creds"
 }
 
 provider "proxmox" {
-  endpoint  = data.vault_kv_secret_v2.proxmox.data["url"]
-  api_token = "${data.vault_kv_secret_v2.proxmox.data["tokenID"]}=${data.vault_kv_secret_v2.proxmox.data["tokenSecret"]}"
-  insecure  = true
+  endpoint  = data.vault_kv_secret_v2.proxmox_creds.data["host"]
+  api_token = "${data.vault_kv_secret_v2.proxmox_creds.data["token_id"]}=${data.vault_kv_secret_v2.proxmox_creds.data["token_secret"]}"
+  
 
   ssh {
     agent      = true
-    username   = "root"
-    private_key = data.vault_kv_secret_v2.proxmox.data["SSH_priv_key"]
+    #username   = data.vault_kv_secret_v2.proxmox_creds.data["user"]
+    #private_key = data.vault_kv_secret_v2.proxmox_creds.data["SSH_priv_key"]
   }
 }
 
