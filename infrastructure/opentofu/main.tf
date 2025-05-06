@@ -27,7 +27,7 @@ provider "proxmox" {
     agent    = false
     username = "terraform"
     private_key = <<-EOF
-    ${data.vault_kv_secret_v2.proxmox_ssh.data["priv"]}
+    ${data.vault_kv_secret_v2.proxmox_ssh.data["priv_key"]}
     EOF
   }
     
@@ -70,4 +70,5 @@ module "ubuntu_test_vm" {
   node_name      = var.proxmox_node_name
   image_url      = "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-amd64.img"
   ip_address     = "192.168.1.10"
+  repo_name      = var.repo_name
 }

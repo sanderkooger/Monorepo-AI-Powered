@@ -11,6 +11,11 @@ variable "vault_token" {
   type        = string
   sensitive   = true
 }
+variable "repo_name" {
+  type        = string
+  description = "Manual repository name override"
+  default = null
+}
 
 variable "env_name" {
   description = "env name for environment segregation (prod, accept, or dev-<name>)"
@@ -24,8 +29,3 @@ variable "proxmox_node_name" {
 }
 
  
-variable "repo_name" {
-  type        = string
-  description = "Manual repository name override"
-  default = null
-}

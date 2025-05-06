@@ -1,3 +1,10 @@
+
+
+variable "repo_name" {
+  type        = string
+  description = "Name of the repository/project"
+}
+
 variable "env_name" {
   description = "Environment name suffix for resource naming"
   type        = string

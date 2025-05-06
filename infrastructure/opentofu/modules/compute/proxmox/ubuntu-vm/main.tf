@@ -50,8 +50,8 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
   initialization {
     user_account {
-      username = "admin"
-      keys     = [trimspace(tls_private_key.ubuntu_vm_key.public_key_openssh)]
+      username = "bootstrap_user"
+      keys     = ["${data.vault_kv_secret_v2.ssh_key.data["pub_key"]}"]
       password = random_password.ubuntu_vm_password.result
       
 
@@ -79,10 +79,9 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_image" {
   file_name    = "${split("/", var.image_url)[7]}"
 }
 
-resource "tls_private_key" "ubuntu_vm_key" {
-  algorithm = "RSA"
-  rsa_bits  = 2048
-}
+
+
+
 
 resource "random_password" "ubuntu_vm_password" {
   length           = 16
@@ -90,5 +89,26 @@ resource "random_password" "ubuntu_vm_password" {
   special          = true
 }
 
+module "get_repo_name" {
+  source = "../../../../modules/helpers/get_repo_name"
+  repo_name = var.repo_name
+}
+
+data "vault_kv_secret_v2" "ssh_key" {
+  mount = "kv-root"
+  name  = "ssh_keys/bootstrap_user"
+}
+
+resource "vault_generic_secret" "machine_credentials" {
+  path = "kv-${module.get_repo_name.name}-${var.env_name}/machines/${var.computer_name}-${var.env_name}"
+
+  data_json = jsonencode({
+    ip_address = var.ip_address
+    username = proxmox_virtual_environment_vm.ubuntu_vm.initialization.0.user_account.0.username
+    password = random_password.ubuntu_vm_password.result
+  })
+}
+
 ## Outputs
+
 
