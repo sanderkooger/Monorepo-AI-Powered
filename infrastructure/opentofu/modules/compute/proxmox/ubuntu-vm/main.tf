@@ -51,7 +51,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   initialization {
     user_account {
       username = "bootstrap_user"
-      keys     = ["${data.vault_kv_secret_v2.ssh_key.data["pub_key"]}"]
+      keys     = [trimspace(var.ssh_pub_key)]
       password = random_password.ubuntu_vm_password.result
       
 
@@ -81,8 +81,6 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_image" {
 
 
 
-
-
 resource "random_password" "ubuntu_vm_password" {
   length           = 16
   override_special = "_%@"
@@ -94,20 +92,21 @@ module "get_repo_name" {
   repo_name = var.repo_name
 }
 
-data "vault_kv_secret_v2" "ssh_key" {
-  mount = "kv-root"
-  name  = "ssh_keys/bootstrap_user"
-}
 
-resource "vault_generic_secret" "machine_credentials" {
-  path = "kv-${module.get_repo_name.name}-${var.env_name}/machines/${var.computer_name}-${var.env_name}"
 
+resource "vault_kv_secret_v2" "machine_credentials" {
+  mount = var.kv_store_path
+  name  = "machines/${proxmox_virtual_environment_vm.ubuntu_vm.name}" # Use variable instead of local
+  
   data_json = jsonencode({
-    ip_address = var.ip_address
-    username = proxmox_virtual_environment_vm.ubuntu_vm.initialization.0.user_account.0.username
+    user     = proxmox_virtual_environment_vm.ubuntu_vm.initialization[0].user_account[0].username
     password = random_password.ubuntu_vm_password.result
+    ip       = var.ip_address #temp fix
   })
+
+  depends_on = [vault_mount.kv]
 }
+
 
 ## Outputs
 

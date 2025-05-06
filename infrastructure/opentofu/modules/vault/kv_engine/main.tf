@@ -1,5 +1,22 @@
-resource "vault_mount" "kv_engine" {
-  path        = "kv-${var.repo_name}-${var.env_name}"
+resource "vault_mount" "kv" {
+  path        = "kv-Monorepo-AI-Powered-prod"
   type        = "kv-v2"
-  description = "KV v2 secrets engine for ${var.repo_name} (${var.env_name})"
+  description = "Central KV store for Monorepo AI Powered"
+  options = {
+    version = "2"
+  }
+}
+
+resource "vault_kv_secret_backend_v2" "config" {
+  mount                = vault_mount.kv.path
+  delete_version_after = 31536000 # 1 year in seconds
+  cas_required         = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+output "store_path" {
+  value = vault_mount.kv.path
 }
