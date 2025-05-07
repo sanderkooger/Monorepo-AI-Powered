@@ -37,6 +37,9 @@ yarn-error.log*
 *.tfstate
 *.tfstate.*
 .terraform/
+
+
+
 # Misc
 .DS_Store
 *.pem

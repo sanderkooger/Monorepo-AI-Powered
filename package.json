@@ -1,7 +1,10 @@
 {
+  "author": "sanderkooger",
+  "license": "MIT",
   "name": "Monorepo-AI-Powered",
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
@@ -10,8 +13,16 @@
     "dev-init": "./scripts/setup-dev-env.sh",
     "clean": "rimraf node_modules && rimraf .turbo"
   },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "cline": "^0.8.2",
+    "husky": "^9.1.7",
     "prettier": "^3.5.0",
     "rimraf": "^6.0.1",
     "turbo": "^2.4.4",
@@ -20,5 +31,9 @@
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=22"
+  },
+  "dependencies": {
+    "@commitlint/types": "^19.8.0",
+    "conventional-changelog-atom": "^5.0.0"
   }
 }
