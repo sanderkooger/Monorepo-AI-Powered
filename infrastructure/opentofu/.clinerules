@@ -1,0 +1,39 @@
+# OpenTofu Infrastructure Standards
+
+## Structure
+- Single source of truth for all infrastructure definitions
+- Mandatory directories:
+  - environments/{prod,accept,dev-<user>}
+  - modules/<category>/<name>
+  - providers/<name>
+- Root module must be identical across environments
+
+## Environments
+- Naming: prod|accept|dev-<lowercase_alphanumeric_user>
+- Workspace names must match environment exactly
+- Topology parity enforced across all environments
+- Environment-specific overrides prohibited in modules
+- Default to prod configuration
+
+## Code
+- 2-space indentation enforced
+- Strict OpenTofu formatting required
+- Consistent resource naming across environments
+- Provider configurations isolated in dedicated blocks
+
+## Changes
+- Atomic commits prefixed with [prod|accept|dev]
+- Dev environment testing mandatory before prod merges
+- Documentation updates required for topology changes
+
+## Validation
+- tofu validate && tofu fmt check required pre-commit
+- Cross-environment plan parity checks enforced
+- Automated testing required for all module changes
+- All modules must validate in all environments simultaneously
+
+## Documentation
+- README.md must reflect current structure
+- Module/provider directories require purpose/usage docs
+- Infrastructure diagrams must match deployed state
+- Environment configs must reference documentation

@@ -34,9 +34,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # Terraform / OpenTofu
-*.tfvars
 *.tfstate
 *.tfstate.*
+.terraform/
 # Misc
 .DS_Store
 *.pem
