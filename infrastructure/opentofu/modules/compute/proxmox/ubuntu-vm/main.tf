@@ -10,7 +10,7 @@ terraform {
 
 ## Ubuntu VM Module
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  name        = "${var.env_name}-${var.instance_name}"
+  name        = "${var.instance_name}-${var.env_name}"
   node_name   = var.node_name
   description = var.description
   tags        = ["terraform", "ubuntu"]
@@ -96,14 +96,14 @@ module "get_repo_name" {
 
 # Vault policy for this VM instance
 resource "vault_policy" "vm_policy" {
-  name = "${var.env_name}-${var.instance_name}-policy"
+  name = "${proxmox_virtual_environment_vm.ubuntu_vm.name}-policy"
 
   policy = <<EOT
-path "${var.kv_store_path}/data/infrastructure/machines/${var.env_name}-${var.instance_name}/*" {
+path "${var.kv_store_path}/data/infrastructure/machines/${proxmox_virtual_environment_vm.ubuntu_vm.name}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 
-path "${var.kv_store_path}/metadata/infrastructure/machines/${var.env_name}-${var.instance_name}/*" {
+path "${var.kv_store_path}/metadata/infrastructure/machines/${proxmox_virtual_environment_vm.ubuntu_vm.name}/*" {
   capabilities = ["list"]
 }
 EOT
@@ -112,7 +112,7 @@ EOT
 # AppRole for VM authentication
 resource "vault_approle_auth_backend_role" "vm_role" {
   backend        = "approle"
-  role_name      = "${var.env_name}-${var.instance_name}-role"
+  role_name      = "${proxmox_virtual_environment_vm.ubuntu_vm.name}-role"
   token_policies = [vault_policy.vm_policy.name]
 }
 

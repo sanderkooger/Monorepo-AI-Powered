@@ -33,9 +33,9 @@ provider "proxmox" {
     
     
     
-
+ 
 }
-
+ 
 module "get_repo_name" {
   source = "./modules/helpers/get_repo_name"
   repo_name = var.repo_name
@@ -67,9 +67,9 @@ data "vault_kv_secret_v2" "bootstrap_user_" {
 
 ## test VM
 
-module "ubuntu_test_vm" {
+module "ubuntu_test_vm-1"  {
   source = "./modules/compute/proxmox/ubuntu-vm"
-  instance_name  = "ubuntu-test"
+  instance_name  = "ubuntu-test-1"
   description    = "ubuntu test machine"
   repo_name      = var.repo_name
   env_name       = var.env_name
@@ -80,3 +80,5 @@ module "ubuntu_test_vm" {
   ssh_pub_key    = data.vault_kv_secret_v2.bootstrap_user_.data["pub_key"]
 
 }
+
+

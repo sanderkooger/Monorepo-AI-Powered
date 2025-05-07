@@ -1,39 +1,21 @@
-# OpenTofu Configuration
+# OpenTofu Infrastructure
 
-## Repository Name Handling
-
-The `repo_name` variable supports automatic detection from git origin with manual override capability:
+## TL;DR
+**Vault Integration**:  
+The `vault/kv_engine` module provides environment-isolated secrets storage.  
+[Detailed Vault KV Documentation](./modules/vault/kv_engine/README.md)
 
 ```hcl
-variable "repo_name" {
-  description = <<EOT
-  Repository name detection:
-  - Automatically extracted from git origin URL
-  - Override by setting in repo.auto.tfvars
-  - Format: "repository-name" (no organization)
-  EOT
-  type        = string
-  default     = null
+module "vault_kv_prod" {
+  source    = "./modules/vault/kv_engine"
+  repo_name = "monorepo-ai"
+  env_name  = "prod"
 }
 ```
 
-### Example override:
-```hcl
-# repo.auto.tfvars
-repo_name = "monorepo-ai-powered"
-```
-
-### Detection Logic
-```mermaid
-sequenceDiagram
-    User->>Terraform: Apply config
-    Terraform->>Script: Execute get_repo_name.sh
-    Script->>Git: Get origin URL
-    Git-->>Script: Return URL
-    Script-->>Terraform: JSON response
-    Terraform->>Validation: Check sources
-    alt Override exists
-        Validation-->>User: Use manual value
-    else
-        Validation-->>User: Use git origin value
-    end
+## Key Modules
+| Module | Purpose | Docs |
+|--------|---------|------|
+| `vault/kv_engine` | Centralized secrets management | [Readme](./modules/vault/kv_engine/README.md) |
+| `compute/proxmox/ubuntu-vm` | VM provisioning | - |
+| `helpers/get_repo_name` | Repository identification | - |
