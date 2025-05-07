@@ -10,9 +10,9 @@ terraform {
 
 ## Ubuntu VM Module
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  name        = "${var.computer_name}-${var.env_name}"
+  name        = "${var.env_name}-${var.instance_name}"
   node_name   = var.node_name
-  description = "Ubuntu 24.04 Minimal (${var.env_name})"
+  description = var.description
   tags        = ["terraform", "ubuntu"]
   
   
@@ -94,6 +94,33 @@ module "get_repo_name" {
 
 
 
+# Vault policy for this VM instance
+resource "vault_policy" "vm_policy" {
+  name = "${var.env_name}-${var.instance_name}-policy"
+
+  policy = <<EOT
+path "${var.kv_store_path}/data/infrastructure/machines/${var.env_name}-${var.instance_name}/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "${var.kv_store_path}/metadata/infrastructure/machines/${var.env_name}-${var.instance_name}/*" {
+  capabilities = ["list"]
+}
+EOT
+}
+
+# AppRole for VM authentication
+resource "vault_approle_auth_backend_role" "vm_role" {
+  backend        = "approle"
+  role_name      = "${var.env_name}-${var.instance_name}-role"
+  token_policies = [vault_policy.vm_policy.name]
+}
+
+output "vault_role_id" {
+  value = vault_approle_auth_backend_role.vm_role.role_id
+  sensitive = true
+}
+
 resource "vault_kv_secret_v2" "machine_credentials" {
   mount = var.kv_store_path
   name  = "machines/${proxmox_virtual_environment_vm.ubuntu_vm.name}" # Use variable instead of local
@@ -104,7 +131,6 @@ resource "vault_kv_secret_v2" "machine_credentials" {
     ip       = var.ip_address #temp fix
   })
 
-  depends_on = [vault_mount.kv]
 }
 
 

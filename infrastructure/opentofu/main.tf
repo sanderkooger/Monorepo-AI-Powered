@@ -69,13 +69,14 @@ data "vault_kv_secret_v2" "bootstrap_user_" {
 
 module "ubuntu_test_vm" {
   source = "./modules/compute/proxmox/ubuntu-vm"
-  computer_name = "ubuntu-test"
+  instance_name  = "ubuntu-test"
+  description    = "ubuntu test machine"
   repo_name      = var.repo_name
   env_name       = var.env_name
   node_name      = var.proxmox_node_name
   image_url      = "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-amd64.img"
   ip_address     = "192.168.1.10"
-  kv_store_path = module.kv_engine.store_path
-  ssh_pub_key = data.vault_kv_secret_v2.bootstrap_user_.data["pub_key"]
+  kv_store_path  = module.kv_engine.kv_store_path
+  ssh_pub_key    = data.vault_kv_secret_v2.bootstrap_user_.data["pub_key"]
 
 }

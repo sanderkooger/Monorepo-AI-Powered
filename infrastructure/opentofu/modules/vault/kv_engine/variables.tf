@@ -1,9 +1,9 @@
 variable "repo_name" {
   type        = string
-  description = "Repository name from repo_name module output"
+  description = "Name of the repository/project"
 }
 
 variable "env_name" {
   type        = string
-  description = "env name for environment segregation (e.g. dev, staging, prod)"
+  description = "Environment name suffix for resource naming"
 }

@@ -1,5 +1,15 @@
 
 
+variable "instance_name" {
+  type        = string
+  description = "Unique name for this VM instance"
+}
+variable "description" {
+  type        = string
+  description = "Description of the VM instance"
+  
+}
+
 variable "repo_name" {
   type        = string
   description = "Name of the repository/project"
@@ -12,10 +22,6 @@ variable "env_name" {
 
 variable "node_name" {
   description = "Proxmox host node name"
-  type        = string
-}
-variable "computer_name" {
-  description = "VM machine name"
   type        = string
 }
 variable "ssh_pub_key" {
