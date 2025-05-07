@@ -24,9 +24,9 @@ The project requires a simplified, secure, and scalable method for various infra
 1.  **Option 1 (Chosen): Centralized, Dynamically Named KV with Module-Specific Policies and Paths.**
     *   A single KV-v2 secrets engine is mounted per environment, named dynamically using repository and environment variables (e.g., `path = "kv-${var.repo_name}-${var.env_name}"`).
     *   A standardized hierarchical path structure is enforced within this mount: `kv-${var.repo_name}-${var.env_name}/<module_type>/<module_category>/<module_instance_name>/...` (e.g., `kv-myproject-prod/infrastructure/machines/webserver-01/config`).
-    *   Each OpenTofu module instance that requires secrets will manage its own `vault_policy` resource and an associated authentication mechanism (e.g., `vault_approle_auth_backend_role`).
-    *   Policies grant permissions (`create`, `read`, `update`, `delete`, `list`) strictly scoped to the module's designated path prefix (covering both `data/` and `metadata/` subpaths for KV-v2).
-    *   Upon module destruction via OpenTofu, the associated `vault_policy` and auth role are destroyed, revoking access. The secret data itself remains in Vault by default, preventing accidental loss.
+    *   Centralized policy management through infrastructure team-controlled roles
+    *   Module-specific path isolation using hierarchical structure
+    *   Secrets retention policy aligned with environment lifecycle
 
 2.  **Option 2: Separate KV Mount per Module.**
     *   Each module would define and manage its own `vault_mount`.
@@ -47,54 +47,33 @@ This approach provides the best balance of security (through strict, module-inst
 **Implementation Details (as per the agreed plan):**
 
 *   The existing `infrastructure/opentofu/modules/vault/kv_engine/main.tf` will be updated to accept `repo_name` and `env_name` variables to set its `path`.
-*   New or existing OpenTofu modules (e.g., for VMs, routers) will include:
-    *   `vault_policy` resources, with paths constructed using the convention and scoped to the module instance.
-    *   `vault_approle_auth_backend_role` resources, linking to these policies.
-*   The OpenTofu provider for Vault must be configured with sufficient permissions to manage policies and AppRole roles.
-*   Secure handling of AppRole RoleID and SecretID for provisioned resources will be necessary (standard AppRole operational consideration).
+*   The `infrastructure/opentofu/modules/vault/kv_engine` module provides:
+    *   Environment-specific KV store creation
+    *   Standardized path structure enforcement
+    *   Integration with centralized access control policies
+*   Secret access management handled through platform-level roles
+*   Data retention policies managed through Vault's expiration system
 
 ```mermaid
 graph TD
-    User[User/CI/CD with OpenTofu Permissions] -- Manages --> OTF_Root[OpenTofu Root Configuration]
-
-    subgraph Central Vault Setup (Dynamically Named)
-        KV_Mount_Def[vault_mount "kv-\${var.repo_name}-\${var.env_name}"]
+    User[User/CI/CD] -- Deploys --> OTF_Root[OpenTofu Configuration]
+    
+    subgraph Vault Environment
+        KV_Mount["kv-${var.repo_name}-${var.env_name}"]
+        KV_Mount -->|Contains| VM_Secrets["infrastructure/machines/vm-alpha-01"]
+        KV_Mount -->|Contains| Router_Secrets["infrastructure/network/edge-router-01"]
     end
 
-    OTF_Root -- Deploys --> OTF_Module_VM[OTF Module: VM]
-    OTF_Root -- Deploys --> OTF_Module_Router[OTF Module: Router]
+    OTF_Root -- Manages --> KV_Module[Vault KV Engine Module]
+    KV_Module -- Creates --> KV_Mount
 
-    subgraph Module VM Instance (vm-alpha-01)
-        Policy_VM_Path["kv-\${var.repo_name}-\${var.env_name}/data/infrastructure/machines/vm-alpha-01/*"]
-        Metadata_VM_Path["kv-\${var.repo_name}-\${var.env_name}/metadata/infrastructure/machines/vm-alpha-01/*"]
-        OTF_Module_VM -- Creates --> Policy_VM[vault_policy "vm-alpha-01-policy"]
-        Policy_VM -- Grants Access To --> Policy_VM_Path
-        Policy_VM -- Grants Access To --> Metadata_VM_Path
-        OTF_Module_VM -- Creates --> AppRole_VM[vault_approle_auth_backend_role "vm-alpha-01-role"]
-        AppRole_VM -- Associated with --> Policy_VM
+    subgraph Access Control
+        Platform_Role[Platform Engineering Role] -- Manages --> KV_Mount
+        Platform_Role -- Grants --> App_Team[Application Team Access]
     end
 
-    subgraph Module Router Instance (edge-router-01)
-        Policy_Router_Path["kv-\${var.repo_name}-\${var.env_name}/data/infrastructure/network/routers/edge-router-01/*"]
-        Metadata_Router_Path["kv-\${var.repo_name}-\${var.env_name}/metadata/infrastructure/network/routers/edge-router-01/*"]
-        OTF_Module_Router -- Creates --> Policy_Router[vault_policy "edge-router-01-policy"]
-        Policy_Router -- Grants Access To --> Policy_Router_Path
-        Policy_Router -- Grants Access To --> Metadata_Router_Path
-        OTF_Module_Router -- Creates --> AppRole_Router[vault_approle_auth_backend_role "edge-router-01-role"]
-        AppRole_Router -- Associated with --> Policy_Router
-    end
-
-    Actual_VM[VM Instance: vm-alpha-01] -- Authenticates via AppRole_VM --> Vault[HashiCorp Vault]
-    Actual_VM -- Reads/Writes --> Policy_VM_Path
-
-    Actual_Router[Router Instance: edge-router-01] -- Authenticates via AppRole_Router --> Vault
-    Actual_Router -- Reads/Writes --> Policy_Router_Path
-
-    %% Deletion Flow
-    User -- "terraform destroy vm-alpha-01" --> OTF_Module_VM
-    OTF_Module_VM -- Deletes --> Policy_VM
-    OTF_Module_VM -- Deletes --> AppRole_VM
-    Policy_VM_Path -- "Data Remains (Access Revoked)" --> Vault
+    VM_Instance[VM Instance] -- Reads/Writes --> VM_Secrets
+    Router_Instance[Router Instance] -- Reads/Writes --> Router_Secrets
 ```
 
 **Positive Consequences:**
