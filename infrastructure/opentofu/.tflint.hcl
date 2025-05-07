@@ -1,16 +1,8 @@
-config {
-  module = true
-  force = false
-}
 
-plugin "basic" {
-  enabled = true
-}
 
-plugin "aws" {
+plugin "terraform" {
   enabled = true
-  version = "0.28.0"
-  source  = "github.com/terraform-linters/tflint-ruleset-aws"
+  preset  = "recommended"
 }
 
 rule "terraform_comment_syntax" {
