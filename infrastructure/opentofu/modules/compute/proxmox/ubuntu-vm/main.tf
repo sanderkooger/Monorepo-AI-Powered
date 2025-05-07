@@ -15,13 +15,10 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   description = var.description
   tags        = ["terraform", "ubuntu"]
   
-  
   agent {
-    # read 'Qemu guest agent' section, change to true only when ready
-    enabled = false
+    enabled = true
   }
-  # if agent is not enabled, the VM may not be able to shutdown properly, and may need to be forced off
-  stop_on_destroy = true
+ 
 
   cpu {
     cores = 1
@@ -31,8 +28,6 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     dedicated = 2048
   }
 
-
-
   disk {
     datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_download_file.ubuntu_image.id
@@ -41,22 +36,20 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     iothread     = true
     discard      = "on"
   }
-    network_device {
+
+  network_device {
     bridge = "vmbr0"
   }
-    tpm_state {
+  serial_device {
+    device = "socket"
+  }
+
+  tpm_state {
     version = "v2.0"
   }
 
   initialization {
-    user_account {
-      username = "bootstrap_user"
-      keys     = [trimspace(var.ssh_pub_key)]
-      password = random_password.ubuntu_vm_password.result
-      
-
-      
-    }
+    user_data_file_id = proxmox_virtual_environment_file.user_data_cloud_config.id
     ip_config {
       ipv4 {
         address = "${var.ip_address}/24"
@@ -64,12 +57,39 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
       }
     }
     dns {
-      servers = ["192.168.1.1","1.1.1.1"]
-      }
+      servers = ["192.168.1.1", "1.1.1.1"]
+    }
   }
 }
 
 ## Resources
+
+resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
+  content_type = "snippets"
+  datastore_id = "local"
+  node_name    = var.node_name
+
+  source_raw {
+    data = <<-EOT
+    #cloud-config
+    hostname: ${var.instance_name}-${var.env_name}
+    users:
+      - name: ${var.user_name}
+        groups: sudo
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - ${trimspace(var.ssh_pub_key)}
+        sudo: ALL=(ALL) NOPASSWD:ALL
+    package_update: true
+    packages:
+      - qemu-guest-agent
+    runcmd:
+      - systemctl enable --now qemu-guest-agent
+    EOT
+
+    file_name = "${var.instance_name}-${var.env_name}-user-data.yaml"
+  }
+}
 
 resource "proxmox_virtual_environment_download_file" "ubuntu_image" {
   content_type = "iso"
@@ -126,7 +146,7 @@ resource "vault_kv_secret_v2" "machine_credentials" {
   name  = "machines/${proxmox_virtual_environment_vm.ubuntu_vm.name}" # Use variable instead of local
   
   data_json = jsonencode({
-    user     = proxmox_virtual_environment_vm.ubuntu_vm.initialization[0].user_account[0].username
+    user     = var.user_name
     password = random_password.ubuntu_vm_password.result
     ip       = var.ip_address #temp fix
   })

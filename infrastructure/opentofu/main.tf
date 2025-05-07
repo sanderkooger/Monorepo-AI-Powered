@@ -77,6 +77,7 @@ module "ubuntu_test_vm-1"  {
   image_url      = "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-amd64.img"
   ip_address     = "192.168.1.10"
   kv_store_path  = module.kv_engine.kv_store_path
+  user_name      = "bootstrap_user"
   ssh_pub_key    = data.vault_kv_secret_v2.bootstrap_user_.data["pub_key"]
 
 }

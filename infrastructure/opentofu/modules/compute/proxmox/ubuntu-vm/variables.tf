@@ -20,6 +20,12 @@ variable "env_name" {
   type        = string
 }
 
+variable "user_name" {
+  description = "Username for the VM"
+  type        = string
+  default     = "bootstrap_user"
+}
+
 variable "node_name" {
   description = "Proxmox host node name"
   type        = string
