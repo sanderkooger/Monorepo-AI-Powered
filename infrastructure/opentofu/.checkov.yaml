@@ -1,0 +1,10 @@
+framework:
+  - terraform
+skip-check:
+  - CKV_AWS_20 # S3 Bucket ACL
+  - CKV_AWS_18 # S3 Bucket Logging
+  - CKV_AWS_21 # S3 Bucket Versioning
+soft-fail: true
+output: cli
+compact: true
+quiet: true

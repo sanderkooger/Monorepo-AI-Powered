@@ -208,7 +208,35 @@
         path: "/tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
         state: absent
       when: vault_check.rc != 0
-       # --- Add other sudo tasks as needed ---
+
+    # --- TFLint ---
+    - name: Check if TFLint is installed (Linux)
+      ansible.builtin.command: tflint --version
+      register: tflint_check
+      ignore_errors: true
+      changed_when: false
+      when: ansible_system == "Linux"
+
+    - name: Download TFLint install script (Linux)
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh
+        dest: /tmp/install_tflint.sh
+        mode: '0755'
+      when: ansible_system == "Linux" and tflint_check.rc != 0
+
+    - name: Install TFLint using script (Linux)
+      become: true
+      ansible.builtin.command:
+        cmd: bash /tmp/install_tflint.sh
+        creates: /usr/local/bin/tflint # Assumes script installs to /usr/local/bin
+      changed_when: true # Assume changed if script runs
+      when: ansible_system == "Linux" and tflint_check.rc != 0
+
+    - name: Clean up TFLint install script (Linux)
+      ansible.builtin.file:
+        path: /tmp/install_tflint.sh
+        state: absent
+      when: ansible_system == "Linux" and tflint_check.rc != 0 # Only clean up if we downloaded it
 
     # ===========================================
     # NVM and Node.js Installation (as user)
@@ -242,4 +270,4 @@
     # ===========================================
     - name: Display final message
       ansible.builtin.debug:
-        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu, Vault, kubectl, Helm) should now be installed/updated."
+        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu, Vault, kubectl, Helm, TFLint) should now be installed/updated."

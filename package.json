@@ -8,10 +8,11 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:infra": "turbo run lint:infra",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "dev-init": "./scripts/setup-dev-env.sh",
-    "clean": "rimraf node_modules && rimraf .turbo"
+    "clean": "rimraf .turbo node_modules"
   },
   "config": {
     "commitizen": {
@@ -23,10 +24,10 @@
     "@commitlint/config-conventional": "^19.8.0",
     "cline": "^0.8.2",
     "husky": "^9.1.7",
-    "prettier": "^3.5.0",
+    "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
-    "turbo": "^2.4.4",
-    "typescript": "5.7.3"
+    "turbo": "^2.5.3",
+    "typescript": "5.8.3"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

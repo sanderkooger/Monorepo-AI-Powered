@@ -10,6 +10,9 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "lint:infra": {
+      "dependsOn": ["^lint:infra"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },

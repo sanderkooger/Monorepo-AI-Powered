@@ -1,1 +1,5 @@
+echo "Linting infrastructure..."
+pnpm run lint:infra
+
+echo "Linting code..."
 pnpm run lint
