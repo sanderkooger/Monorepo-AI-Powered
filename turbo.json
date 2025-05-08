@@ -2,6 +2,9 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
+    "clean": {
+      "dependsOn": ["^clean"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
@@ -10,9 +13,7 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
-    "lint:infra": {
-      "dependsOn": ["^lint:infra"]
-    },
+   
     "check-types": {
       "dependsOn": ["^check-types"]
     },

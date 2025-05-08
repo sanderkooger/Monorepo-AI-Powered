@@ -4,6 +4,7 @@
   "name": "Monorepo-AI-Powered",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "prepare": "husky",
     "build": "turbo run build",
     "dev": "turbo run dev",
