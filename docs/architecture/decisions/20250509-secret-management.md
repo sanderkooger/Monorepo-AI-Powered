@@ -69,6 +69,5 @@ graph TD
 - **Negative:** Requires coordinated updates between infrastructure and Ansible teams  
 
 **References:**  
-- Supersedes ADR-2025-05-06-Vault-KV-Strategy  
-- Replaces ADR-2025-05-08-Ansible-Strategy  
+- Historical Note: Consolidates previous secret management strategies
 ---
