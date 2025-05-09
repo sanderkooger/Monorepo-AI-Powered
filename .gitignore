@@ -38,8 +38,10 @@ yarn-error.log*
 *.tfstate.*
 .terraform/
 
-
-
+# Python Venvs
+*-venv/
+.venv/
+venv/
 # Misc
 .DS_Store
 *.pem

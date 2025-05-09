@@ -114,6 +114,12 @@ importers:
         specifier: 5.7.3
         version: 5.7.3
 
+  infrastructure/ansible:
+    devDependencies:
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+
   infrastructure/opentofu:
     devDependencies:
       npm-run-all:

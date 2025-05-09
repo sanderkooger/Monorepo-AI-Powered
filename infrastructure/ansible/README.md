@@ -24,9 +24,8 @@ graph LR
 ## Virtual Environment Setup
 ```bash
 # Create and activate venv
-python3 -m venv .ansible-venv
-source .ansible-venv/bin/activate
-
+python3 -m venv .venv
+source .venv/bin/activate
 # Install requirements
 pip install -r inventory/requirements.txt
 ```

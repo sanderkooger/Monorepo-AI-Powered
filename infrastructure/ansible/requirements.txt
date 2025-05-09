@@ -1,0 +1,2 @@
+hvac>=2.0.0
+ansible-dev-tools>=25.5.1
