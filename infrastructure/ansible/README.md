@@ -41,20 +41,36 @@ inventory = ./inventory/dynamic_inventory.py
 ```
 
 ### Vault Integration
-Reference KV engine setup from:
+**Secret Path Structure**:
 ```bash
-infrastructure/opentofu/modules/vault/kv_engine/
+kv-${repo_name}-${env_name}/ansible/{collection}
+# Example: kv-monorepo-prod/ansible/database_creds
 ```
 
-Example secret retrieval:
+**Configuration**:
+1. Source from OpenTofu outputs:
+```yaml
+# ansible.cfg
+[vault]
+address = "{{ vault_addr }}"
+role_id = "{{ vault_approle_id }}"
+secret_id = "{{ vault_secret_id }}"
+```
+
+2. Secret retrieval example:
 ```yaml
 - name: Get database credentials
   ansible.builtin.uri:
-    url: "{{ vault_addr }}/v1/kv/data/db"
+    url: "{{ vault_addr }}/v1/kv/data/ansible/database_creds"
     method: GET
     headers:
       X-Vault-Token: "{{ vault_token }}"
+  register: secret_result
 ```
+
+**Policy Requirements**:
+- AppRole: `ansible-${repo_name}-${env_name}`
+- Policy: `service-${repo_name}-${env_name}`
 
 ### Playbook Structure
 Entrypoint for local provisioning:
@@ -73,5 +89,4 @@ Entrypoint for local provisioning:
 | Python module missing | Reinstall requirements from `inventory/requirements.txt` |
 
 ## Architectural Decisions
-- [20250508-ansible-strategy.md](../docs/architecture/decisions/20250508-ansible-strategy.md)
-- [20250506-vault-kv-strategy.md](../docs/architecture/decisions/20250506-vault-kv-strategy.md)
+- [20250509-secret-management.md](../docs/architecture/decisions/20250509-secret-management.md) (Unified Vault strategy)
