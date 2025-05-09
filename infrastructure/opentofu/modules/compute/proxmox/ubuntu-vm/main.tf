@@ -148,12 +148,10 @@ resource "vault_kv_secret_v2" "machine_credentials" {
   data_json = jsonencode({
     user     = var.user_name
     password = random_password.ubuntu_vm_password.result
-    ip       = var.ip_address #temp fix
+    ip       = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1]
   })
 
 }
 
-
-## Outputs
 
 
