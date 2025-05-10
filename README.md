@@ -3,9 +3,17 @@
 <div align="center">
   <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/Turborepo-EF4444?logo=turborepo&logoColor=white" alt="TurboRepo">
+  <br>
+  <img src="https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white" alt="pnpm">
+  <img src="https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white" alt="ESLint">
+  <img src="https://img.shields.io/badge/Prettier-F7B93E?logo=prettier&logoColor=black" alt="Prettier">
   <img src="https://img.shields.io/badge/Ansible-EE0000?logo=ansible&logoColor=white" alt="Ansible">
   <img src="https://img.shields.io/badge/OpenTofu-7B42BC?logo=opentofu&logoColor=white" alt="OpenTofu">
+  <img src="https://img.shields.io/badge/HashiCorp%20Vault-FFEC6E?logo=hashicorpvault&logoColor=black" alt="HashiCorp Vault">
 </div>
 
 ## Vision Statement
@@ -92,25 +100,27 @@ gantt
 
 ```bash
 .
-├── apps/
-│   ├── web      # Next.js production application
-│   └── docs     # Documentation & system overview
-├── packages/
-│   ├── ui       # Shared React components
-│   ├── eslint-config  # Standardized lint rules
-│   └── typescript-config # TS base configurations
-├── infrastructure/
-│   ├── ansible         # Configuration management
+├── .roo/                   # Directory for AI-driven development standards
+│   ├── rules/
+│   │   └── .roorules.md    # Repository-wide development standards
+│   └── rules-architect/
+│       └── .roorules.md    # Architecture-specific rules
+├── apps/                   # Application-specific code
+│   ├── web                 # Next.js production application
+│   └── docs                # Documentation & system overview
+├── packages/               # Shared libraries and configurations
+│   ├── ui                  # Shared React components
+│   ├── eslint-config       # Standardized lint rules
+│   └── typescript-config   # TS base configurations
+├── infrastructure/         # Infrastructure as Code (IaC)
+│   ├── ansible             # Configuration management
 │   │   └── playbooks/
 │   │       └── setup-local-dev.yml # Playbook for dev tool installation
-│   ├── opentofu        # Cloud provisioning
-│   └── packer          # VM Image building (e.g., Proxmox Ubuntu) -> [See Details](./infrastructure/packer/)
-├── scripts/
-│   └── setup-dev-env.sh # Script to bootstrap dev environment
-├── .clinerules         # Repository-wide development standards
-├── .clinerules-architect # Architecture-specific rules
-├── AI_CONTEXT.md       # Infrastructure context
-└── turbo.json          # Build pipeline config
+│   ├── opentofu            # Cloud provisioning (see .roorules for standards)
+│   └── packer              # VM Image building (e.g., Proxmox Ubuntu) -> [See Details](./infrastructure/packer/)
+├── scripts/                # Utility and setup scripts
+│   └── setup-dev-env.sh    # Script to bootstrap dev environment
+└── turbo.json              # Build pipeline config
 ```
 
 ### Preferred Way of Working
@@ -118,21 +128,42 @@ gantt
 - **Branching:** For new features, create a branch from the main branch. Use atomic commits within these branches to document changes effectively.
 - **Commits:** Ensure commits are small, focused, and descriptive to enhance the project's documentation through git history.
 
-## AI Implementation
+## Development Standards & AI Guidance
 
-- **.clinerules:** Contains repository-wide development standards for code style, testing, documentation, and infrastructure practices. **Use this file to set standards that apply across all projects in the monorepo.**
-- **.clinerules-architect:** Specifies architecture-specific rules for design principles, documentation standards, and decision records. **Use this file to define architecture patterns and practices for the architect mode.**
-- **AI Context Files:** Use AI context files to provide additional context to AI tools. These files should be in the root of the project with additional files on a per-subproject basis in the respective directory. They can include:
-  - Project-specific guidelines
-  - Code snippets for reference
-  - Architectural decisions
-  - Any other relevant information for AI tools to understand the project better
+This repository employs a hierarchical system of `.roorules.md` files to define development standards, best practices, and operational guidelines. These rules are utilized by AI development assistants (like Roo) to ensure consistency, quality, and adherence to architectural decisions across the monorepo.
+
+### `.roorules.md` Hierarchy
+
+The rules are organized as follows:
+
+```mermaid
+graph TD
+    A[Monorepo Root] --> B[<code>.roo/</code> Directory]
+    B --> C[<code>rules/.roorules.md</code><br>(Global Repository Standards)]
+    B --> D[<code>rules-architect/.roorules.md</code><br>(Global Architect Role Standards)]
+    B --> E[<code>rules-<other-role>/.roorules.md</code><br>(Future Role-Specific Standards)]
+    A --> F[Specific Directory<br>(e.g., <code>infrastructure/opentofu/</code>)]
+    F --> G[<code>.roorules</code> or <code>.roorules.md</code><br>(Directory-Specific Standards)]
+```
+
+*   **Global Repository Standards (`.roo/rules/.roorules.md`):**
+    *   **Purpose:** Defines overarching standards applicable to the entire repository.
+    *   **Current Scope:** Covers general code style (TypeScript, indentation, React, JSDoc), commit strategies, documentation practices (READMEs, ADRs, JSDocs), and recommended MCP (Model Context Protocol) tool usage.
+*   **Role-Specific Global Standards (`.roo/rules-<role>/.roorules.md`):**
+    *   **Purpose:** Provides specialized guidelines for different development roles.
+    *   **Example (`.roo/rules-architect/.roorules.md`):** Defines architectural design principles (e.g., hexagonal architecture), documentation standards for architectural decisions (ADRs, secret management), and decision record formats.
+*   **Directory-Specific Standards (`<directory>/.roorules.md` or `.roorules`):**
+    *   **Purpose:** Allows for context-specific rules tailored to particular technologies, modules, or sub-projects. These rules complement or can override global rules for that specific context.
+    *   **Example (`infrastructure/opentofu/.roorules`):** Details standards for OpenTofu structure, environment management, coding practices, change validation, and documentation.
+    *   **Example (`infrastructure/packer/ubuntu/22.04/.roorules.md`):** Currently a placeholder, indicating Packer rules are for future reference.
 
 **Usage:**
 
-- **.clinerules:** Use this file to set standards that apply across all projects in the monorepo. **Ensure your code adheres to these standards for consistency and quality.**
-- **.clinerules-architect:** Use this file to define architecture patterns and practices for the architect mode. **This helps maintain architectural integrity across the project.**
-- **AI Context Files:** Use these files to provide context to AI tools. **Place them in the root of the project with additional files on a per-subproject basis in the respective directory.**
+AI tools will reference these `.roorules.md` files to:
+- Understand project standards and constraints.
+- Generate code and configurations aligned with established practices.
+- Assist in reviews and suggest improvements based on defined rules.
+- Provide contextually relevant advice and solutions.
 
 ## Getting Started
 
