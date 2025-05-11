@@ -8,6 +8,11 @@ terraform {
 }
 
 
+locals {
+ # Construct FQDN: if domain_name is provided, append it; otherwise, use the VM name.
+ fqdn = var.domain_name != null ? "${proxmox_virtual_environment_vm.ubuntu_vm.name}.${var.domain_name}" : proxmox_virtual_environment_vm.ubuntu_vm.name
+}
+
 ## Ubuntu VM Module
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   name        = "${var.instance_name}-${var.env_name}"
@@ -135,12 +140,7 @@ resource "vault_approle_auth_backend_role" "vm_role" {
   role_name      = "${proxmox_virtual_environment_vm.ubuntu_vm.name}-role"
   token_policies = [vault_policy.vm_policy.name]
 }
-
-output "vault_role_id" {
-  value = vault_approle_auth_backend_role.vm_role.role_id
-  sensitive = true
-}
-
+ 
 resource "vault_kv_secret_v2" "machine_credentials" {
   mount = var.kv_store_path
   name  = "machines/${proxmox_virtual_environment_vm.ubuntu_vm.name}" # Use variable instead of local
@@ -150,8 +150,17 @@ resource "vault_kv_secret_v2" "machine_credentials" {
     password = random_password.ubuntu_vm_password.result
     ip       = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1]
   })
-
+ 
 }
 
+# Ansible Interface Module
+module "ansible_interface" {
+  source = "../../../interfaces/ansible" # Adjust path as necessary
 
-
+  instance_name      = proxmox_virtual_environment_vm.ubuntu_vm.name
+  ip_address         = var.ip_address # Use the input variable which is the plain IP
+  fqdn               = local.fqdn
+  ansible_user       = var.user_name
+  ansible_public_key = var.ssh_pub_key # This is the public key for the user created by cloud-init
+  tags               = var.ansible_tags
+}

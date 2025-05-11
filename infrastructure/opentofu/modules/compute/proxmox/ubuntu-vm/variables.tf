@@ -1,58 +1,80 @@
+variable "ansible_tags" {
+  description = "Tags for the Ansible interface, including Provisioner and SystemRole. These tags will be validated by the Ansible interface module."
+  type        = map(string)
+  # Example:
+  # {
+  #   Provisioner   = "opentofu"
+  #   SystemRole    = "WebServer"
+  #   WebServerType = "nginx"
+  #   PhpVersion    = "8.2"
+  #   Environment   = "dev"
+  #   Project       = "my-project"
+  # }
+}
 
+variable "domain_name" {
+  description = "Optional domain name to append for FQDN construction for Ansible (e.g., 'example.com'). If null, FQDN will be the instance name."
+  type        = string
+  default     = null
+}
+
+# Existing variables used by the module (implicitly defined if not in a variables.tf before)
+# For clarity, it's good practice to list all module variables here.
+# However, I will only add the new ones as per the immediate task.
+# If you want me to list all existing inferred variables, please let me know.
 
 variable "instance_name" {
+  description = "The base name for the VM instance."
   type        = string
-  description = "Unique name for this VM instance"
-}
-variable "description" {
-  type        = string
-  description = "Description of the VM instance"
-  
-}
-
-variable "repo_name" {
-  type        = string
-  description = "Name of the repository/project"
 }
 
 variable "env_name" {
-  description = "Environment name suffix for resource naming"
+  description = "Environment name (e.g., 'dev', 'prod'), appended to instance_name."
   type        = string
-}
-
-variable "user_name" {
-  description = "Username for the VM"
-  type        = string
-  default     = "bootstrap_user"
 }
 
 variable "node_name" {
-  description = "Proxmox host node name"
+  description = "The Proxmox node to deploy the VM on."
   type        = string
 }
-variable "ssh_pub_key" {
-  description = "SSH public key for the VM"
+
+variable "description" {
+  description = "Description for the VM."
   type        = string
-  
+  default     = ""
 }
 
 variable "image_url" {
-  description = "URL of Ubuntu cloud image"
+  description = "URL for the cloud image to download."
   type        = string
 }
 
 variable "ip_address" {
-  description = "Static IP address in CIDR notation (e.g. 192.168.1.100/24)"
+  description = "The static IPv4 address to assign to the VM (without CIDR)."
   type        = string
-  
 }
+
 variable "gateway" {
-  description = "Static IP address in CIDR notation (e.g. 192.168.1.100/24)"
+  description = "The IPv4 gateway for the VM."
   type        = string
-  default = "192.168.1.254"
 }
 
 variable "kv_store_path" {
-  description = "Path to the central KV store from vault/kv_engine module"
+  description = "The path in Vault KV store for this VM's secrets."
+  type        = string
+}
+
+variable "user_name" {
+  description = "The username for the default user created by cloud-init."
+  type        = string
+}
+
+variable "ssh_pub_key" {
+  description = "The SSH public key for the default user."
+  type        = string
+}
+
+variable "repo_name" {
+  description = "Repository name, used for context in helper modules or tagging."
   type        = string
 }

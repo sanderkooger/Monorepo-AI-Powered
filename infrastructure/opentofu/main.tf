@@ -83,10 +83,23 @@ module "ubuntu_test_vm-1"  {
   node_name      = var.proxmox_node_name
   image_url      = "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-amd64.img"
   ip_address     = "192.168.1.10"
+  gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "bootstrap_user"
   ssh_pub_key    = data.vault_kv_secret_v2.bootstrap_user_.data["pub_key"]
-
+  domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
+  ansible_tags = {
+   Provisioner   = "opentofu"
+   SystemRole    = "WebServer" # Example role
+   WebServerType = "nginx"     # Example type for WebServer
+   PhpVersion    = "8.2"       # Example version for WebServer
+   Environment   = var.env_name
+   Project       = module.get_repo_name.name # Or a more specific project name
+ }
 }
 
-
+output "ubuntu_test_vm_1_ansible_data" {
+ description = "Ansible host data for the ubuntu_test_vm-1."
+ value       = module.ubuntu_test_vm-1.ansible_host_data
+ sensitive   = true
+}
