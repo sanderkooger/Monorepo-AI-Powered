@@ -54,7 +54,6 @@ output "ansible_secret_id" {
 infrastructure/ansible/
 ├── ansible.cfg
 ├── inventory/
-│   ├── dynamic_inventory.py
 │   └── group_vars/all/vault.yml
 ├── roles/
 │   └── nginx/{tasks,handlers,templates}

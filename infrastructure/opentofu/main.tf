@@ -41,13 +41,20 @@ module "get_repo_name" {
   repo_name = var.repo_name
 }
 
-
+# Set up kv engine
 module "kv_engine" {
   source      = "./modules/vault/kv_engine"
   repo_name   = module.get_repo_name.name
   env_name = var.env_name
 }
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ # Get bootstrap users data and keys
 data "vault_kv_secret_v2" "proxmox_creds" {
   mount = "kv-root"
   name  = "proxmox_creds"
@@ -65,7 +72,7 @@ data "vault_kv_secret_v2" "bootstrap_user_" {
 
 
 
-## test VM
+# Deploy machines
 
 module "ubuntu_test_vm-1"  {
   source = "./modules/compute/proxmox/ubuntu-vm"

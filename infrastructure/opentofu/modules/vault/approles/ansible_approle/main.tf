@@ -1,14 +1,26 @@
 data "vault_policy_document" "ansible" {
+  # Access to Machine secrets
   rule {
-    path         = "secret/data/ansible/*"
+    path         = "secret/data/ansible/machines/*"
     capabilities = ["create", "read", "update", "delete", "list"]
-    description  = "Full access to Ansible secrets"
+    description  = "Allow full CRUDL access to machine-specific secrets for Ansible."
+  }
+  rule {
+    path         = "secret/metadata/ansible/machines/*"
+    capabilities = ["list"]
+    description  = "Allow listing metadata for machine-specific secrets for Ansible."
   }
 
+  # Access to Cluster secrets
   rule {
-    path         = "secret/metadata/ansible"
+    path         = "secret/data/ansible/clusters/*"
+    capabilities = ["create", "read", "update", "delete", "list"]
+    description  = "Allow full CRUDL access to cluster-specific secrets for Ansible."
+  }
+  rule {
+    path         = "secret/metadata/ansible/clusters/*"
     capabilities = ["list"]
-    description  = "List access to Ansible secret metadata"
+    description  = "Allow listing metadata for cluster-specific secrets for Ansible."
   }
 }
 

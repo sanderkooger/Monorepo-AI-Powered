@@ -1,9 +1,7 @@
-n 
 # Ansible Infrastructure Automation
 
 ## Overview
 Modular Ansible configuration for provisioning:
-- Proxmox VMs via dynamic inventory
 - NGINX web servers with role-based configuration
 - HashiCorp Vault integration for secret management
 
@@ -26,19 +24,10 @@ graph LR
 # Create and activate venv
 python3 -m venv .venv
 source .venv/bin/activate
-# Install requirements
-pip install -r inventory/requirements.txt
 ```
 
 ## Key Components
 
-### Dynamic Inventory
-Uses `dynamic_inventory.py` with Proxmox plugin:
-```yaml
-# ansible.cfg
-[defaults]
-inventory = ./inventory/dynamic_inventory.py
-```
 
 ### Vault Integration
 **Secret Path Structure**:
@@ -86,7 +75,6 @@ Entrypoint for local provisioning:
 |-------|----------|
 | Inventory connection failed | Verify Proxmox API credentials in `ansible.cfg` |
 | Vault permission denied | Renew token with `kv-secrets/write` policy |
-| Python module missing | Reinstall requirements from `inventory/requirements.txt` |
 
 ## Architectural Decisions
 - [20250509-secret-management.md](../docs/architecture/decisions/20250509-secret-management.md) (Unified Vault strategy)

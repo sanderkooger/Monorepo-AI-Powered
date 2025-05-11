@@ -1,3 +1,5 @@
+# prefer the use of coud images from distro provider Packer is a last resort that will result in much maintenance. 
+
 # Packer Configuration: Ubuntu 22.04 LTS for Proxmox
 
 This directory contains the Packer configuration files to build a Ubuntu 22.04 LTS (Jammy Jellyfish) cloud-init ready template for Proxmox VE.
