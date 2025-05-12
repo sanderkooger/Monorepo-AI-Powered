@@ -1,0 +1,6 @@
+---
+- name: Setup Nginx on Web Servers
+  hosts: nginx_hosts # Targets hosts from the dynamic inventory group
+  become: true       # Ensures tasks run with sudo
+  roles:
+    - nginx          # Uses the nginx role

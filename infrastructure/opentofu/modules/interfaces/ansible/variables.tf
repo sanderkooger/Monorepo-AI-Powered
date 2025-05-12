@@ -20,13 +20,6 @@ variable "ansible_user" {
  
 }
 
-variable "ansible_public_key" {
-  description = "The SSH public key to be installed on the instance for the ansible_user."
-  type        = string
-  # This should likely be a required variable, so no default is provided.
-  # Alternatively, it could default to a common key path or be sourced from elsewhere.
-}
-
 variable "tags" {
   description = "A map of tags to assign to the instance, defining its role and configuration."
   type        = map(string)

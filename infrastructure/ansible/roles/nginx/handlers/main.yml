@@ -1,3 +1,6 @@
 ---
 # Handlers for nginx role
-[]
+- name: reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded

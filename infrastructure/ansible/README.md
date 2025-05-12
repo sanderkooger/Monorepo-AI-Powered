@@ -61,6 +61,22 @@ secret_id = "{{ vault_secret_id }}"
 - AppRole: `ansible-${repo_name}-${env_name}`
 - Policy: `service-${repo_name}-${env_name}`
 
+### SSH Certificate Authority (CA) Integration with Vault
+
+Hosts provisioned using the updated OpenTofu modules (which configure `TrustedUserCAKeys` via cloud-init) will automatically trust SSH certificates issued by the HashiCorp Vault SSH Secrets Engine.
+
+This integration enables a shift away from static SSH key pairs for Ansible and user access, enhancing security through short-lived certificates.
+
+**Connecting with a Vault-issued SSH Certificate:**
+
+To connect to a host that trusts the Vault SSH CA, Ansible (or a user) needs to:
+1. Authenticate to Vault.
+2. Request an SSH certificate from the appropriate SSH secrets engine path (e.g., `your-repo-name-dev/ssh/sign/your_role`).
+   Vault will sign the user's provided public SSH key and return a short-lived certificate.
+3. Use the obtained certificate along with the corresponding private key to SSH into the target host.
+
+The specific Ansible configuration for using Vault-issued certificates (e.g., using `ansible_ssh_private_key_file` to point to the certificate and private key, or leveraging helper scripts/plugins) will be detailed in further documentation and playbook examples.
+
 ### Playbook Structure
 Entrypoint for local provisioning:
 ```yaml

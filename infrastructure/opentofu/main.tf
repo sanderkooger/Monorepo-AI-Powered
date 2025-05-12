@@ -64,15 +64,18 @@ data "vault_kv_secret_v2" "proxmox_ssh" {
   mount = "kv-root"
   name  = "ssh_keys/terraform-proxmox"
 }
-data "vault_kv_secret_v2" "bootstrap_user_" {
-  mount = "kv-root"
-  name  = "ssh_keys/bootstrap_user"
-}
-
-
-
-
 # Deploy machines
+
+# Configure Vault SSH CA
+module "vault_ssh_ca_config" {
+  source        = "./modules/vault-ssh-engine"
+  reponame      = module.get_repo_name.name # Or var.repo_name directly if preferred
+  environment   = var.env_name
+  # You might want to add other variables like allowed_users, role_name, ttl if you made them configurable
+  # and want to set them from the root module. Otherwise, they will use the defaults from the module.
+  # Example:
+  # allowed_users = ["ansible", "ubuntu"]
+}
 
 module "ubuntu_test_vm-1"  {
   source = "./modules/compute/proxmox/ubuntu-vm"
@@ -85,8 +88,10 @@ module "ubuntu_test_vm-1"  {
   ip_address     = "192.168.1.10"
   gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
-  user_name      = "bootstrap_user"
-  ssh_pub_key    = data.vault_kv_secret_v2.bootstrap_user_.data["pub_key"]
+  user_name      = "ansible"
+  # ssh_pub_key is now optional in the module and will default to null if not provided.
+  # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
+  vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
   ansible_tags = {
    Provisioner   = "opentofu"
@@ -98,8 +103,4 @@ module "ubuntu_test_vm-1"  {
  }
 }
 
-output "ubuntu_test_vm_1_ansible_data" {
- description = "Ansible host data for the ubuntu_test_vm-1."
- value       = module.ubuntu_test_vm-1.ansible_host_data
- sensitive   = true
-}
+

@@ -67,14 +67,21 @@ variable "kv_store_path" {
 variable "user_name" {
   description = "The username for the default user created by cloud-init."
   type        = string
+  default = "ansible"
 }
 
 variable "ssh_pub_key" {
-  description = "The SSH public key for the default user."
+  description = "The SSH public key for the default user. Optional, if not provided, initial access relies on other means (e.g., Vault SSH CA)."
   type        = string
+  default     = null
 }
 
 variable "repo_name" {
   description = "Repository name, used for context in helper modules or tagging."
   type        = string
+}
+variable "vault_ssh_ca_public_key_pem" {
+  description = "The PEM-encoded public key of the Vault SSH CA."
+  type        = string
+  sensitive   = true # The key itself might not be super secret, but good practice for keys.
 }

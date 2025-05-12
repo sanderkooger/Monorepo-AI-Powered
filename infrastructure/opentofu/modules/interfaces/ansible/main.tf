@@ -9,8 +9,5 @@ locals {
     fqdn               = var.fqdn
     tags               = var.tags
     ansible_user       = var.ansible_user
-    ansible_public_key = var.ansible_public_key # Note: Exposing public keys, even if "public", should be handled with care.
-                                               # Consider if this is truly needed in the inventory data structure itself
-                                               # or if it's only used during instance provisioning by another module.
   }
 }
