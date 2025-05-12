@@ -4,6 +4,14 @@ terraform {
       source  = "bpg/proxmox"
       version = "0.77.0" # Verify latest version
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.7.2"
+    }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "4.8.0"
+    }
   }
 }
 
@@ -18,7 +26,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   name        = "${var.instance_name}-${var.env_name}"
   node_name   = var.node_name
   description = var.description
-  tags        = ["terraform", "ubuntu"]
+  tags        = ["ubuntu", var.ansible_tags.Provisioner, var.ansible_tags.SystemRole]
 
   agent {
     enabled = true

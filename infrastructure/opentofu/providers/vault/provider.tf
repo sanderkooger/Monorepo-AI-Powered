@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.7" # Added based on linting requirement
   required_providers {
     vault = {
       source = "hashicorp/vault"

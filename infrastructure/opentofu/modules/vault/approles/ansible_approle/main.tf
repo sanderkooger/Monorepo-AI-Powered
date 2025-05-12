@@ -1,3 +1,13 @@
+terraform {
+  required_version = ">= 1.7" # Added based on linting requirement
+
+  required_providers {
+    vault = {
+      source  = "hashicorp/vault"
+      version = "4.8.0" # From lock file
+    }
+  }
+}
 data "vault_policy_document" "ansible" {
   # Access to Machine secrets
   rule {
