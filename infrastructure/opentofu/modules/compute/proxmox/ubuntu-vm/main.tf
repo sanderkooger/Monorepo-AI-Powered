@@ -26,7 +26,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   name        = "${var.instance_name}-${var.env_name}"
   node_name   = var.node_name
   description = var.description
-  tags        = ["ubuntu", var.ansible_tags.Provisioner, var.ansible_tags.SystemRole]
+  tags        = ["ubuntu"]
 
   agent {
     enabled = true
@@ -170,13 +170,3 @@ resource "vault_kv_secret_v2" "machine_credentials" {
 
 }
 
-# Ansible Interface Module
-module "ansible_interface" {
-  source = "../../../interfaces/ansible" # Adjust path as necessary
-
-  instance_name      = proxmox_virtual_environment_vm.ubuntu_vm.name
-  ip_address         = var.ip_address # Use the input variable which is the plain IP
-  fqdn               = local.fqdn
-  ansible_user       = var.user_name
-  tags               = var.ansible_tags
-}

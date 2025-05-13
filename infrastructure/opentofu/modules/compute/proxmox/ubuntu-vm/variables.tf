@@ -1,16 +1,3 @@
-variable "ansible_tags" {
-  description = "Tags for the Ansible interface, including Provisioner and SystemRole. These tags will be validated by the Ansible interface module."
-  type        = map(string)
-  # Example:
-  # {
-  #   Provisioner   = "opentofu"
-  #   SystemRole    = "WebServer"
-  #   WebServerType = "nginx"
-  #   PhpVersion    = "8.2"
-  #   Environment   = "dev"
-  #   Project       = "my-project"
-  # }
-}
 
 variable "domain_name" {
   description = "Optional domain name to append for FQDN construction for Ansible (e.g., 'example.com'). If null, FQDN will be the instance name."

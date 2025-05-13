@@ -94,14 +94,7 @@ module "ubuntu_test_vm-1"  {
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
-  ansible_tags = {
-   Provisioner   = "opentofu"
-   SystemRole    = "WebServer" # Example role
-   WebServerType = "nginx"     # Example type for WebServer
-   PhpVersion    = "8.2"       # Example version for WebServer
-   Environment   = var.env_name
-   Project       = module.get_repo_name.name # Or a more specific project name
- }
+ 
 }
 
 

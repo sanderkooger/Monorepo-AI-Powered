@@ -1,8 +1,3 @@
-output "ansible_host_data" {
-  description = "Structured data for Ansible inventory, including instance name, IP, FQDN, and tags."
-  value       = module.ansible_interface.ansible_host_data
-  sensitive   = true # Inherits sensitivity from the ansible_interface module
-}
 
 output "vm_name" {
   description = "The full name of the Proxmox VM instance."
