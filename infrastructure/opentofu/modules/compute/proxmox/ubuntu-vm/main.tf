@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "4.8.0"
     }
+    ansible = {
+      version = "~> 1.1.0"
+      source  = "ansible/ansible"
+    }
   }
 }
 
@@ -168,5 +172,17 @@ resource "vault_kv_secret_v2" "machine_credentials" {
     ip       = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1]
   })
 
+}
+
+resource "ansible_host" "host" {
+  name   = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1][0]
+  groups = var.ansible_groups
+
+  variables = {
+    instance_name   = proxmox_virtual_environment_vm.ubuntu_vm.name
+    vault_ssh_ca = var.vault_ssh_engine_full_path
+    # tags    = proxmox_virtual_environment_vm.ubuntu_vm.tags
+   
+  }
 }
 

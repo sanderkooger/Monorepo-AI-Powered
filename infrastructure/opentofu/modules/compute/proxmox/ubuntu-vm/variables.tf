@@ -72,3 +72,17 @@ variable "vault_ssh_ca_public_key_pem" {
   type        = string
   sensitive   = true # The key itself might not be super secret, but good practice for keys.
 }
+
+variable "vault_ssh_engine_full_path" {
+  description = "The name of the Vault SSH secret backend CA."
+  type        = string
+ 
+  
+}
+
+variable "ansible_groups" {
+  description = "Ansible groups to assign the VM to."
+  type        = list(string)
+  default     = []
+  
+}

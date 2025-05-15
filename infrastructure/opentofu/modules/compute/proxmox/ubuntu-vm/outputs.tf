@@ -6,7 +6,7 @@ output "vm_name" {
 
 output "ip_address" {
   description = "The primary IPv4 address of the VM."
-  value       = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[0] # Assuming the first IP is the primary one
+  value       = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1] # Assuming the first IP is the primary one
 }
 
 output "vault_role_id" {
