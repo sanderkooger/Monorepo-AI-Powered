@@ -1,0 +1,14 @@
+---
+# This playbook updates the apt cache and upgrades all installed packages.
+- name: Update APT and upgrade packages on all servers
+  hosts: all
+  become: true # Run tasks with elevated privileges
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: dist

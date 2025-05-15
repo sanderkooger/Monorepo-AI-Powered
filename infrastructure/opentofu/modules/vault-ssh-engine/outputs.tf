@@ -4,7 +4,7 @@ output "ca_public_key_pem" {
   sensitive   = false # Public key is not sensitive
 }
 
-output "ssh_engine_path" {
-  description = "The full path where the SSH secrets engine is enabled."
-  value       = vault_mount.ssh_engine.path
+output "ssh_engine_signing_role_ansible" {
+  description = "SSH signing role path."
+  value       = vault_ssh_secret_backend_role.default_role.id
 }

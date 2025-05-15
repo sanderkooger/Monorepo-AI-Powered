@@ -180,7 +180,7 @@ resource "ansible_host" "host" {
 
   variables = {
     instance_name   = proxmox_virtual_environment_vm.ubuntu_vm.name
-    vault_ssh_ca = var.vault_ssh_engine_full_path
+    vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
     # tags    = proxmox_virtual_environment_vm.ubuntu_vm.tags
    
   }

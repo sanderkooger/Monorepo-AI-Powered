@@ -73,8 +73,8 @@ variable "vault_ssh_ca_public_key_pem" {
   sensitive   = true # The key itself might not be super secret, but good practice for keys.
 }
 
-variable "vault_ssh_engine_full_path" {
-  description = "The name of the Vault SSH secret backend CA."
+variable "vault_ssh_engine_signing_role" {
+  description = "The name of the Vault SSH vault_ssh_engine_signing_role"
   type        = string
  
   

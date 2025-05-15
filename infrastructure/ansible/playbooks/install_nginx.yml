@@ -1,0 +1,12 @@
+---
+# This playbook installs Nginx on hosts in the 'Nginx' group.
+- name: Install Nginx on nginx group servers
+  hosts: nginx # Target hosts belonging to the 'Nginx' group
+  become: true # Run tasks with elevated privileges
+
+  tasks:
+    - name: Install Nginx package
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: yes # Update cache before installing

@@ -90,10 +90,11 @@ module "ubuntu_test_vm-1"  {
   gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
+  ansible_groups = ["nginx"]
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
-  vault_ssh_engine_full_path = module.vault_ssh_ca_config.ssh_engine_path
+  vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
   domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
  
 }
