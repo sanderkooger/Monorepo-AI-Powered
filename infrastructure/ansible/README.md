@@ -20,10 +20,29 @@ graph LR
 - Vault token with write access to KV engine
 
 ## Virtual Environment Setup
+
+1. Install direnv:
 ```bash
-# Create and activate venv
-python3 -m venv .venv
-source .venv/bin/activate
+curl -sfL https://direnv.net/install.sh | bash
+echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+```
+
+2. Run setup:
+```bash
+cd infrastructure/ansible
+direnv allow  # Approve the .envrc
+./setup-venv.sh
+```
+
+The virtual environment will auto-activate when entering the directory. To verify:
+```bash
+which python  # Should show .venv/bin/python
+```
+
+## Common Commands
+```bash
+npm run setup  # Reinstall dependencies
+npm start     # Run test ping to 192.168.1.10
 ```
 
 ## Key Components

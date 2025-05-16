@@ -38,16 +38,16 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
 
   cpu {
-    cores = 1
+    cores = var.cpu_cores
     type  = "host"
   }
   memory {
-    dedicated = 2048
+    dedicated = var.memory_size
   }
 
   disk {
     datastore_id = "local-lvm"
-    file_id      = proxmox_virtual_environment_download_file.ubuntu_image.id
+    file_id      = var.image_id# proxmox_virtual_environment_download_file.ubuntu_image.id
     interface    = "virtio0"
     size         = 30
     iothread     = true
@@ -117,13 +117,6 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
   }
 }
 
-resource "proxmox_virtual_environment_download_file" "ubuntu_image" {
-  content_type = "iso"
-  datastore_id = "local"
-  node_name    = var.node_name
-  url          = var.image_url
-  file_name    = split("/", var.image_url)[7]
-}
 
 
 

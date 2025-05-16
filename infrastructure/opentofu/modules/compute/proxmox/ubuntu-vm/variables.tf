@@ -31,8 +31,8 @@ variable "description" {
   default     = ""
 }
 
-variable "image_url" {
-  description = "URL for the cloud image to download."
+variable "image_id" {
+  description = "the id of the image hosted on proxmox."
   type        = string
 }
 
@@ -84,5 +84,17 @@ variable "ansible_groups" {
   description = "Ansible groups to assign the VM to."
   type        = list(string)
   default     = []
+  
+}
+variable "cpu_cores" {
+  description = "Number of CPU cores for the VM."
+  type        = number
+  default     = 1
+  
+}
+variable "memory_size" {
+  description = "Memory size for the VM in MB."
+  type        = number
+  default     = 256
   
 }

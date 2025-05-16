@@ -4,9 +4,10 @@
   "description": "Ansible environment management package",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+    "postinstall": "pnpm python:install",
     "lint:off": "ansible-lint",
-    "clean": "rimraf .venv node_modules"
+    "clean": "rimraf .venv node_modules",
+    "python:install": "./setup-venv.sh"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

@@ -8,3 +8,7 @@ output "ssh_engine_signing_role_ansible" {
   description = "SSH signing role path."
   value       = vault_ssh_secret_backend_role.default_role.id
 }
+output "ssh_signing_path" {
+  description = "The full Vault path for signing SSH certificates."
+  value       = "${var.reponame}-${var.environment}/${var.ssh_engine_path_suffix}/sign/${var.role_name}"
+}
