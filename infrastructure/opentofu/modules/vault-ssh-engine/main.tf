@@ -39,6 +39,11 @@ resource "vault_ssh_secret_backend_role" "default_role" {
   # allowed_critical_options = ""
   # allowed_extensions       = ""
   # default_critical_options = {}
-  # default_extensions       = {}
+  default_extensions       = {
+    "permit-pty": "",
+    "permit-port-forwarding": "",
+    "permit-X11-forwarding": "",
+    "permit-agent-forwarding": ""
+    }
   # allowed_user_key_configs = [] # For OTP/signed SSH certs
 }

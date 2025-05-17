@@ -23,7 +23,7 @@ variable "allowed_users" {
 variable "ttl" {
   description = "The Time-To-Live for certificates issued by this role."
   type        = string
-  default     = "30m"
+  default     = "1h"
 }
 
 variable "max_ttl" {
