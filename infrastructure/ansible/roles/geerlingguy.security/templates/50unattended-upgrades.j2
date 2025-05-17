@@ -1,0 +1,33 @@
+Unattended-Upgrade::Automatic-Reboot "{{ security_autoupdate_reboot }}";
+Unattended-Upgrade::Automatic-Reboot-Time "{{ security_autoupdate_reboot_time }}";
+
+{% if security_autoupdate_mail_to %}
+Unattended-Upgrade::Mail "{{ security_autoupdate_mail_to }}";
+{% if security_autoupdate_mail_on_error %}
+Unattended-Upgrade::MailOnlyOnError "true";
+{% endif %}
+{% endif %}
+
+Unattended-Upgrade::Origins-Pattern {
+    // Debian security repositories
+    "origin=Debian,codename=${distro_codename},label=Debian-Security";
+    "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+
+    // Ubuntu security repository
+    "origin=Ubuntu,archive=${distro_codename}-security"
+
+    // Ubuntu ESM repositories
+    "origin=${distro_id}ESMApps,archive=${distro_codename}-apps-security";
+    "origin=${distro_id}ESM,archive=${distro_codename}-infra-security";
+
+    // Custom repositories
+{% for origin in security_autoupdate_additional_origins %}
+    "{{ origin }}";
+{% endfor %}
+}
+
+Unattended-Upgrade::Package-Blacklist{
+{% for package in security_autoupdate_blacklist %}
+    "{{package}}";
+{% endfor %}
+}
