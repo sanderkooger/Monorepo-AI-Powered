@@ -98,3 +98,8 @@ variable "memory_size" {
   default     = 256
   
 }
+
+variable "ansible_variables" {
+  description = "Optional map of variables to pass to the Ansible host resource."
+  type        = map(any)
+}

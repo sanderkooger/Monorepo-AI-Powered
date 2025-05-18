@@ -1,20 +1,4 @@
-terraform {
-  required_version = ">= 1.7" 
-  required_providers {
-    external = {
-      source = "hashicorp/external"
-      version = "~> 2.3.4"
-    }
-    vault = {
-      source = "hashicorp/vault"
-      version = "~> 4.8"
-    }
-    proxmox = {
-      source = "bpg/proxmox"
-      version = "0.77.0"
-    }
-  }
-}
+
 
 # Root module and plumbing
 
@@ -109,6 +93,7 @@ module "mngmt_01"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["mngmt", "monitor"]
+  ansible_variables = {ansible_connection        = "vault_ssh"}
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
@@ -132,6 +117,7 @@ module "web_01"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["nginx"]
+  ansible_variables = {ansible_connection        = "vault_ssh"}
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
@@ -156,6 +142,7 @@ module "web_02"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["nginx"]
+  ansible_variables = {ansible_connection        = "vault_ssh"}
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
@@ -179,6 +166,7 @@ module "mariadb_01"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["cl_mariadb_master_master"]
+  ansible_variables = {ansible_connection        = "vault_ssh"}
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
@@ -201,6 +189,7 @@ module "mariadb_02"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["cl_mariadb_master_master"]
+  ansible_variables = {ansible_connection        = "vault_ssh"}
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem

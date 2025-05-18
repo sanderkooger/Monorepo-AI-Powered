@@ -1,23 +1,4 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.77.0" # Verify latest version
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.7.2"
-    }
-    vault = {
-      source  = "hashicorp/vault"
-      version = "4.8.0"
-    }
-    ansible = {
-      version = "~> 1.1.0"
-      source  = "ansible/ansible"
-    }
-  }
-}
+
 
 
 locals {
@@ -171,11 +152,13 @@ resource "ansible_host" "host" {
   name   = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1][0]
   groups = var.ansible_groups
 
-  variables = {
-    instance_name   = proxmox_virtual_environment_vm.ubuntu_vm.name
-    vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
-    # tags    = proxmox_virtual_environment_vm.ubuntu_vm.tags
-   
-  }
+  variables = merge(
+    {
+      instance_name             = proxmox_virtual_environment_vm.ubuntu_vm.name
+      vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
+      
+    },
+    var.ansible_variables
+  )
 }
 
