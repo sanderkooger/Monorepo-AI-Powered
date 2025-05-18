@@ -11,5 +11,6 @@
       - "443"
 
   roles:
-    - role: geerlingguy.nginx
     - role: geerlingguy.firewall
+    - role: geerlingguy.nginx
+    

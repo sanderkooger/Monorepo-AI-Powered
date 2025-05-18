@@ -178,7 +178,7 @@ module "mariadb_01"  {
   gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
-  ansible_groups = ["mariadb"]
+  ansible_groups = ["cl_mariadb_master_master"]
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
@@ -200,7 +200,7 @@ module "mariadb_02"  {
   gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
-  ansible_groups = ["mariadb"]
+  ansible_groups = ["cl_mariadb_master_master"]
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
