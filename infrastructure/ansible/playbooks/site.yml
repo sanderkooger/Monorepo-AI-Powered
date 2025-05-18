@@ -1,18 +1,5 @@
 ---
 # This playbook orchestrates the deployment of various roles across the infrastructure.
-
-- name: Run common updates on all servers
-  import_playbook: update_apt.yml
-  # This play targets 'all' hosts as defined in update_apt.yml
-
-- name: Configure Nginx on web servers
-  hosts: nginx # Target the 'nginx' group from the dynamic inventory
-  become: true # Run tasks with elevated privileges
-
-  roles:
-    - name: Apply the nginx role
-      role: nginx
-
 - name: Apply basic security hardening
   hosts: all # Or a specific group if not all servers need this
   become: true
