@@ -4,6 +4,7 @@ import json
 import sys
 import os
 import subprocess
+import time # Import time for potential future use (e.g., caching tofu state)
 
 def find_executable(name):
     """Searches for the executable in the directories listed in the PATH."""
@@ -28,6 +29,7 @@ def find_ansible_hosts(module_data, inventory):
                 inventory["_meta"]["hostvars"][host_name] = {
                     "ansible_host": host_name, # Ensure ansible_host is set
                     "ansible_user": "ansible", # Default user based on cloud-init
+                    "ansible_connection": "vault_ssh", # Set the custom connection plugin
                     # Add other variables from the tofu resource
                     **variables
                 }
