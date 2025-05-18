@@ -1,0 +1,15 @@
+---
+# Playbook for installing and configuring Nginx and managing its firewall rules
+- name: Install and configure Nginx and manage firewall
+  hosts: nginx # Target the nginx group for webservers
+  become: true
+
+  vars:
+    firewall_allowed_tcp_ports:
+      - "22" # Keep SSH open
+      - "80"
+      - "443"
+
+  roles:
+    - role: geerlingguy.nginx
+    - role: geerlingguy.firewall
