@@ -156,6 +156,7 @@ resource "ansible_host" "host" {
     {
       instance_name             = proxmox_virtual_environment_vm.ubuntu_vm.name
       vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
+      ansible_python_interpreter = "/usr/bin/python3.12"
       
     },
     var.ansible_variables
