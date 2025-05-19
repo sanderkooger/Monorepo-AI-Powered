@@ -23,13 +23,13 @@ variable "allowed_users" {
 variable "ttl" {
   description = "The Time-To-Live for certificates issued by this role."
   type        = string
-  default     = "1h"
+  default     = "8h"
 }
 
 variable "max_ttl" {
   description = "The maximum Time-To-Live for certificates issued by this role."
   type        = string
-  default     = "24h" # Example, can be adjusted
+  default     = "48h" # Example, can be adjusted
 }
 
 variable "ssh_engine_path_suffix" {
