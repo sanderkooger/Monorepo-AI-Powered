@@ -16,8 +16,6 @@ display = Display()
 
 # Class-level cache to track if this *process* has already performed
 # the primary logging for a specific host's certificate status.
-# This helps reduce duplicate messages if the same process handles a host multiple times.
-# Renamed for clarity, effectively the same as PROCESS_LOGGED_HOST_CERT_STATUS
 _host_logged_initial_cert_status_this_process = {}
 
 
@@ -31,6 +29,8 @@ DOCUMENTATION = '''
           using the 'vault' CLI.
         - The Ansible controller must have the 'vault' and 'ssh-keygen' CLIs installed and configured
           for non-interactive authentication to Vault.
+        - The Vault signing path is derived by transforming the 'vault_ssh_ca_signing_role' variable
+          (e.g., 'ssh-engine/roles/my-role' becomes 'ssh-engine/sign/my-role').
     author: "Your Name (Vault SSH signer)"
     extends_documentation_fragment:
         - connection_pipelining
@@ -38,12 +38,14 @@ DOCUMENTATION = '''
     notes:
         - This plugin inherits most of its SSH behavior from the standard 'ssh' connection plugin.
         - The Vault SSH signing logic is prepended to the connection process.
+        - Valid principals for the certificate are primarily sourced from 'vault_ssh_valid_principals'
+          or the connection user ('ansible_user'). If neither is set, no principals are explicitly
+          sent to Vault, and Vault's role defaults will apply.
         - At default verbosity (no -v), it primarily logs if a certificate needs renewal and the outcome of that renewal.
         - If a certificate is already fresh and requires no action, it logs nothing by default. Use -vvv (triple verbosity) for confirmation of a fresh certificate's status.
         - Other verbose messages related to the process (e.g., reasons for renewal if not forced) may appear with -v.
     options:
       # --- Standard SSH options (mirrored from ssh.py for compatibility) ---
-      # ... (All standard SSH options from the previous version remain UNCHANGED) ...
       host:
           description: Hostname/IP to connect to.
           default: inventory_hostname
@@ -63,7 +65,6 @@ DOCUMENTATION = '''
             - name: ansible_port
             - name: ansible_ssh_port
           default: 22
-
       remote_user:
           description:
               - User name with which to login to the remote server, normally set by the remote_user keyword.
@@ -74,10 +75,9 @@ DOCUMENTATION = '''
           env:
             - name: ANSIBLE_REMOTE_USER
           vars:
-            - name: ansible_user
+            - name: ansible_user # This is the key for inventory "ansible_user"
             - name: ansible_ssh_user
             - name: remote_user
-
       password:
           description: Authentication password for the O(remote_user). Can be supplied as CLI option.
           type: string
@@ -85,7 +85,6 @@ DOCUMENTATION = '''
               - name: ansible_password
               - name: ansible_ssh_pass
               - name: ansible_ssh_password
-
       sshpass_prompt:
           description:
               - Password prompt that sshpass should search for. Supported by sshpass 1.06 and up.
@@ -98,7 +97,6 @@ DOCUMENTATION = '''
               - name: ANSIBLE_SSHPASS_PROMPT
           vars:
               - name: ansible_sshpass_prompt
-
       private_key_file:
           description: Path to private key file to use for authentication.
           type: path
@@ -109,7 +107,6 @@ DOCUMENTATION = '''
           vars:
             - name: ansible_private_key_file
             - name: ansible_ssh_private_key_file
-
       ssh_executable:
           default: ssh
           description:
@@ -120,7 +117,6 @@ DOCUMENTATION = '''
           - {key: ssh_executable, section: ssh_connection}
           vars:
               - name: ansible_ssh_executable
-
       sftp_executable:
           default: sftp
           description:
@@ -131,7 +127,6 @@ DOCUMENTATION = '''
           - {key: sftp_executable, section: ssh_connection}
           vars:
               - name: ansible_sftp_executable
-
       scp_executable:
           default: scp
           description:
@@ -142,7 +137,6 @@ DOCUMENTATION = '''
           - {key: scp_executable, section: ssh_connection}
           vars:
               - name: ansible_scp_executable
-
       ssh_args:
           description: Arguments to pass to all SSH CLI tools.
           default: '-C -o ControlMaster=auto -o ControlPersist=60s'
@@ -153,7 +147,6 @@ DOCUMENTATION = '''
               - name: ANSIBLE_SSH_ARGS
           vars:
               - name: ansible_ssh_args
-
       ssh_common_args:
           description: Common extra args for all SSH CLI tools.
           type: string
@@ -164,7 +157,6 @@ DOCUMENTATION = '''
           vars:
               - name: ansible_ssh_common_args
           default: ''
-
       scp_extra_args:
           description: Extra exclusive to the C(scp) CLI
           type: string
@@ -175,7 +167,6 @@ DOCUMENTATION = '''
           ini:
             - {key: scp_extra_args, section: ssh_connection}
           default: ''
-
       sftp_extra_args:
           description: Extra exclusive to the C(sftp) CLI
           type: string
@@ -186,7 +177,6 @@ DOCUMENTATION = '''
           ini:
             - {key: sftp_extra_args, section: ssh_connection}
           default: ''
-
       ssh_extra_args:
           description: Extra exclusive to the SSH CLI.
           type: string
@@ -197,7 +187,6 @@ DOCUMENTATION = '''
           ini:
             - {key: ssh_extra_args, section: ssh_connection}
           default: ''
-
       reconnection_retries:
           description: Number of attempts to connect.
           default: 0
@@ -208,7 +197,6 @@ DOCUMENTATION = '''
             - {section: ssh_connection, key: retries}
           vars:
             - name: ansible_ssh_retries
-
       control_path:
         description:
           - This is the location to save SSH's ControlPath sockets, it uses SSH's variable substitution.
@@ -220,7 +208,6 @@ DOCUMENTATION = '''
         vars:
           - name: ansible_control_path
           - name: ansible_ssh_control_path
-
       control_path_dir:
         default: "~/.ansible/cp"
         description:
@@ -233,7 +220,6 @@ DOCUMENTATION = '''
         vars:
           - name: ansible_control_path_dir
           - name: ansible_ssh_control_path_dir
-
       sftp_batch_mode:
         default: true
         description: 'If set to true, sftp will operate in batch mode, which disables interactive prompts.'
@@ -243,7 +229,6 @@ DOCUMENTATION = '''
         type: boolean
         vars:
           - name: ansible_sftp_batch_mode
-
       ssh_transfer_method:
         description: Preferred method to use when transferring files over ssh
         choices: ["sftp", "scp", "piped", "smart"]
@@ -254,7 +239,6 @@ DOCUMENTATION = '''
             - {key: transfer_method, section: ssh_connection}
         vars:
             - name: ansible_ssh_transfer_method
-
       use_tty:
         default: true
         description: add -tt to ssh commands to force tty allocation.
@@ -264,7 +248,6 @@ DOCUMENTATION = '''
         type: boolean
         vars:
           - name: ansible_ssh_use_tty
-
       timeout:
         default: 10
         description:
@@ -279,7 +262,6 @@ DOCUMENTATION = '''
           - name: ansible_ssh_timeout
           - name: ansible_timeout
         type: integer
-
       host_key_checking:
           description: Determines if SSH should reject or not a connection after checking host keys.
           default: True
@@ -293,7 +275,6 @@ DOCUMENTATION = '''
           vars:
               - name: ansible_host_key_checking
               - name: ansible_ssh_host_key_checking
-
       host_key_auto_add:
         description: If host_key_checking is enabled and this is True, automatically add new host keys.
         type: boolean
@@ -303,7 +284,6 @@ DOCUMENTATION = '''
           - {section: ssh_connection, key: host_key_auto_add}
         vars:
           - name: ansible_ssh_host_key_auto_add
-
       pipelining:
           description: Controls if SSH pipelining is used.
           env:
@@ -316,7 +296,6 @@ DOCUMENTATION = '''
             - name: ansible_ssh_pipelining
           type: boolean
           default: False
-
       pkcs11_provider:
         default: ""
         type: string
@@ -327,7 +306,6 @@ DOCUMENTATION = '''
           - {key: pkcs11_provider, section: ssh_connection}
         vars:
           - name: ansible_ssh_pkcs11_provider
-
       pkcs11_pass:
         description: Password for the PKCS#11 token.
         type: string
@@ -338,13 +316,9 @@ DOCUMENTATION = '''
           - name: ansible_ssh_pkcs11_pass
 
       # --- Plugin-specific options (Vault SSH Signer) ---
-      vault_ssh_sign_path:
-          description: "The Vault SSH signing path (e.g., 'ssh-engine/sign/my-role'). This is the preferred variable."
-          env: [{name: ANSIBLE_VAULT_SSH_SIGN_PATH}]
-          vars: [{name: vault_ssh_sign_path}]
-
       vault_ssh_ca_signing_role:
-          description: "The Vault SSH CA signing role path (e.g., 'ssh-engine/roles/my-role'). If 'vault_ssh_sign_path' is not set, this will be used and '/roles/' will be transformed to '/sign/'."
+          description: "The Vault SSH CA signing role path (e.g., 'ssh-engine/roles/my-role'). This variable is REQUIRED. The plugin will transform this path by replacing '/roles/' with '/sign/' to determine the actual Vault signing endpoint."
+          type: string
           env: [{name: ANSIBLE_VAULT_SSH_CA_SIGNING_ROLE}]
           vars: [{name: vault_ssh_ca_signing_role}]
 
@@ -363,13 +337,15 @@ DOCUMENTATION = '''
           vars: [{name: vault_ssh_signed_key_path}]
 
       vault_ssh_valid_principals:
-          description: "Specific valid principals for the SSH certificate. If not set, the connection 'user' (ansible_user) will be used, then the 'valid_principals' option default."
+          description: "Specific valid principals for the SSH certificate. If not set, the connection 'user' (ansible_user) will be used. If neither is set, principals are not sent to Vault."
+          type: string # Still useful to define type for env/ini overrides
           env: [{name: ANSIBLE_VAULT_SSH_VALID_PRINCIPALS}]
           vars: [{name: vault_ssh_valid_principals}]
 
       valid_principals:
-          description: "Default valid principals if not overridden by 'vault_ssh_valid_principals' or connection 'user'."
-          default: "ansible"
+          description: "Fallback valid principals if not overridden by 'vault_ssh_valid_principals' or connection 'user'. If this option is not set (e.g. via ini/env) and other sources are also not set, no principals are sent to Vault."
+          type: string # Explicitly type string
+          # default: "ansible"  # <<< REMOVED DEFAULT
 
       key_min_ttl_seconds:
           description: "Minimum seconds the certificate should be valid for. If TTL is less, a new one is requested."
@@ -385,17 +361,20 @@ DOCUMENTATION = '''
           env: [{name: ANSIBLE_VAULT_SSH_FORCE_KEY_REFRESH}]
           vars: [{name: vault_ssh_force_key_refresh}]
 
-      _hardcoded_sign_path_fallback:
-          description: "DO NOT SET EXTERNALLY. Internal hardcoded default for Vault sign path if no other configuration is found."
-          default: "Monorepo-AI-Powered-prod/ssh/sign/default-role"
+      # --- Test Variable ---
+      hello_world:
+          description: "A test variable to demonstrate inventory variable retrieval."
+          type: string
+          default: "Default World"
+          vars:
+            - name: hello_world
+            - name: ansible_hello_world
 '''
 
 PLUGIN_NAME = "Vault SSH Signer"
 
 class Connection(SSHConnection):
     transport = 'vault_ssh_signer'
-    # This class-level dictionary tracks if a host's initial cert status
-    # has been logged by *this specific Ansible worker process*.
     _host_logged_initial_cert_status_this_process = {}
 
 
@@ -407,6 +386,7 @@ class Connection(SSHConnection):
         self._resolved_valid_principals = None
         self._resolved_key_min_ttl_seconds = None
         self._resolved_force_key_refresh = None
+        self._resolved_hello_world = None
         self._config_loaded = False
         self._vault_cert_operations_done_this_instance = False
 
@@ -414,61 +394,75 @@ class Connection(SSHConnection):
         if self._config_loaded:
             return
 
-        pkp_opt = self.get_option('public_key_path')
-        self._resolved_public_key_path = os.path.expanduser(pkp_opt) if pkp_opt else None
-        skp_opt = self.get_option('signed_key_path')
-        self._resolved_signed_key_path = os.path.expanduser(skp_opt) if skp_opt else None
-        self._resolved_key_min_ttl_seconds = self.get_option('key_min_ttl_seconds')
-        self._resolved_force_key_refresh = self.get_option('force_key_refresh')
-
-        sign_path_direct = self.get_option('vault_ssh_sign_path')
         current_host = self.get_option('host')
 
-        if sign_path_direct is not None:
-            self._resolved_vault_sign_path = sign_path_direct
-            display.vv(f"{PLUGIN_NAME}: Using Vault sign path: {self._resolved_vault_sign_path} (from 'vault_ssh_sign_path') for host {current_host}")
+        ca_signing_role = self.get_option('vault_ssh_ca_signing_role')
+
+        if ca_signing_role is None:
+            msg = (f"{PLUGIN_NAME} ({current_host}): Critical configuration missing. "
+                   f"'vault_ssh_ca_signing_role' must be set in inventory or vars.")
+            display.error(msg)
+            raise AnsibleError(msg)
+
+        if "/roles/" in ca_signing_role:
+            self._resolved_vault_sign_path = ca_signing_role.replace("/roles/", "/sign/", 1)
+            display.vv(f"{PLUGIN_NAME} ({current_host}): Using Vault sign path: {self._resolved_vault_sign_path} "
+                       f"(transformed from 'vault_ssh_ca_signing_role': {ca_signing_role})")
         else:
-            ca_signing_role = self.get_option('vault_ssh_ca_signing_role')
-            if ca_signing_role is not None:
-                if "/roles/" in ca_signing_role:
-                    self._resolved_vault_sign_path = ca_signing_role.replace("/roles/", "/sign/", 1)
-                    display.vv(f"{PLUGIN_NAME}: Transformed 'vault_ssh_ca_signing_role' ({ca_signing_role}) to sign path: {self._resolved_vault_sign_path} for host {current_host}")
-                else:
-                    self._resolved_vault_sign_path = ca_signing_role
-                    display.warning(f"{PLUGIN_NAME}: Using 'vault_ssh_ca_signing_role' ({ca_signing_role}) directly as sign path for host {current_host} as it doesn't contain '/roles/'.")
-            else:
-                self._resolved_vault_sign_path = self.get_option('_hardcoded_sign_path_fallback')
-                display.warning(f"{PLUGIN_NAME}: Using hardcoded fallback Vault sign path: {self._resolved_vault_sign_path} for host {current_host}. "
-                                f"Consider setting 'vault_ssh_sign_path' or 'vault_ssh_ca_signing_role'.")
+            msg = (f"{PLUGIN_NAME} ({current_host}): Invalid 'vault_ssh_ca_signing_role' ('{ca_signing_role}'). "
+                   f"It must contain '/roles/' to be transformed into a sign path. "
+                   f"Example: 'ssh-engine/roles/my-role'.")
+            display.error(msg)
+            raise AnsibleError(msg)
 
-        if not self._resolved_vault_sign_path:
-            raise AnsibleError(f"{PLUGIN_NAME}: Vault SSH sign path could not be determined for host {current_host}. Critical configuration missing.")
+        pkp_opt = self.get_option('public_key_path')
+        self._resolved_public_key_path = os.path.expanduser(pkp_opt) if pkp_opt is not None else None
 
+        skp_opt = self.get_option('signed_key_path')
+        self._resolved_signed_key_path = os.path.expanduser(skp_opt) if skp_opt is not None else None
+
+        self._resolved_key_min_ttl_seconds = self.get_option('key_min_ttl_seconds')
+        self._resolved_force_key_refresh = self.get_option('force_key_refresh')
+        self._resolved_hello_world = self.get_option('hello_world')
+
+        # Resolve valid_principals
         principals_explicit = self.get_option('vault_ssh_valid_principals')
         if principals_explicit is not None:
             self._resolved_valid_principals = principals_explicit
-            display.vv(f"{PLUGIN_NAME}: Using valid_principals from 'vault_ssh_valid_principals': {self._resolved_valid_principals} for host {current_host}")
+            display.vv(f"{PLUGIN_NAME} ({current_host}): Using valid_principals from 'vault_ssh_valid_principals': {self._resolved_valid_principals}")
         else:
-            connection_user = self.get_option('remote_user')
+            connection_user = self.get_option('remote_user') # This will pick up 'ansible_user' from inventory
             if connection_user:
                 self._resolved_valid_principals = connection_user
-                display.vv(f"{PLUGIN_NAME}: Using valid_principals from connection user ('{connection_user}' via 'remote_user' option) for host {current_host}.")
+                display.vv(f"{PLUGIN_NAME} ({current_host}): Using valid_principals from connection user ('{connection_user}' via 'remote_user'/'ansible_user' option).")
             else:
+                # Fallback to the 'valid_principals' option itself (e.g., if set in ansible.cfg or env var).
+                # Since it no longer has a default in DOCUMENTATION, it will be None if not set elsewhere.
                 self._resolved_valid_principals = self.get_option('valid_principals')
-                display.vv(f"{PLUGIN_NAME}: Using valid_principals from plugin option 'valid_principals' default: {self._resolved_valid_principals} for host {current_host}")
+                if self._resolved_valid_principals:
+                     display.vv(f"{PLUGIN_NAME} ({current_host}): Using valid_principals from plugin option 'valid_principals' (e.g. ansible.cfg/env): {self._resolved_valid_principals}")
+                # If still None, the warning below will trigger.
 
         if not self._resolved_valid_principals:
-             display.warning(f"{PLUGIN_NAME}: Valid principals for host {current_host} could not be determined, Vault signing might fail or use Vault's role default.")
+             display.warning(f"{PLUGIN_NAME} ({current_host}): Valid principals could not be determined from 'vault_ssh_valid_principals', "
+                             f"'ansible_user', or 'valid_principals' option. No principals will be explicitly sent to Vault. "
+                             f"Vault's role defaults will apply.")
 
         self._config_loaded = True
 
         display.vv(f"{PLUGIN_NAME} Config for host '{current_host}':")
+        display.vv(f"  Vault Sign Path: {self._resolved_vault_sign_path}")
         display.vv(f"  Public Key Path: {self._resolved_public_key_path}")
         display.vv(f"  Signed Key Path: {self._resolved_signed_key_path}")
-        display.vv(f"  Vault Sign Path: {self._resolved_vault_sign_path}")
-        display.vv(f"  Valid Principals: {self._resolved_valid_principals}")
+        display.vv(f"  Valid Principals: {self._resolved_valid_principals if self._resolved_valid_principals else 'Not Sent (Vault Default)'}")
         display.vv(f"  Key Min TTL (s): {self._resolved_key_min_ttl_seconds}")
         display.vv(f"  Force Key Refresh: {self._resolved_force_key_refresh}")
+        display.vv(f"  Hello World Var: {self._resolved_hello_world}")
+
+
+    def _say_hello_world(self):
+        host_for_msg = self.get_option('host')
+        display.display(f"{PLUGIN_NAME} ({host_for_msg}): Hello, {self._resolved_hello_world}!", color=C.COLOR_OK)
 
 
     def _get_cert_expiry_for_display(self):
@@ -517,7 +511,7 @@ class Connection(SSHConnection):
         return "unknown"
 
 
-    def _is_cert_fresh(self): # Made this method quiet for primary status
+    def _is_cert_fresh(self):
         host_for_msg = self.get_option('host')
         cert_path_for_msg = f"'{self._resolved_signed_key_path}'" if self._resolved_signed_key_path else "configured path"
 
@@ -531,7 +525,7 @@ class Connection(SSHConnection):
             if process.returncode != 0:
                 if "No such file or directory" in process.stderr:
                     return False, "disappeared"
-                else: # More serious ssh-keygen error, log this warning
+                else:
                     display.warning(f"{PLUGIN_NAME} ({host_for_msg}): 'ssh-keygen -L' failed for {cert_path_for_msg}. Stderr: {process.stderr.strip()}")
                 return False, "ssh-keygen failed"
 
@@ -586,9 +580,15 @@ class Connection(SSHConnection):
         cert_path_for_msg = f"'{self._resolved_signed_key_path}'" if self._resolved_signed_key_path else "configured path"
 
         if not self._resolved_public_key_path or not os.path.exists(self._resolved_public_key_path):
-            msg = f"{PLUGIN_NAME} ({host_for_msg}): Public key file not found at '{self._resolved_public_key_path}'. Cannot request certificate."
+            msg = f"{PLUGIN_NAME} ({host_for_msg}): Public key file not found or not configured at '{self._resolved_public_key_path}'. Cannot request certificate."
             display.error(msg)
             raise AnsibleError(msg)
+
+        if not self._resolved_signed_key_path:
+            msg = f"{PLUGIN_NAME} ({host_for_msg}): Signed key path ('signed_key_path') is not configured (e.g. set to null/empty). Cannot save certificate."
+            display.error(msg)
+            raise AnsibleError(msg)
+
 
         lock_file_path = self._resolved_signed_key_path + ".lock"
         attempts = 0
@@ -596,6 +596,10 @@ class Connection(SSHConnection):
         display.v(f"{PLUGIN_NAME} ({host_for_msg}): Attempting to acquire lock for certificate renewal: {lock_file_path}")
         while attempts < max_attempts:
             try:
+                lock_dir = os.path.dirname(lock_file_path)
+                if lock_dir and not os.path.exists(lock_dir):
+                    os.makedirs(lock_dir, mode=0o700)
+
                 fd = os.open(lock_file_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
                 os.close(fd)
                 display.v(f"{PLUGIN_NAME} ({host_for_msg}): Acquired lock: {lock_file_path}")
@@ -617,12 +621,12 @@ class Connection(SSHConnection):
                  display.v(f"{PLUGIN_NAME} ({host_for_msg}): Certificate for {cert_path_for_msg} became fresh while waiting for lock. Skipping renewal.")
                  return True
 
-            if self._resolved_signed_key_path and os.path.exists(self._resolved_signed_key_path):
+            if os.path.exists(self._resolved_signed_key_path):
                 try:
                     os.remove(self._resolved_signed_key_path)
                     display.vv(f"{PLUGIN_NAME} ({host_for_msg}): Removed old/stale signed key {cert_path_for_msg}.")
                 except OSError as e:
-                    display.warning(f"{PLUGIN_NAME} ({host_for_msg}): Failed to remove existing signed key {cert_path_for_msg}, possibly due to race: {e}")
+                    display.warning(f"{PLUGIN_NAME} ({host_for_msg}): Failed to remove existing signed key {cert_path_for_msg}, possibly due to race or permissions: {e}")
 
             display.vv(f"{PLUGIN_NAME} ({host_for_msg}): Proceeding with Vault SSH key request for {cert_path_for_msg}.")
 
@@ -631,10 +635,9 @@ class Connection(SSHConnection):
                 self._resolved_vault_sign_path,
                 f'public_key=@{self._resolved_public_key_path}'
             ]
-            if self._resolved_valid_principals:
+            if self._resolved_valid_principals: # Only append if principals were resolved
                 vault_command.append(f'valid_principals={self._resolved_valid_principals}')
-            else:
-                display.warning(f"{PLUGIN_NAME} ({host_for_msg}): 'valid_principals' is not set for {cert_path_for_msg}. The Vault role's default principals will be used.")
+            # No 'else' here, as the warning about missing principals is in _load_config
 
             if not os.getenv('VAULT_ADDR'):
                 display.warning(f"{PLUGIN_NAME} ({host_for_msg}): VAULT_ADDR environment variable is not set. Vault command may fail.")
@@ -649,12 +652,6 @@ class Connection(SSHConnection):
                 display.error(f"{PLUGIN_NAME} ({host_for_msg}): Vault returned an empty signed key for path '{self._resolved_vault_sign_path}'.")
                 raise AnsibleError(f"Vault returned an empty signed key for {self._resolved_vault_sign_path}")
 
-
-            if not self._resolved_signed_key_path:
-                msg = f"{PLUGIN_NAME} ({host_for_msg}): Signed key path ('signed_key_path') is not configured. Cannot save certificate."
-                display.error(msg)
-                raise AnsibleError(msg)
-
             signed_key_dir = os.path.dirname(self._resolved_signed_key_path)
             if signed_key_dir and not os.path.exists(signed_key_dir):
                 try:
@@ -665,9 +662,9 @@ class Connection(SSHConnection):
 
             with open(self._resolved_signed_key_path, 'w') as f:
                 f.write(signed_key_content)
-
-            display.vv(f"{PLUGIN_NAME} ({host_for_msg}): Setting permissions to 0644 for {cert_path_for_msg}.")
             os.chmod(self._resolved_signed_key_path, 0o644)
+            display.vv(f"{PLUGIN_NAME} ({host_for_msg}): Set permissions to 0644 for {cert_path_for_msg}.")
+
 
             return True
 
@@ -696,12 +693,13 @@ class Connection(SSHConnection):
                     display.v(f"{PLUGIN_NAME} ({host_for_msg}): Released lock: {lock_file_path}")
                 except OSError as e:
                     display.warning(f"{PLUGIN_NAME} ({host_for_msg}): Failed to remove lock file {lock_file_path}: {e}")
-        return False
 
 
     def _connect(self):
         if not self._config_loaded:
             self._load_config()
+
+        self._say_hello_world()
 
         host_for_msg = self.get_option('host')
         cert_path_for_msg = f"'{self._resolved_signed_key_path}'" if self._resolved_signed_key_path else "configured path"
@@ -711,51 +709,32 @@ class Connection(SSHConnection):
 
             log_primary_status_for_this_host_by_this_process = not Connection._host_logged_initial_cert_status_this_process.get(host_for_msg)
 
-            needs_renewal = True
+            needs_renewal = False
 
             if self._resolved_force_key_refresh:
+                needs_renewal = True
                 if log_primary_status_for_this_host_by_this_process:
                     display.display(f"{PLUGIN_NAME} ({host_for_msg}): Force refresh enabled. Attempting certificate renewal.", color=C.COLOR_VERBOSE)
-                # needs_renewal remains True
             else:
                 is_fresh, reason = self._is_cert_fresh()
-                if is_fresh:
-                    needs_renewal = False
-                    # --- MODIFIED SECTION START ---
-                    # Log "Valid certificate found" only at -vvv
-                    display.vvv(f"{PLUGIN_NAME} ({host_for_msg}): Valid certificate found for {cert_path_for_msg}. Expires: {self._get_cert_expiry_for_display()} (TTL: {self._get_cert_ttl_for_display()}s).")
-                    
-                    # Still set the process-level flag if it's the first time this process logs primary status.
-                    # This prevents other primary messages (like renewal if forced later) from this process.
-                    if log_primary_status_for_this_host_by_this_process:
-                        Connection._host_logged_initial_cert_status_this_process[host_for_msg] = True
-                    # --- MODIFIED SECTION END ---
-                else: # Not fresh, log reason if it's the first time for this host by this process
+                if not is_fresh:
+                    needs_renewal = True
                     if log_primary_status_for_this_host_by_this_process:
                         if reason == "not found":
                             display.display(f"{PLUGIN_NAME} ({host_for_msg}): Certificate for {cert_path_for_msg} not found. Attempting renewal.", color=C.COLOR_VERBOSE)
                         elif reason == "disappeared":
-                             display.display(f"{PLUGIN_NAME} ({host_for_msg}): Certificate for {cert_path_for_msg} disappeared. Attempting renewal.", color=C.COLOR_VERBOSE)
+                             display.display(f"{PLUGIN_NAME} ({host_for_msg}): Certificate for {cert_path_for_msg} seems to have disappeared. Attempting renewal.", color=C.COLOR_VERBOSE)
                         elif reason.startswith("expires too soon"):
                             display.display(f"{PLUGIN_NAME} ({host_for_msg}): Certificate for {cert_path_for_msg} {reason}. Attempting renewal.", color=C.COLOR_VERBOSE)
-                        # Other failure reasons are already display.warning in _is_cert_fresh
+                        elif display.verbosity < 1 :
+                            display.display(f"{PLUGIN_NAME} ({host_for_msg}): Certificate for {cert_path_for_msg} requires renewal (reason: {reason}). Attempting renewal.", color=C.COLOR_VERBOSE)
+                else:
+                    display.vvv(f"{PLUGIN_NAME} ({host_for_msg}): Valid certificate found for {cert_path_for_msg}. Expires: {self._get_cert_expiry_for_display()} (TTL: {self._get_cert_ttl_for_display()}s).")
+                    if log_primary_status_for_this_host_by_this_process:
+                        Connection._host_logged_initial_cert_status_this_process[host_for_msg] = True
+
 
             if needs_renewal:
-                missing_paths = []
-                if not self._resolved_public_key_path: missing_paths.append("'public_key_path'")
-                if not self._resolved_signed_key_path: missing_paths.append("'signed_key_path'")
-                if not self._resolved_vault_sign_path: missing_paths.append("'vault_ssh_sign_path' or related")
-
-                if missing_paths:
-                    msg = f"{PLUGIN_NAME} ({host_for_msg}): Cannot obtain new certificate. Required path(s) not configured: {', '.join(missing_paths)}"
-                    display.error(msg)
-                    raise AnsibleConnectionFailure(msg)
-
-                # Only log "Attempting renewal" if not already covered by force_refresh or specific "not fresh" reasons above,
-                # and if it's the primary logging turn for this process.
-                if log_primary_status_for_this_host_by_this_process and not self._resolved_force_key_refresh and not (not is_fresh and reason in ["not found", "disappeared"] or (not is_fresh and reason and reason.startswith("expires too soon"))):
-                    display.display(f"{PLUGIN_NAME} ({host_for_msg}): Attempting certificate renewal for {cert_path_for_msg}.", color=C.COLOR_VERBOSE)
-
                 renewal_succeeded = self._obtain_new_certificate()
 
                 if renewal_succeeded:
@@ -765,12 +744,10 @@ class Connection(SSHConnection):
                             display.display(f"{PLUGIN_NAME} ({host_for_msg}): Successfully renewed certificate {cert_path_for_msg}. Expires: {self._get_cert_expiry_for_display()} (TTL: {self._get_cert_ttl_for_display()}s).", color=C.COLOR_OK)
                             Connection._host_logged_initial_cert_status_this_process[host_for_msg] = True
                     else:
-                        msg = f"{PLUGIN_NAME} ({host_for_msg}): Certificate renewal reported success but certificate is still not fresh. Check logs."
+                        msg = f"{PLUGIN_NAME} ({host_for_msg}): Certificate renewal process seemed to succeed for {cert_path_for_msg}, but the certificate is still not fresh or valid. Check Vault configuration and logs."
                         display.error(msg)
                         raise AnsibleConnectionFailure(msg)
-                else:
-                    msg = f"{PLUGIN_NAME} ({host_for_msg}): Certificate renewal process failed. Check logs."
-                    raise AnsibleConnectionFailure(msg)
+
 
             self._vault_cert_operations_done_this_instance = True
 
@@ -786,5 +763,5 @@ class Connection(SSHConnection):
         except Exception as e:
             display.error(f"{PLUGIN_NAME} ({host_for_msg}): An unexpected error occurred during SSH connection: {type(e).__name__} - {e}")
             if isinstance(e, KeyError):
-                 display.error(f"{PLUGIN_NAME} ({host_for_msg}): This KeyError might indicate that a standard SSH option (like '{str(e)}') is not defined in plugin's DOCUMENTATION.")
+                 display.error(f"{PLUGIN_NAME} ({host_for_msg}): This KeyError might indicate that a standard SSH option (like '{str(e)}') is not defined in plugin's DOCUMENTATION or is misconfigured.")
             raise AnsibleConnectionFailure(f"Unexpected connection error to {host_for_msg}: {e}")

@@ -155,8 +155,12 @@ resource "ansible_host" "host" {
   variables = merge(
     {
       instance_name             = proxmox_virtual_environment_vm.ubuntu_vm.name
-      vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
       ansible_python_interpreter = "/usr/bin/python3.12"
+      vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
+      vault_ssh_ca_principal     = var.user_name
+
+
+      hello_world= "Sander ROCKS 2 MUCH!!!"
       
     },
     var.ansible_variables
