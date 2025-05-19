@@ -16,8 +16,7 @@ display = Display()
 
 # Class-level cache to track if this *process* has already performed
 # the primary logging for a specific host's certificate status.
-_host_logged_initial_cert_status_this_process = {}
-
+# This was moved into the class in the previous correction.
 
 DOCUMENTATION = '''
     connection: vault_ssh_signer
@@ -31,6 +30,8 @@ DOCUMENTATION = '''
           for non-interactive authentication to Vault.
         - The Vault signing path is derived by transforming the 'vault_ssh_ca_signing_role' variable
           (e.g., 'ssh-engine/roles/my-role' becomes 'ssh-engine/sign/my-role').
+        - The principal for the certificate is sourced directly from the 'vault_ssh_ca_principal'
+          inventory variable.
     author: "Your Name (Vault SSH signer)"
     extends_documentation_fragment:
         - connection_pipelining
@@ -38,9 +39,7 @@ DOCUMENTATION = '''
     notes:
         - This plugin inherits most of its SSH behavior from the standard 'ssh' connection plugin.
         - The Vault SSH signing logic is prepended to the connection process.
-        - Valid principals for the certificate are primarily sourced from 'vault_ssh_valid_principals'
-          or the connection user ('ansible_user'). If neither is set, no principals are explicitly
-          sent to Vault, and Vault's role defaults will apply.
+        - The principal for the certificate is sourced directly from the 'vault_ssh_ca_principal' inventory variable, which is required.
         - At default verbosity (no -v), it primarily logs if a certificate needs renewal and the outcome of that renewal.
         - If a certificate is already fresh and requires no action, it logs nothing by default. Use -vvv (triple verbosity) for confirmation of a fresh certificate's status.
         - Other verbose messages related to the process (e.g., reasons for renewal if not forced) may appear with -v.
@@ -68,7 +67,6 @@ DOCUMENTATION = '''
       remote_user:
           description:
               - User name with which to login to the remote server, normally set by the remote_user keyword.
-              - This will also be used as a source for 'valid_principals' if 'vault_ssh_valid_principals' is not set.
           type: string
           ini:
             - {section: defaults, key: remote_user}
@@ -317,10 +315,16 @@ DOCUMENTATION = '''
 
       # --- Plugin-specific options (Vault SSH Signer) ---
       vault_ssh_ca_signing_role:
-          description: "The Vault SSH CA signing role path (e.g., 'ssh-engine/roles/my-role'). This variable is REQUIRED. The plugin will transform this path by replacing '/roles/' with '/sign/' to determine the actual Vault signing endpoint."
+          description: "The Vault SSH CA signing role (e.g., 'Monorepo-AI-Powered-prod/ssh/roles/default-role'). This variable is REQUIRED. The plugin will transform this by replacing '/roles/' with '/sign/' to determine the actual Vault signing endpoint."
           type: string
           env: [{name: ANSIBLE_VAULT_SSH_CA_SIGNING_ROLE}]
           vars: [{name: vault_ssh_ca_signing_role}]
+
+      vault_ssh_ca_principal:
+          description: "The principal name to request for the SSH certificate (e.g., 'ansible'). This variable is REQUIRED and sourced from inventory."
+          type: string
+          env: [{name: ANSIBLE_VAULT_SSH_CA_PRINCIPAL}]
+          vars: [{name: vault_ssh_ca_principal}]
 
       public_key_path:
           description: "Path to the SSH public key to be signed (e.g., '~/.ssh/id_rsa.pub')."
@@ -336,17 +340,6 @@ DOCUMENTATION = '''
           env: [{name: ANSIBLE_VAULT_SSH_SIGNED_KEY_PATH}]
           vars: [{name: vault_ssh_signed_key_path}]
 
-      vault_ssh_valid_principals:
-          description: "Specific valid principals for the SSH certificate. If not set, the connection 'user' (ansible_user) will be used. If neither is set, principals are not sent to Vault."
-          type: string # Still useful to define type for env/ini overrides
-          env: [{name: ANSIBLE_VAULT_SSH_VALID_PRINCIPALS}]
-          vars: [{name: vault_ssh_valid_principals}]
-
-      valid_principals:
-          description: "Fallback valid principals if not overridden by 'vault_ssh_valid_principals' or connection 'user'. If this option is not set (e.g. via ini/env) and other sources are also not set, no principals are sent to Vault."
-          type: string # Explicitly type string
-          # default: "ansible"  # <<< REMOVED DEFAULT
-
       key_min_ttl_seconds:
           description: "Minimum seconds the certificate should be valid for. If TTL is less, a new one is requested."
           type: int
@@ -360,15 +353,6 @@ DOCUMENTATION = '''
           default: false
           env: [{name: ANSIBLE_VAULT_SSH_FORCE_KEY_REFRESH}]
           vars: [{name: vault_ssh_force_key_refresh}]
-
-      # --- Test Variable ---
-      hello_world:
-          description: "A test variable to demonstrate inventory variable retrieval."
-          type: string
-          default: "Default World"
-          vars:
-            - name: hello_world
-            - name: ansible_hello_world
 '''
 
 PLUGIN_NAME = "Vault SSH Signer"
@@ -377,16 +361,15 @@ class Connection(SSHConnection):
     transport = 'vault_ssh_signer'
     _host_logged_initial_cert_status_this_process = {}
 
-
     def __init__(self, *args, **kwargs):
         super(Connection, self).__init__(*args, **kwargs)
         self._resolved_public_key_path = None
         self._resolved_signed_key_path = None
         self._resolved_vault_sign_path = None
-        self._resolved_valid_principals = None
+        self._resolved_vault_ssh_ca_principal = None
         self._resolved_key_min_ttl_seconds = None
         self._resolved_force_key_refresh = None
-        self._resolved_hello_world = None
+        # self._resolved_hello_world = None # Removed
         self._config_loaded = False
         self._vault_cert_operations_done_this_instance = False
 
@@ -397,7 +380,6 @@ class Connection(SSHConnection):
         current_host = self.get_option('host')
 
         ca_signing_role = self.get_option('vault_ssh_ca_signing_role')
-
         if ca_signing_role is None:
             msg = (f"{PLUGIN_NAME} ({current_host}): Critical configuration missing. "
                    f"'vault_ssh_ca_signing_role' must be set in inventory or vars.")
@@ -411,9 +393,18 @@ class Connection(SSHConnection):
         else:
             msg = (f"{PLUGIN_NAME} ({current_host}): Invalid 'vault_ssh_ca_signing_role' ('{ca_signing_role}'). "
                    f"It must contain '/roles/' to be transformed into a sign path. "
-                   f"Example: 'ssh-engine/roles/my-role'.")
+                   f"Example: 'your-ssh-engine/roles/your-role'.")
             display.error(msg)
             raise AnsibleError(msg)
+
+        ca_principal = self.get_option('vault_ssh_ca_principal')
+        if ca_principal is None:
+            msg = (f"{PLUGIN_NAME} ({current_host}): Critical configuration missing. "
+                   f"'vault_ssh_ca_principal' must be set in inventory or vars.")
+            display.error(msg)
+            raise AnsibleError(msg)
+        self._resolved_vault_ssh_ca_principal = ca_principal
+        display.vv(f"{PLUGIN_NAME} ({current_host}): Using principal from 'vault_ssh_ca_principal': {self._resolved_vault_ssh_ca_principal}")
 
         pkp_opt = self.get_option('public_key_path')
         self._resolved_public_key_path = os.path.expanduser(pkp_opt) if pkp_opt is not None else None
@@ -423,46 +414,23 @@ class Connection(SSHConnection):
 
         self._resolved_key_min_ttl_seconds = self.get_option('key_min_ttl_seconds')
         self._resolved_force_key_refresh = self.get_option('force_key_refresh')
-        self._resolved_hello_world = self.get_option('hello_world')
-
-        # Resolve valid_principals
-        principals_explicit = self.get_option('vault_ssh_valid_principals')
-        if principals_explicit is not None:
-            self._resolved_valid_principals = principals_explicit
-            display.vv(f"{PLUGIN_NAME} ({current_host}): Using valid_principals from 'vault_ssh_valid_principals': {self._resolved_valid_principals}")
-        else:
-            connection_user = self.get_option('remote_user') # This will pick up 'ansible_user' from inventory
-            if connection_user:
-                self._resolved_valid_principals = connection_user
-                display.vv(f"{PLUGIN_NAME} ({current_host}): Using valid_principals from connection user ('{connection_user}' via 'remote_user'/'ansible_user' option).")
-            else:
-                # Fallback to the 'valid_principals' option itself (e.g., if set in ansible.cfg or env var).
-                # Since it no longer has a default in DOCUMENTATION, it will be None if not set elsewhere.
-                self._resolved_valid_principals = self.get_option('valid_principals')
-                if self._resolved_valid_principals:
-                     display.vv(f"{PLUGIN_NAME} ({current_host}): Using valid_principals from plugin option 'valid_principals' (e.g. ansible.cfg/env): {self._resolved_valid_principals}")
-                # If still None, the warning below will trigger.
-
-        if not self._resolved_valid_principals:
-             display.warning(f"{PLUGIN_NAME} ({current_host}): Valid principals could not be determined from 'vault_ssh_valid_principals', "
-                             f"'ansible_user', or 'valid_principals' option. No principals will be explicitly sent to Vault. "
-                             f"Vault's role defaults will apply.")
+        # self._resolved_hello_world = self.get_option('hello_world') # Removed
 
         self._config_loaded = True
 
         display.vv(f"{PLUGIN_NAME} Config for host '{current_host}':")
         display.vv(f"  Vault Sign Path: {self._resolved_vault_sign_path}")
+        display.vv(f"  Principal: {self._resolved_vault_ssh_ca_principal}")
         display.vv(f"  Public Key Path: {self._resolved_public_key_path}")
         display.vv(f"  Signed Key Path: {self._resolved_signed_key_path}")
-        display.vv(f"  Valid Principals: {self._resolved_valid_principals if self._resolved_valid_principals else 'Not Sent (Vault Default)'}")
         display.vv(f"  Key Min TTL (s): {self._resolved_key_min_ttl_seconds}")
         display.vv(f"  Force Key Refresh: {self._resolved_force_key_refresh}")
-        display.vv(f"  Hello World Var: {self._resolved_hello_world}")
+        # display.vv(f"  Hello World Var: {self._resolved_hello_world}") # Removed
 
 
-    def _say_hello_world(self):
-        host_for_msg = self.get_option('host')
-        display.display(f"{PLUGIN_NAME} ({host_for_msg}): Hello, {self._resolved_hello_world}!", color=C.COLOR_OK)
+    # def _say_hello_world(self): # Removed
+    #     host_for_msg = self.get_option('host')
+    #     display.display(f"{PLUGIN_NAME} ({host_for_msg}): Hello, {self._resolved_hello_world}!", color=C.COLOR_OK)
 
 
     def _get_cert_expiry_for_display(self):
@@ -633,11 +601,9 @@ class Connection(SSHConnection):
             vault_command = [
                 'vault', 'write', '-field=signed_key',
                 self._resolved_vault_sign_path,
-                f'public_key=@{self._resolved_public_key_path}'
+                f'public_key=@{self._resolved_public_key_path}',
+                f'valid_principals={self._resolved_vault_ssh_ca_principal}'
             ]
-            if self._resolved_valid_principals: # Only append if principals were resolved
-                vault_command.append(f'valid_principals={self._resolved_valid_principals}')
-            # No 'else' here, as the warning about missing principals is in _load_config
 
             if not os.getenv('VAULT_ADDR'):
                 display.warning(f"{PLUGIN_NAME} ({host_for_msg}): VAULT_ADDR environment variable is not set. Vault command may fail.")
@@ -664,7 +630,6 @@ class Connection(SSHConnection):
                 f.write(signed_key_content)
             os.chmod(self._resolved_signed_key_path, 0o644)
             display.vv(f"{PLUGIN_NAME} ({host_for_msg}): Set permissions to 0644 for {cert_path_for_msg}.")
-
 
             return True
 
@@ -699,7 +664,7 @@ class Connection(SSHConnection):
         if not self._config_loaded:
             self._load_config()
 
-        self._say_hello_world()
+        # self._say_hello_world() # Removed
 
         host_for_msg = self.get_option('host')
         cert_path_for_msg = f"'{self._resolved_signed_key_path}'" if self._resolved_signed_key_path else "configured path"
@@ -747,7 +712,6 @@ class Connection(SSHConnection):
                         msg = f"{PLUGIN_NAME} ({host_for_msg}): Certificate renewal process seemed to succeed for {cert_path_for_msg}, but the certificate is still not fresh or valid. Check Vault configuration and logs."
                         display.error(msg)
                         raise AnsibleConnectionFailure(msg)
-
 
             self._vault_cert_operations_done_this_instance = True
 

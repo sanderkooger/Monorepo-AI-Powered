@@ -159,8 +159,6 @@ resource "ansible_host" "host" {
       vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
       vault_ssh_ca_principal     = var.user_name
 
-
-      hello_world= "Sander ROCKS 2 MUCH!!!"
       
     },
     var.ansible_variables
