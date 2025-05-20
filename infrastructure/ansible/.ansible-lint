@@ -5,7 +5,7 @@
 # Exclude roles from linting that are managed by Ansible Galaxy or in .venv
 exclude_paths:
   - .venv
-  - roles/geerlingguy.*
+  - roles/galaxy/ # Exclude the directory where galaxy roles are installed
 
 # Enable specific rules or rule sets
 
