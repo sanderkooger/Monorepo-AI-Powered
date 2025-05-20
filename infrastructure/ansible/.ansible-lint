@@ -6,6 +6,7 @@
 exclude_paths:
   - .venv
   - roles/galaxy/ # Exclude the directory where galaxy roles are installed
+  - .ansible
 
 # Enable specific rules or rule sets
 

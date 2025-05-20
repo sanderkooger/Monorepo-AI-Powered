@@ -1,6 +1,14 @@
 ---
 # Playbook for installing and configuring Nginx and managing its firewall rules
-- name: Install and configure Nginx and manage firewall
+
+- name: Install and configure Nginx
+  hosts: nginx # Target the nginx group for webservers
+  become: true
+
+  roles:
+    - role: geerlingguy.nginx
+
+- name: Configure Firewall for Nginx
   hosts: nginx # Target the nginx group for webservers
   become: true
 
@@ -10,10 +18,9 @@
       - '80'
       - '443'
 
-roles:
-    - role: common/firewall_state_check
+  roles:
+    - role: firewall_state_check
       vars:
-        playbook_identifier: 'nginx' # Unique identifier for this playbook
+        firewall_state_check_playbook_identifier: 'nginx' # Unique identifier for this playbook
     - role: geerlingguy.firewall
       when: firewall_config_changed # Conditionally run based on the check
-    - role: geerlingguy.nginx

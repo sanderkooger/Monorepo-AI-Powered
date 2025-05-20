@@ -1,5 +1,8 @@
 ---
 # This playbook orchestrates the deployment of various roles across the infrastructure.
 
-- import_playbook: security.yml
-- import_playbook: nginx.yml
+- name: Import Security Playbook
+  import_playbook: security.yml
+
+- name: Import Nginx Playbook
+  import_playbook: nginx.yml

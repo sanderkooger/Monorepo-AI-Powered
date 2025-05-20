@@ -28,9 +28,9 @@
       block:
         - name: Update package cache (Debian/Ubuntu)
           ansible.builtin.apt:
-            update_cache: yes
+            update_cache: true
             cache_valid_time: 3600
-            force_apt_get: yes
+            force_apt_get: true
           register: apt_update
           until: apt_update is succeeded
           retries: 3
@@ -70,7 +70,7 @@
           ansible.builtin.unarchive:
             src: "/tmp/packer_{{ packer_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
             dest: "/usr/local/bin/"
-            remote_src: yes
+            remote_src: true
             mode: '0755'
             owner: root
             group: root
@@ -107,7 +107,7 @@
           ansible.builtin.unarchive:
             src: "/tmp/tofu_{{ opentofu_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
             dest: "/usr/local/bin/"
-            remote_src: yes
+            remote_src: true
             mode: '0755'
             owner: root
             group: root
@@ -197,7 +197,7 @@
       ansible.builtin.unarchive:
         src: "/tmp/vault_{{ vault_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
         dest: "/usr/local/bin/"
-        remote_src: yes
+        remote_src: true
         mode: '0755'
         owner: root
         group: root
@@ -286,7 +286,7 @@
         src: /opt/checkov-venv/bin/checkov
         dest: /usr/local/bin/checkov
         state: link
-        force: yes
+        force: true
         mode: '0755'
       when: checkov_check.rc != 0
 
@@ -298,15 +298,21 @@
         path: "{{ nvm_script }}"
       register: nvm_stat
 
-    - name: Download and install NVM
-      ansible.builtin.shell: >
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh | bash
-      args:
+    - name: Download NVM install script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh
+        dest: /tmp/install_nvm.sh
+        mode: '0755'
+      when: not nvm_stat.stat.exists
+
+    - name: Run NVM install script
+      ansible.builtin.command:
+        cmd: bash /tmp/install_nvm.sh
         creates: "{{ nvm_script }}" # Makes the task idempotent
       when: not nvm_stat.stat.exists
       changed_when: true # Assume changed if NVM wasn't installed
 
-    - name: Install Node.js version {{ node_version }} using NVM and enable corepack
+    - name: Install Node.js using NVM and enable corepack (version {{ node_version }})
       ansible.builtin.shell: |
         set -e
         . "{{ nvm_script }}"

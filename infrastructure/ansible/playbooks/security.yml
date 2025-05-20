@@ -13,9 +13,9 @@
     firewall_allowed_tcp_ports:
       - "22"
   roles:
-    - role: common/firewall_state_check
+    - role: firewall_state_check
       vars:
-        playbook_identifier: "security"
+        firewall_state_check_playbook_identifier: "security"
     - role: geerlingguy.security
     - role: geerlingguy.firewall
       when: firewall_config_changed

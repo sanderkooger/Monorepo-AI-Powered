@@ -5,7 +5,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm python:install",
-    "lint": "ansible-lint .",
+    "lint": "ansible-lint",
     "clean": "rimraf .venv node_modules roles/galaxy .ansible .turbo",
     "python:install": "./setup-venv.sh"
   },

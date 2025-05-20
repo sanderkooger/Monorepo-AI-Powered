@@ -1,15 +1,15 @@
 ---
 # tasks file for common/firewall_state_check
 
-- name: Ensure state directory exists for playbook identifier {{ playbook_identifier }}
+- name: Ensure state directory exists for playbook identifier {{ firewall_state_check_playbook_identifier }}
   ansible.builtin.file:
-    path: "/etc/ansible_state/{{ playbook_identifier }}"
+    path: "/etc/ansible_state/{{ firewall_state_check_playbook_identifier }}"
     state: directory
     mode: '0755'
 
 - name: Define firewall state file path
   ansible.builtin.set_fact:
-    firewall_state_file: "/etc/ansible_state/{{ playbook_identifier }}/geerlingguy.firewall.json"
+    firewall_state_file: "/etc/ansible_state/{{ firewall_state_check_playbook_identifier }}/geerlingguy.firewall.json"
 
 - name: Gather current firewall configuration variables
   ansible.builtin.set_fact:
@@ -52,4 +52,5 @@
   ansible.builtin.copy:
     content: "{{ current_firewall_config | to_json }}"
     dest: "{{ firewall_state_file }}"
+    mode: '0644'
   when: firewall_config_changed
