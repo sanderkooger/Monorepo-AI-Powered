@@ -73,6 +73,9 @@ importers:
       eslint:
         specifier: ^9.21.0
         version: 9.21.0(jiti@2.4.2)
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
       typescript:
         specifier: 5.7.3
         version: 5.7.3
@@ -110,9 +113,18 @@ importers:
       eslint:
         specifier: ^9.21.0
         version: 9.21.0(jiti@2.4.2)
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
       typescript:
         specifier: 5.7.3
         version: 5.7.3
+
+  infrastructure/ansible:
+    devDependencies:
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
 
   infrastructure/opentofu:
     devDependencies:

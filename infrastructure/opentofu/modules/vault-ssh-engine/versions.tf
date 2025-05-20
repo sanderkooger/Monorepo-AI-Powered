@@ -1,7 +1,5 @@
-
 terraform {
-  required_version = ">= 1.7.2" 
-  required_providers {
+    required_providers {
     external = {
       source = "hashicorp/external"
       version = "~> 2.3.4"
@@ -15,4 +13,5 @@ terraform {
       version = "0.77.0"
     }
   }
+  required_version = ">= 1.7.2" # OpenTofu/Terraform version
 }

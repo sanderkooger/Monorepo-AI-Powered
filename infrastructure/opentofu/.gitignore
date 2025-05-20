@@ -1,0 +1,5 @@
+# Terraform / OpenTofu
+*.tfstate
+*.tfstate.*
+.terraform
+node_modules

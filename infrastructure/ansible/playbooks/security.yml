@@ -1,0 +1,21 @@
+---
+# Playbook for basic security hardening
+- name: Apply basic security hardening
+  hosts: all # Or a specific group if not all servers need this
+  become: true
+
+  vars:
+    security_ssh_port: 22
+    security_ssh_allowed_users:
+      - ansible
+    security_sudoers_passwordless:
+      - ansible # Assuming passwordless sudo for ansible user
+    firewall_allowed_tcp_ports:
+      - "22"
+  roles:
+    - role: firewall_state_check
+      vars:
+        firewall_state_check_playbook_identifier: "security"
+    - role: geerlingguy.security
+    - role: geerlingguy.firewall
+      when: firewall_config_changed

@@ -33,14 +33,14 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Terraform / OpenTofu
-*.tfstate
-*.tfstate.*
-.terraform/
 
 
-
+# Python Venvs
+*-venv/
+.venv/
+venv/
 # Misc
 .DS_Store
 *.pem
 .env
+

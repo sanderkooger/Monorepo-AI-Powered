@@ -1,31 +1,36 @@
 # Global variables
 
-## Vault vars 
-variable "vault_addr" {
-  description = "Vault server URL (e.g. https://vault.example.com:8200)"
-  type        = string
-}
 
-variable "vault_token" {
-  description = "Vault authentication token with appropriate permissions"
-  type        = string
-  sensitive   = true
-}
 variable "repo_name" {
   type        = string
   description = "Manual repository name override"
-  default = null
+  default     = null
 }
+
 
 variable "env_name" {
   description = "env name for environment segregation (prod, accept, or dev-<name>)"
   type        = string
-  default = null
+  default     = null
 }
+
 
 variable "proxmox_node_name" {
-  description = "Name of Proxmox host node for VM deployment"
+  description = "Proxmox node name"
   type        = string
+  default     = null
+
 }
 
- 
+variable "vault_addr" {
+  description = "The address of the Vault server."
+  type        = string
+  default     = null # Or provide a sensible default if desired, though tfvars will override
+}
+
+variable "vault_token" {
+  description = "The Vault token to use for authentication."
+  type        = string
+  sensitive   = true
+  default     = null # Or provide a sensible default if desired, though tfvars will override
+}

@@ -1,0 +1,56 @@
+---
+# tasks file for common/firewall_state_check
+
+- name: Ensure state directory exists for playbook identifier {{ firewall_state_check_playbook_identifier }}
+  ansible.builtin.file:
+    path: "/etc/ansible_state/{{ firewall_state_check_playbook_identifier }}"
+    state: directory
+    mode: '0755'
+
+- name: Define firewall state file path
+  ansible.builtin.set_fact:
+    firewall_state_file: "/etc/ansible_state/{{ firewall_state_check_playbook_identifier }}/geerlingguy.firewall.json"
+
+- name: Gather current firewall configuration variables
+  ansible.builtin.set_fact:
+    current_firewall_config:
+      firewall_state: "{{ firewall_state | default('started') }}"
+      firewall_enabled_at_boot: "{{ firewall_enabled_at_boot | default(true) }}"
+      firewall_flush_rules_and_chains: "{{ firewall_flush_rules_and_chains | default(true) }}"
+      firewall_template: "{{ firewall_template | default('firewall.bash.j2') }}"
+      firewall_allowed_tcp_ports: "{{ firewall_allowed_tcp_ports | default([]) }}"
+      firewall_allowed_udp_ports: "{{ firewall_allowed_udp_ports | default([]) }}"
+      firewall_forwarded_tcp_ports: "{{ firewall_forwarded_tcp_ports | default([]) }}"
+      firewall_forwarded_udp_ports: "{{ firewall_forwarded_udp_ports | default([]) }}"
+      firewall_additional_rules: "{{ firewall_additional_rules | default([]) }}"
+      firewall_enable_ipv6: "{{ firewall_enable_ipv6 | default(true) }}"
+      firewall_ip6_additional_rules: "{{ firewall_ip6_additional_rules | default([]) }}"
+      firewall_log_dropped_packets: "{{ firewall_log_dropped_packets | default(true) }}"
+      firewall_disable_firewalld: "{{ firewall_disable_firewalld | default(false) }}"
+      firewall_disable_ufw: "{{ firewall_disable_ufw | default(false) }}"
+- name: Check if previous firewall state file exists
+  ansible.builtin.stat:
+    path: "{{ firewall_state_file }}"
+  register: firewall_state_file_status
+
+- name: Read previous firewall state if file exists
+  ansible.builtin.slurp:
+    src: "{{ firewall_state_file }}"
+  register: previous_firewall_state_slurp
+  when: firewall_state_file_status.stat.exists
+
+- name: Set previous firewall configuration fact
+  ansible.builtin.set_fact:
+    previous_firewall_config: "{{ previous_firewall_state_slurp.content | b64decode | from_json }}"
+  when: firewall_state_file_status.stat.exists
+
+- name: Determine if firewall configuration has changed
+  ansible.builtin.set_fact:
+    firewall_config_changed: "{{ not firewall_state_file_status.stat.exists or current_firewall_config != previous_firewall_config }}"
+
+- name: Save current firewall state to file
+  ansible.builtin.copy:
+    content: "{{ current_firewall_config | to_json }}"
+    dest: "{{ firewall_state_file }}"
+    mode: '0644'
+  when: firewall_config_changed
