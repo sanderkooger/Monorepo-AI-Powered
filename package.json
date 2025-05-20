@@ -13,7 +13,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "dev-init": "./scripts/setup-dev-env.sh",
-    "clean": "rimraf .turbo node_modules"
+    "clean": "turbo run clean && rimraf .turbo node_modules"
   },
   "config": {
     "commitizen": {

@@ -6,15 +6,14 @@
 
   vars:
     firewall_allowed_tcp_ports:
-      - "22" # Keep SSH open
-      - "80"
-      - "443"
-      
+      - '22' # Keep SSH open
+      - '80'
+      - '443'
 
-  roles:
+roles:
     - role: common/firewall_state_check
       vars:
-        playbook_identifier: "nginx" # Unique identifier for this playbook
+        playbook_identifier: 'nginx' # Unique identifier for this playbook
     - role: geerlingguy.firewall
       when: firewall_config_changed # Conditionally run based on the check
     - role: geerlingguy.nginx

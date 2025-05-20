@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "clean": "rimraf .next node_modules",
+    "clean": "rimraf .next node_modules .turbo",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
