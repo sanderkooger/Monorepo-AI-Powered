@@ -1,0 +1,48 @@
+---
+# .ansible-lint
+# Configuration for ansible-lint
+
+# Exclude roles from linting that are managed by Ansible Galaxy or in .venv
+exclude_paths:
+  - .venv
+  - roles/geerlingguy.*
+
+# Enable specific rules or rule sets
+
+# Disable specific rules
+# disable_rules:
+#   - example-rule-id
+
+# Configure rule severity
+# warn_list:
+#   - example-rule-id
+
+# Define custom rules directory
+# rulesdir:
+#   - /path/to/custom/rules
+
+# Define custom tags to ignore
+# skip_tags:
+#   - skip_this_task
+
+# Define custom tags to warn on
+# warn_tags:
+#   - warn_on_this_task
+
+# Set the verbosity level
+# verbosity: 1
+
+# Set the output format
+# format: pep8
+
+# Set the number of parallel processes
+# processes: 1
+
+# Set the maximum line length
+# max_line_length: 120
+
+# Set the default parse mode (loose or strict)
+# parse_mode: loose
+
+# Set the default severity for rules without a defined severity
+# default_severity: warning

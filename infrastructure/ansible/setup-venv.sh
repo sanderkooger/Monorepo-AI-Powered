@@ -2,7 +2,10 @@
 set -e  # Exit immediately on error
 
 # Clean existing environment
-deactivate 2>/dev/null || true
+# Deactivate virtual environment if active
+if [ -n "$VIRTUAL_ENV" ]; then
+  deactivate
+fi
 rm -rf .venv
 
 # Create fresh environment

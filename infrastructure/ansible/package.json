@@ -5,8 +5,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm python:install",
-    "lint:off": "ansible-lint",
-    "clean": "rimraf .venv node_modules",
+    "lint:off": "ansible-lint .",
+    "clean": "rimraf .venv node_modules .ansible",
     "python:install": "./setup-venv.sh"
   },
   "packageManager": "pnpm@9.0.0",
@@ -15,9 +15,7 @@
   },
   "license": "MIT",
   "private": true,
-  "dependencies": {
-     
-  },
+  "dependencies": {},
   "devDependencies": {
     "rimraf": "^6.0.1"
   }

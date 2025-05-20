@@ -22,3 +22,14 @@ See full documentation: [Vault SSH Signer Guide](../docs/plugins/vault_ssh_signe
 - Ansible 2.10+ with vault_ssh_signer connection plugin
 - Vault CLI configured on Ansible controller
 - SSH key pair (`id_rsa` + `id_rsa.pub`) in user's ~/.ssh
+## Linting
+
+`ansible-lint` is used to check Ansible playbooks, roles, and collections for syntax errors, best practices, and potential issues.
+
+To run the linter, use the following command from the `infrastructure/ansible` directory:
+
+```bash
+pnpm lint
+```
+
+The linting rules are configured in the [`infrastructure/ansible/.ansible-lint`](infrastructure/ansible/.ansible-lint) file.

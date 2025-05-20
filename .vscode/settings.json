@@ -5,5 +5,7 @@
     }
   ],
   "flashpost.saveDataToWorkspace": true,
-  "roo-cline.vsCodeLmModelSelector": {}
+  "roo-cline.vsCodeLmModelSelector": {},
+  "ansible.python.interpreterPath": "/home/sander/code/Monorepo-AI-Powered/infrastructure/ansible/.venv/bin/python3",
+  "ansible.executionEnvironment.enabled": false
 }

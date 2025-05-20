@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
+    "clean": "rimraf .next node_modules",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
     "eslint": "^9.21.0",
+    "rimraf": "^6.0.1",
     "typescript": "5.7.3"
   }
 }
