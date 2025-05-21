@@ -93,12 +93,15 @@ module "mngmt_01"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["mngmt", "monitor"]
-  ansible_variables = {ansible_connection        = "vault_ssh_signer"}
+  ansible_variables = {
+    ansible_connection = "vault_ssh_signer",
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal management VM
+  }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
- 
+
 }
 
 module "web_01"  {
@@ -116,12 +119,15 @@ module "web_01"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["nginx"]
-  ansible_variables = {ansible_connection        = "vault_ssh_signer"}
+  ansible_variables = {
+    ansible_connection = "vault_ssh_signer",
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
+  }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
- 
+
 }
 
 
@@ -140,13 +146,16 @@ module "web_02"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["nginx"]
-  ansible_variables = {ansible_connection        = "vault_ssh_signer"}
+  ansible_variables = {
+    ansible_connection = "vault_ssh_signer",
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
+  }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
- 
- 
+
+
 }
 
 module "mariadb_01"  {
@@ -164,13 +173,16 @@ module "mariadb_01"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["cl_mariadb_master_master"]
-  ansible_variables = {ansible_connection        = "vault_ssh_signer"}
+  ansible_variables = {
+    ansible_connection = "vault_ssh_signer",
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal mariadb VM
+  }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
   
- 
+
 }
 module "mariadb_02"  {
   source = "./modules/compute/proxmox/ubuntu-vm"
@@ -187,13 +199,16 @@ module "mariadb_02"  {
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["cl_mariadb_master_master"]
-  ansible_variables = {ansible_connection        = "vault_ssh_signer"}
+  ansible_variables = {
+    ansible_connection = "vault_ssh_signer",
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal mariadb VM
+  }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
   
- 
+
 }
 
 

@@ -26,13 +26,22 @@ def find_ansible_hosts(module_data, inventory):
 
             if host_name:
                 # Add host-specific variables to _meta.hostvars
-                inventory["_meta"]["hostvars"][host_name] = {
+                host_vars = {
                     "ansible_host": host_name, # Ensure ansible_host is set
                     "ansible_user": "ansible", # Default user based on cloud-init
-                   
+
                     # Add other variables from the tofu resource
                     **variables
                 }
+
+                # Check for ansible_ssh_jumphost and add ProxyJump if present
+                if "ansible_ssh_jumphost" in variables and variables["ansible_ssh_jumphost"]:
+                    # Construct the ProxyJump command using the jumphost variable and ansible_user
+                    # Assumes the local SSH agent is configured with the Vault-signed cert for the jumphost user
+                    host_vars["ansible_ssh_common_args"] = f'-J {host_vars["ansible_user"]}@{variables["ansible_ssh_jumphost"]}'
+
+                # Add host-specific variables to _meta.hostvars
+                inventory["_meta"]["hostvars"][host_name] = host_vars
 
                 # Add the host to its respective groups
                 if not groups:

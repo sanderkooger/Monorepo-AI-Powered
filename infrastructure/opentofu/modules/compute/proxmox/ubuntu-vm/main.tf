@@ -145,7 +145,7 @@ resource "vault_kv_secret_v2" "machine_credentials" {
 }
 
 resource "ansible_host" "host" {
-  name   = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1][0]
+  name   = "${var.instance_name}-${var.env_name}" # Use hostname for inventory name
   groups = var.ansible_groups
 
   variables = merge(
@@ -155,7 +155,7 @@ resource "ansible_host" "host" {
       ansible_python_interpreter = "/usr/bin/python3.12"
       vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
       vault_ssh_ca_principal     = var.user_name
-
+      ansible_host              = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1][0] # Explicitly set ansible_host to IP
       
     },
     var.ansible_variables
