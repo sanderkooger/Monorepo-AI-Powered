@@ -98,7 +98,6 @@ module "mngmt_01"  {
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
-  domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
  
 }
 
@@ -122,7 +121,6 @@ module "web_01"  {
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
-  domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
  
 }
 
@@ -147,7 +145,7 @@ module "web_02"  {
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
-  domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
+ 
  
 }
 
@@ -171,7 +169,7 @@ module "mariadb_01"  {
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
-  domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
+  
  
 }
 module "mariadb_02"  {
@@ -194,7 +192,7 @@ module "mariadb_02"  {
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
   vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
   vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
-  domain_name    = "lab.local" # Example domain, adjust as needed or make it a variable
+  
  
 }
 

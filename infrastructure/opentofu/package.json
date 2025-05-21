@@ -2,7 +2,8 @@
   "name": "opentofu",
   "scripts": {
     "postinstall": "tofu init",
-    "lint": "pnpm npm-run-all lint:tflint",
+    "lint": "pnpm npm-run-all lint:tflint lint:validate",
+    "lint:validate":"tofu validate",
     "lint:tflint": "tflint --recursive --color --minimum-failure-severity='error'",
     "lint:tflint:fix": "tflint --fix --recursive --color --minimum-failure-severity='error'",
     "lint:checkov": "checkov --directory . --config-file .checkov.yaml",
