@@ -43,7 +43,8 @@ graph LR
 
 **Implemented Features:**
 
-- 🖥️ Two Next.js demo apps (web & docs)
+- 🛡️ Secure SSH relaying via a manually installed Jump Host for accessing private network machines from public runners (see [infrastructure/docker/jumphost/README.md](infrastructure/docker/jumphost/README.md) for installation)
+- �️ Two Next.js demo apps (web & docs)
 - 🧩 Shared UI component library
 - 🔧 Unified TypeScript/ESLint configurations
 - 🏗 Basic Infrastructure-as-Code patterns

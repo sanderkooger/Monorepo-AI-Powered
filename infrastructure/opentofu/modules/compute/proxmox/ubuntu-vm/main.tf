@@ -1,10 +1,6 @@
 
 
 
-locals {
-  # Construct FQDN: if domain_name is provided, append it; otherwise, use the VM name.
-  fqdn = var.domain_name != null ? "${proxmox_virtual_environment_vm.ubuntu_vm.name}.${var.domain_name}" : proxmox_virtual_environment_vm.ubuntu_vm.name
-}
 
 ## Ubuntu VM Module
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
