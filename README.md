@@ -48,6 +48,7 @@ graph LR
 - 🔧 Unified TypeScript/ESLint configurations
 - 🏗 Basic Infrastructure-as-Code patterns
 - ⚡ TurboRepo-optimized build pipelines
+- 🐘 PostgreSQL backend for OpenTofu state storage (hosted on Supabase)
 
 ## Roadmap 🛣️
 

@@ -4,14 +4,14 @@
 variable "repo_name" {
   type        = string
   description = "Manual repository name override"
-  default     = null
+  default     = "Monorepo-AI-Powered"
 }
 
 
 variable "env_name" {
   description = "env name for environment segregation (prod, accept, or dev-<name>)"
   type        = string
-  default     = null
+  default     = "prod"
 }
 
 
@@ -30,6 +30,12 @@ variable "vault_addr" {
 
 variable "vault_token" {
   description = "The Vault token to use for authentication."
+  type        = string
+  sensitive   = true
+  default     = null # Or provide a sensible default if desired, though tfvars will override
+}
+ variable "supabase_postgres_conn_str" {
+  description = "The connection string for the Supabase Postgres database."
   type        = string
   sensitive   = true
   default     = null # Or provide a sensible default if desired, though tfvars will override

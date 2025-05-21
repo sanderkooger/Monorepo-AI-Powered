@@ -15,4 +15,9 @@ terraform {
       version = "0.77.0"
     }
   }
+
+  backend "pg" {
+    schema_name = "${var.repo_name}_${var.env_name}"
+   
+  }
 }

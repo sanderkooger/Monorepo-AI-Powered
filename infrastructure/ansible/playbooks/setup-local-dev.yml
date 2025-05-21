@@ -10,8 +10,8 @@
     # Define desired versions (adjust as needed)
     node_version: "lts/*" # Use NVM alias for latest LTS
     nvm_version: "0.39.7" # Check latest NVM version
-    packer_version: "1.10.3" # Check latest stable version
-    opentofu_version: "1.7.2" # Check latest stable version
+    pnpm_version: "10.11.0" # Check latest stable version
+    opentofu_version: "1.9.1" # Check latest stable version
     vault_version: "1.15.2" # HashiCorp Vault LTS
     kubectl_version: "1.29.3" # Check latest stable version
     # Helm version is usually handled by the install script (latest v3)
@@ -45,46 +45,9 @@
             name: ["curl", "git", "unzip"] # Added git as NVM install script might use it
             state: present
 
-        # --- Packer ---
-        - name: Check if Packer is installed (as root for /usr/local/bin check)
-          ansible.builtin.command: packer --version
-          register: packer_check
-          ignore_errors: true
-          changed_when: false
-
-        - name: Download Packer binary
-          ansible.builtin.get_url:
-            url: "https://releases.hashicorp.com/packer/{{ packer_version }}/packer_{{ packer_version }}_linux_amd64.zip"
-            dest: "/tmp/packer_{{ packer_version }}_linux_amd64.zip"
-            mode: '0644'
-          when: ansible_os_family != "Darwin" and packer_check.rc != 0
-
-        - name: Download Packer binary (macOS)
-          ansible.builtin.get_url:
-            url: "https://releases.hashicorp.com/packer/{{ packer_version }}/packer_{{ packer_version }}_darwin_amd64.zip"
-            dest: "/tmp/packer_{{ packer_version }}_darwin_amd64.zip"
-            mode: '0644'
-          when: ansible_os_family == "Darwin" and packer_check.rc != 0
-
-        - name: Unzip Packer binary to /usr/local/bin
-          ansible.builtin.unarchive:
-            src: "/tmp/packer_{{ packer_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
-            dest: "/usr/local/bin/"
-            remote_src: true
-            mode: '0755'
-            owner: root
-            group: root
-          when: packer_check.rc != 0
-
-        - name: Clean up Packer zip file
-          ansible.builtin.file:
-            path: "/tmp/packer_{{ packer_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
-            state: absent
-          when: packer_check.rc != 0
-
         # --- OpenTofu ---
-        - name: Check if OpenTofu is installed (as root for /usr/local/bin check)
-          ansible.builtin.command: tofu --version
+        - name: Check if OpenTofu is installed and matches version
+          ansible.builtin.command: "tofu --version"
           register: tofu_check
           ignore_errors: true
           changed_when: false
@@ -94,14 +57,18 @@
             url: "https://github.com/opentofu/opentofu/releases/download/v{{ opentofu_version }}/tofu_{{ opentofu_version }}_linux_amd64.zip"
             dest: "/tmp/tofu_{{ opentofu_version }}_linux_amd64.zip"
             mode: '0644'
-          when: ansible_os_family != "Darwin" and tofu_check.rc != 0
+          when:
+            - ansible_os_family != "Darwin"
+            - tofu_check.rc != 0 or opentofu_version not in tofu_check.stdout
 
         - name: Download OpenTofu binary (macOS)
           ansible.builtin.get_url:
             url: "https://github.com/opentofu/opentofu/releases/download/v{{ opentofu_version }}/tofu_{{ opentofu_version }}_darwin_amd64.zip"
             dest: "/tmp/tofu_{{ opentofu_version }}_darwin_amd64.zip"
             mode: '0644'
-          when: ansible_os_family == "Darwin" and tofu_check.rc != 0
+          when:
+            - ansible_os_family == "Darwin"
+            - tofu_check.rc != 0 or opentofu_version not in tofu_check.stdout
 
         - name: Unzip OpenTofu binary to /usr/local/bin
           ansible.builtin.unarchive:
@@ -111,13 +78,13 @@
             mode: '0755'
             owner: root
             group: root
-          when: tofu_check.rc != 0
+          when: tofu_check.rc != 0 or opentofu_version not in tofu_check.stdout
 
         - name: Clean up OpenTofu zip file
           ansible.builtin.file:
             path: "/tmp/tofu_{{ opentofu_version }}_{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}_amd64.zip"
             state: absent
-          when: tofu_check.rc != 0
+          when: tofu_check.rc != 0 or opentofu_version not in tofu_check.stdout
 
         # --- Kubectl ---
         - name: Check if kubectl exists
@@ -323,9 +290,26 @@
       args: {} # Removed 'creates' as exact version path isn't known with lts/*
       changed_when: true # Assume changed if NVM install runs (it's idempotent for aliases)
 
+    - name: Check if pnpm is installed and matches version
+      ansible.builtin.shell: |
+        set -e
+        . "{{ nvm_script }}"
+        pnpm --version
+      register: pnpm_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install pnpm globally using the NVM-managed Node.js
+      ansible.builtin.shell: |
+        set -e
+        . "{{ nvm_script }}"
+        npm install -g pnpm@{{ pnpm_version }}
+      when: pnpm_check.rc != 0 or pnpm_version not in pnpm_check.stdout
+      changed_when: true # Assume changed if install runs
+
     # ===========================================
     # Final Message
     # ===========================================
     - name: Display final message
       ansible.builtin.debug:
-        msg: "Development environment tools (NVM, Node.js, pnpm, Packer, OpenTofu, Vault, kubectl, Helm, TFLint, Checkov) should now be installed/updated."
+        msg: "Development environment tools (NVM, Node.js, pnpm, OpenTofu, Vault, kubectl, Helm, TFLint, Checkov) should now be installed/updated."
