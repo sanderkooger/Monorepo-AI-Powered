@@ -22,21 +22,15 @@ variable "proxmox_node_name" {
 
 }
 
-variable "vault_addr" {
-  description = "The address of the Vault server."
-  type        = string
-  default     = null # Or provide a sensible default if desired, though tfvars will override
-}
+# variable "vault_addr" {
+#   description = "The address of the Vault server."
+#   type        = string
+#   default     = null # Or provide a sensible default if desired, though tfvars will override
+# }
 
-variable "vault_token" {
-  description = "The Vault token to use for authentication."
-  type        = string
-  sensitive   = true
-  default     = null # Or provide a sensible default if desired, though tfvars will override
-}
- variable "supabase_postgres_conn_str" {
-  description = "The connection string for the Supabase Postgres database."
-  type        = string
-  sensitive   = true
-  default     = null # Or provide a sensible default if desired, though tfvars will override
-}
+# variable "vault_token" {
+#   description = "The Vault token to use for authentication."
+#   type        = string
+#   sensitive   = true
+#   default     = null # Or provide a sensible default if desired, though tfvars will override
+# }

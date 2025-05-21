@@ -1,5 +1,5 @@
 
-variable "domain_name" {
+variable "fqdn" {
   description = "Optional domain name to append for FQDN construction for Ansible (e.g., 'example.com'). If null, FQDN will be the instance name."
   type        = string
   default     = null
