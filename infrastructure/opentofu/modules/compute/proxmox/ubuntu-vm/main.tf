@@ -46,8 +46,9 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     user_data_file_id = proxmox_virtual_environment_file.user_data_cloud_config.id
     ip_config {
       ipv4 {
-        address = "${var.ip_address}/24"
-        gateway = var.gateway
+        address = "dhcp"
+        #address = "${var.ip_address}/24"
+        #gateway = var.gateway
       }
     }
     dns {

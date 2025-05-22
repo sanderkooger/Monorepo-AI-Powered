@@ -40,14 +40,14 @@ module "kv_engine" {
   datastore_id = "local"
   node_name    = var.proxmox_node_name
   url          = "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-amd64.img"
-  file_name    = "ubuntu-24.04-minimal-cloudimg-amd64.img"
+  file_name    = "${var.env_name}-ubuntu-24.04-minimal-cloudimg-amd64.img"
 }
  resource "proxmox_virtual_environment_download_file" "ubuntu-24-04-server-cloudimg-amd64" {
   content_type = "iso"
   datastore_id = "local"
   node_name    = var.proxmox_node_name
   url          = "https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img"
-  file_name    = "ubuntu-24.04-server-cloudimg-amd64.img"
+  file_name    = "${var.env_name}-ubuntu-24.04-server-cloudimg-amd64.img"
 }
 
 
