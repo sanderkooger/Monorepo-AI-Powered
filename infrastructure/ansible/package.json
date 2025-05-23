@@ -7,7 +7,9 @@
     "postinstall": "pnpm python:install",
     "lint": "ansible-lint",
     "clean": "rimraf .venv node_modules roles/galaxy .ansible .turbo",
-    "python:install": "./setup-venv.sh"
+    "python:install": "./setup-venv.sh",
+    "configure": "ansible-playbook -i inventories/dynamic_inventory.py playbooks/site.yml",
+    "deploy-infra-configure": "npm run configure"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

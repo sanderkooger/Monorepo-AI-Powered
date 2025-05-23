@@ -1,0 +1,41 @@
+name: CI - Lint, Build and Test All Workspaces
+
+on:
+  push:
+    branches:
+      - '**' # Run on all branches
+  pull_request:
+    branches:
+      - '**' # Run on all branches
+
+jobs:
+  lint-build-and-test:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'accept' && 'accept' || 'dev' }}
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+      ENV_NAME: ${{vars.ENV_NAME}}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm' # Use pnpm for caching
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Turborepo Lint
+        run: npx turbo run lint
+
+      - name: Run Turborepo Build
+        run: npx turbo run build

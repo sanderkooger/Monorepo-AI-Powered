@@ -1,0 +1,52 @@
+name: Deploy Docs App to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/docs/**'
+      - 'packages/**' # Assuming docs app might depend on shared packages
+  workflow_run:
+    workflows: ["CI - Lint & Build All Workspaces"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    # IMPORTANT: Configure GitHub Environments (e.g., 'production', 'staging', 'dev')
+    # in your repository settings for proper secret management and deployment protection.
+    # Example: environment: production
+    if: github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Authenticate with Kubernetes (Placeholder)
+        # This step would involve configuring kubectl with credentials
+        # For example, using OIDC for cloud provider Kubernetes services (EKS, GKE, AKS)
+        # - uses: aws-actions/configure-aws-credentials@v4
+        #   with:
+        #     role-to-assume: arn:aws:iam::123456789012:role/github-actions-k8s-deployer
+        #     aws-region: us-east-1
+        run: echo "KUBERNETES_AUTH_PLACEHOLDER_FOR_DEMO" # Replace with actual K8s auth
+
+      - name: Run Turborepo Docs App Deployment
+        run: npx turbo run deploy-docs --filter=apps/docs
+        env:
+          # Example: KUBECONFIG: ${{ secrets.KUBECONFIG }}
+          # Other environment variables needed by your docs app deployment script
+          # fetched from Vault or GitHub Secrets
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }} # Example: Vault address from GitHub Secrets

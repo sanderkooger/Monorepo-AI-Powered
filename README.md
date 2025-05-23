@@ -50,6 +50,7 @@ graph LR
 - 🏗 Basic Infrastructure-as-Code patterns
 - ⚡ TurboRepo-optimized build pipelines
 - 🐘 PostgreSQL backend for OpenTofu state storage (hosted on Supabase)
+- 🚀 **CI/CD Strategy:** Automated build, test, and deployment pipelines for both infrastructure and applications using GitHub Actions and Turborepo. See the [CI/CD Overview](docs/ci-cd-overview.md) for details.
 
 ## Roadmap 🛣️
 
