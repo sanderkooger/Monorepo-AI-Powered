@@ -36,16 +36,6 @@ variable "image_id" {
   type        = string
 }
 
-variable "ip_address" {
-  description = "The static IPv4 address to assign to the VM (without CIDR)."
-  type        = string
-}
-
-variable "gateway" {
-  description = "The IPv4 gateway for the VM."
-  type        = string
-}
-
 variable "kv_store_path" {
   description = "The path in Vault KV store for this VM's secrets."
   type        = string
@@ -96,6 +86,13 @@ variable "memory_size" {
   description = "Memory size for the VM in MB."
   type        = number
   default     = 256
+  
+}
+
+variable "disk_size" {
+  description = "Disk size for the VM in GB."
+  type        = number
+  default     = 15
   
 }
 

@@ -1,3 +1,5 @@
+vault write -field=signed_key Monorepo-AI-Powered-prod/ssh/sign/default-role public_key=@$HOME/.ssh/id_rsa.pub valid_principals=ansible > $HOME/.ssh/id_rsa-cert.pub
+
 # Jump Host Docker Image
 
 This directory contains the necessary files to build a Docker image for a secure jump host. This jump host is designed to be deployed within a network accessible from the public internet (via NAT and port forwarding) and capable of reaching your private network. It leverages HashiCorp Vault's SSH secrets engine to manage SSH host keys and trust client certificates, enabling secure SSH access from ephemeral environments like GitHub Actions runners to private network machines.

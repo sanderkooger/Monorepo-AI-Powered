@@ -24,11 +24,12 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
   disk {
     datastore_id = "local-lvm"
-    file_id      = var.image_id# proxmox_virtual_environment_download_file.ubuntu_image.id
+    file_id      = var.image_id # proxmox_virtual_environment_download_file.ubuntu_image.id
     interface    = "virtio0"
-    size         = 30
+    size         = var.disk_size
     iothread     = true
     discard      = "on"
+    file_format = "raw"
   }
 
   network_device {
@@ -157,6 +158,7 @@ resource "ansible_host" "host" {
       vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
       vault_ssh_ca_principal     = var.user_name
       ansible_host              = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1][0] # Explicitly set ansible_host to IP
+      
       
     },
     var.ansible_variables

@@ -83,19 +83,17 @@ module "mngmt_01"  {
   instance_name  = "mngmt-01"
   description    = "ubuntu test machine" 
   cpu_cores      = 2
-  memory_size    = 2048
+  memory_size    = 512
   repo_name      = var.repo_name
   env_name       = var.env_name
   node_name      = var.proxmox_node_name
   image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
-  ip_address     = "192.168.1.10"
-  gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["mngmt", "monitor"]
   ansible_variables = {
     ansible_connection = "vault_ssh_signer",
-    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal management VM
+    # ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal management VM
   }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
@@ -109,19 +107,17 @@ module "web_01"  {
   instance_name  = "web-01"
   description    = "ubuntu test machine" 
   cpu_cores      = 2
-  memory_size    = 2048
+  memory_size    = 512
   repo_name      = var.repo_name
   env_name       = var.env_name
   node_name      = var.proxmox_node_name
   image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
-  ip_address     = "192.168.1.11"
-  gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["nginx"]
   ansible_variables = {
     ansible_connection = "vault_ssh_signer",
-    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
+   # ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
   }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
@@ -133,22 +129,20 @@ module "web_01"  {
 
 module "web_02"  {
   source = "./modules/compute/proxmox/ubuntu-vm"
-  instance_name  = "ubuntu-web-02"
+  instance_name  = "web-02"
   description    = "ubuntu test machine" 
   cpu_cores      = 2
-  memory_size    = 2048
+  memory_size    = 512
   repo_name      = var.repo_name
   env_name       = var.env_name
   node_name      = var.proxmox_node_name
   image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
-  ip_address     = "192.168.1.12"
-  gateway        = "192.168.1.254" # Please adjust to your network's gateway
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["nginx"]
   ansible_variables = {
     ansible_connection = "vault_ssh_signer",
-    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
+    # ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
   }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
@@ -157,60 +151,6 @@ module "web_02"  {
 
 
 }
-
-module "mariadb_01"  {
-  source = "./modules/compute/proxmox/ubuntu-vm"
-  instance_name  = "mariadb-01"
-  description    = "ubuntu test machine" 
-  cpu_cores      = 2
-  memory_size    = 2048
-  repo_name      = var.repo_name
-  env_name       = var.env_name
-  node_name      = var.proxmox_node_name
-  image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
-  ip_address     = "192.168.1.13"
-  gateway        = "192.168.1.254" # Please adjust to your network's gateway
-  kv_store_path  = module.kv_engine.kv_store_path
-  user_name      = "ansible"
-  ansible_groups = ["cl_mariadb_master_master"]
-  ansible_variables = {
-    ansible_connection = "vault_ssh_signer",
-    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal mariadb VM
-  }
-  # ssh_pub_key is now optional in the module and will default to null if not provided.
-  # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
-  vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
-  vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
-  
-
-}
-module "mariadb_02"  {
-  source = "./modules/compute/proxmox/ubuntu-vm"
-  instance_name  = "mariadb-02"
-  description    = "ubuntu test machine" 
-  cpu_cores      = 2
-  memory_size    = 2048
-  repo_name      = var.repo_name
-  env_name       = var.env_name
-  node_name      = var.proxmox_node_name
-  image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
-  ip_address     = "192.168.1.14"
-  gateway        = "192.168.1.254" # Please adjust to your network's gateway
-  kv_store_path  = module.kv_engine.kv_store_path
-  user_name      = "ansible"
-  ansible_groups = ["cl_mariadb_master_master"]
-  ansible_variables = {
-    ansible_connection = "vault_ssh_signer",
-    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal mariadb VM
-  }
-  # ssh_pub_key is now optional in the module and will default to null if not provided.
-  # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
-  vault_ssh_ca_public_key_pem = module.vault_ssh_ca_config.ca_public_key_pem
-  vault_ssh_engine_signing_role = module.vault_ssh_ca_config.ssh_engine_signing_role_ansible
-  
-
-}
-
 
 
 
