@@ -1,7 +1,7 @@
 {
   "name": "opentofu",
   "scripts": {
-    "postinstall": "tofu init",
+    "postinstall": "tofu init -reconfigure",
     "lint": "pnpm npm-run-all lint:tflint lint:validate",
     "lint:validate":"tofu validate",
     "lint:tflint": "tflint --recursive --color --minimum-failure-severity='error'",
