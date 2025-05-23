@@ -6,14 +6,12 @@ set -e
 # Required environment variables:
 # VAULT_ADDR: Address of the Vault server (e.g., http://127.0.0.1:8200)
 # VAULT_TOKEN: Vault token for authentication
-# VAULT_SSH_CA_PATH: Path of the Vault SSH secrets engine (e.g., ssh-client-signer)
-
 # Define the specific KV path for the jump host SSH key pair
 SSH_HOST_KEY_KV_PATH="kv-root/data/ssh_keys/jumphost_homeserver"
 
 # Check if required environment variables are set
-if [ -z "$VAULT_ADDR" ] || [ -z "$VAULT_TOKEN" ] || [ -z "$VAULT_SSH_CA_PATH" ]; then
-  echo "Error: Required environment variables VAULT_ADDR, VAULT_TOKEN, and VAULT_SSH_CA_PATH must be set."
+if [ -z "$VAULT_ADDR" ] || [ -z "$VAULT_TOKEN" ]; then
+  echo "Error: Required environment variables VAULT_ADDR and VAULT_TOKEN must be set."
   exit 1
 fi
 
@@ -42,14 +40,47 @@ if [ -z "$VAULT_HOST_PUBLIC_KEY" ] || [ "$VAULT_HOST_PUBLIC_KEY" = "null" ]; the
 fi
 
 
-echo "Fetching Vault CA public key..."
-# Fetch Vault SSH CA public key
-VAULT_CA_PUBLIC_KEY=$(curl -s \
-  --header "X-Vault-Token: $VAULT_TOKEN" \
-  "$VAULT_ADDR/v1/$VAULT_SSH_CA_PATH/config/ca" | jq -r '.data.public_key')
+echo "Discovering and fetching Vault SSH CA public keys..."
 
-if [ -z "$VAULT_CA_PUBLIC_KEY" ] || [ "$VAULT_CA_PUBLIC_KEY" = "null" ]; then
-  echo "Error: Could not fetch Vault CA public key from Vault at $VAULT_SSH_CA_PATH/config/ca. Check path, token, and SSH engine configuration."
+# Initialize the trusted CA keys file
+TRUSTED_CA_KEYS_FILE="/etc/ssh/trusted-user-ca-keys/vault_cas.pub"
+mkdir -p "$(dirname "$TRUSTED_CA_KEYS_FILE")"
+> "$TRUSTED_CA_KEYS_FILE" # Clear the file before adding new keys
+
+# Fetch all mounted secret engines
+echo "Querying Vault for mounted secret engines from $VAULT_ADDR/v1/sys/mounts"
+MOUNT_POINTS=$(curl -sL \
+  --header "X-Vault-Token: $VAULT_TOKEN" \
+  "$VAULT_ADDR/v1/sys/mounts" | jq -r 'keys[]')
+
+SSH_CA_FOUND=0
+
+# Iterate over mount points and check if they are SSH secret engines
+for MOUNT_POINT in $MOUNT_POINTS; do
+  ENGINE_TYPE=$(curl -sL \
+    --header "X-Vault-Token: $VAULT_TOKEN" \
+    "$VAULT_ADDR/v1/sys/mounts/$MOUNT_POINT" | jq -r '.type')
+
+  if [ "$ENGINE_TYPE" = "ssh" ]; then
+    echo "Found SSH secrets engine at: $MOUNT_POINT"
+    SSH_CA_FOUND=1
+    
+    # Fetch Vault SSH CA public key for this engine
+    VAULT_CA_PUBLIC_KEY=$(curl -sL \
+      --header "X-Vault-Token: $VAULT_TOKEN" \
+      "$VAULT_ADDR/v1/$MOUNT_POINT/config/ca" | jq -r '.data.public_key')
+
+    if [ -z "$VAULT_CA_PUBLIC_KEY" ] || [ "$VAULT_CA_PUBLIC_KEY" = "null" ]; then
+      echo "Warning: Could not fetch Vault CA public key for $MOUNT_POINT. Skipping."
+    else
+      echo "Successfully fetched CA public key for $MOUNT_POINT. Appending to $TRUSTED_CA_KEYS_FILE"
+      echo "$VAULT_CA_PUBLIC_KEY" >> "$TRUSTED_CA_KEYS_FILE"
+    fi
+  fi
+done
+
+if [ "$SSH_CA_FOUND" -eq 0 ]; then
+  echo "Error: No SSH secrets engines found in Vault. Please ensure at least one SSH engine is configured."
   exit 1
 fi
 
@@ -61,17 +92,17 @@ echo "$VAULT_HOST_PUBLIC_KEY" > /etc/ssh/ssh_host_rsa_key.pub
 # Set correct permissions for the private key
 chmod 600 /etc/ssh/ssh_host_rsa_key
 
-# Write the Vault CA public key to the trusted keys file
-echo "$VAULT_CA_PUBLIC_KEY" > /etc/ssh/trusted-user-ca-keys/vault_ca.pub
-
 # Configure sshd_config to use the fetched host key and trust the CA key
 # Ensure these lines are not duplicated if they exist
 if ! grep -q "HostKey /etc/ssh/ssh_host_rsa_key" /etc/ssh/sshd_config; then
   echo "HostKey /etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config
 fi
 
-if ! grep -q "TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys/vault_ca.pub" /etc/ssh/sshd_config; then
-  echo "TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys/vault_ca.pub" >> /etc/ssh/sshd_config
+# Update TrustedUserCAKeys to point to the new consolidated file
+if grep -q "TrustedUserCAKeys" /etc/ssh/sshd_config; then
+  sed -i "s|^TrustedUserCAKeys.*|TrustedUserCAKeys $TRUSTED_CA_KEYS_FILE|" /etc/ssh/sshd_config
+else
+  echo "TrustedUserCAKeys $TRUSTED_CA_KEYS_FILE" >> /etc/ssh/sshd_config
 fi
 
 # Disable password authentication (already done in Dockerfile, but double-check)
