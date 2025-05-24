@@ -33,10 +33,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Install openTofu
-        uses: opentofu/setup-opentofu@v1
-        with: 
-          tofu_version: 1.9.1
+
       - name: Setup Node.js and pnpm
         uses: actions/setup-node@v4
         with:
@@ -49,7 +46,10 @@ jobs:
           key: ${{ matrix.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
       - name: Install TFLint
         uses: terraform-linters/setup-tflint@v4
-
+      - name: Install openTofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: 1.9.1
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
