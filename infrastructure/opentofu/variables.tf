@@ -23,7 +23,7 @@ variable "proxmox_node_name" {
 }
 
 
-variable "vault_backend_pg_conn_str" {
+variable "backend_pg_conn_str" {
   description = "PostgreSQL connection string for Vault backend"
   type        = string
   default     = null
