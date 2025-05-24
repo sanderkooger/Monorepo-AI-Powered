@@ -23,6 +23,9 @@ jobs:
       VAULT_ADDR: ${{ vars.VAULT_ADDR }}
       ENV_NAME: ${{vars.ENV_NAME}}
       TF_VAR_vault_addr: ${{ vars.VAULT_ADDR }}
+      TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+      TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
     
       
       
