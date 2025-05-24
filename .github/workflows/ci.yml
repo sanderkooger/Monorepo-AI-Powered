@@ -18,14 +18,14 @@ jobs:
     environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'accept' && 'accept' || 'dev' }}
 
     env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
       VAULT_ADDR: ${{ vars.VAULT_ADDR }}
       ENV_NAME: ${{vars.ENV_NAME}}
-      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
-      TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-      TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
       TF_VAR_vault_addr: ${{ vars.VAULT_ADDR }}
+    
+      
+      
 
     steps:
       - name: Checkout code
@@ -49,15 +49,35 @@ jobs:
       - name: Install openTofu
         uses: opentofu/setup-opentofu@v1
         with: 
-          
           tofu_wrapper: false
+      - name: Cache OpenTofu .terraform directory
+        uses: actions/cache@v4
+        with:
+          path: infrastructure/opentofu/.terraform
+          key: ${{ matrix.os }}-opentofu-${{ hashFiles('infrastructure/opentofu/.terraform.lock.hcl') }}
+          restore-keys: |
+            ${{ matrix.os }}-opentofu-
       - name: Add tofu to PATH
         run: echo "/home/runner/.opentofu/bin" >> $GITHUB_PATH
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+         
+
 
       - name: Run Turborepo Lint
         run: npx turbo run lint
+        env: 
+          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
 
       - name: Run Turborepo Build
         run: npx turbo run build
+        env:
+          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+          TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
