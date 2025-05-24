@@ -39,26 +39,24 @@ jobs:
         with:
           node-version: '24'
           cache: 'pnpm' # Use pnpm for caching
-      - name: Cache plugin dir
-        uses: actions/cache@v4
-        with:
-          path: ~/.tflint.d/plugins
-          key: ${{ matrix.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
       - name: Install TFLint
         uses: terraform-linters/setup-tflint@v4
       - name: Install openTofu
         uses: opentofu/setup-opentofu@v1
         with: 
           tofu_wrapper: false
-      - name: Cache OpenTofu .terraform directory
-        uses: actions/cache@v4
-        with:
-          path: infrastructure/opentofu/.terraform
-          key: ${{ matrix.os }}-opentofu-${{ hashFiles('infrastructure/opentofu/.terraform.lock.hcl') }}
-          restore-keys: |
-            ${{ matrix.os }}-opentofu-
+
       - name: Add tofu to PATH
         run: echo "/home/runner/.opentofu/bin" >> $GITHUB_PATH
+
+      - name: Cache OpenTofu modules
+        id: cache-tofu-modules
+        uses: actions/cache@v4
+        with:
+          path: infrastructure/opentofu/.terraform # Path to the .terraform directory
+          key: ${{ matrix.os }}-tofu-${{ hashFiles('infrastructure/opentofu/**/*.tf') }} # Cache key based on OS and .tf files
+          restore-keys: |
+            ${{ matrix.os }}-tofu-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         env:
