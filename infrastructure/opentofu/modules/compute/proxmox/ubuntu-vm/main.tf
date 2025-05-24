@@ -5,7 +5,7 @@
 ## Ubuntu VM Module
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   name        = "${var.instance_name}-${var.env_name}"
-  node_name   = var.node_name
+  node_name   = var.proxmox_node_name
   description = var.description
   tags        = ["ubuntu"]
 
@@ -63,7 +63,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
   content_type = "snippets"
   datastore_id = "local"
-  node_name    = var.node_name
+  node_name    = var.proxmox_node_name
 
   source_raw {
     data = <<-EOT

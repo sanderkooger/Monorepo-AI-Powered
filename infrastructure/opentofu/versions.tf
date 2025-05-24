@@ -17,6 +17,7 @@ terraform {
   }
 
   backend "pg" {
+    conn_str = var.vault_backend_pg_conn_str
     schema_name = "${var.repo_name}_${var.env_name}"
    
   }

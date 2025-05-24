@@ -22,15 +22,9 @@ variable "proxmox_node_name" {
 
 }
 
-# variable "vault_addr" {
-#   description = "The address of the Vault server."
-#   type        = string
-#   default     = null # Or provide a sensible default if desired, though tfvars will override
-# }
 
-# variable "vault_token" {
-#   description = "The Vault token to use for authentication."
-#   type        = string
-#   sensitive   = true
-#   default     = null # Or provide a sensible default if desired, though tfvars will override
-# }
+variable "vault_backend_pg_conn_str" {
+  description = "PostgreSQL connection string for Vault backend"
+  type        = string
+  default     = null
+}

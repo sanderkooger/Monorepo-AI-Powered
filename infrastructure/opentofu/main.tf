@@ -80,20 +80,20 @@ module "vault_ssh_ca_config" {
 
 module "mngmt_01"  {
   source = "./modules/compute/proxmox/ubuntu-vm"
-  instance_name  = "mngmt-01"
-  description    = "ubuntu test machine" 
-  cpu_cores      = 2
-  memory_size    = 512
-  repo_name      = var.repo_name
-  env_name       = var.env_name
-  node_name      = var.proxmox_node_name
-  image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
-  kv_store_path  = module.kv_engine.kv_store_path
-  user_name      = "ansible"
-  ansible_groups = ["mngmt", "monitor"]
+  instance_name     = "mngmt-01"
+  description       = "ubuntu test machine" 
+  cpu_cores         = 2
+  memory_size       = 512
+  repo_name         = var.repo_name
+  env_name          = var.env_name
+  proxmox_node_name = var.proxmox_node_name
+  image_id          = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
+  kv_store_path     = module.kv_engine.kv_store_path
+  user_name         = "ansible"
+  ansible_groups    = ["mngmt", "monitor"]
   ansible_variables = {
     ansible_connection = "vault_ssh_signer",
-    # ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal management VM
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal management VM
   }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
@@ -104,20 +104,20 @@ module "mngmt_01"  {
 
 module "web_01"  {
   source = "./modules/compute/proxmox/ubuntu-vm"
-  instance_name  = "web-01"
-  description    = "ubuntu test machine" 
-  cpu_cores      = 2
-  memory_size    = 512
-  repo_name      = var.repo_name
-  env_name       = var.env_name
-  node_name      = var.proxmox_node_name
-  image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
-  kv_store_path  = module.kv_engine.kv_store_path
-  user_name      = "ansible"
-  ansible_groups = ["nginx"]
+  instance_name       = "web-01"
+  description         = "ubuntu test machine" 
+  cpu_cores           = 2
+  memory_size         = 512
+  repo_name           = var.repo_name
+  env_name            = var.env_name
+  proxmox_node_name   = var.proxmox_node_name
+  image_id            = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
+  kv_store_path       = module.kv_engine.kv_store_path
+  user_name           = "ansible"
+  ansible_groups      = ["nginx"]
   ansible_variables = {
     ansible_connection = "vault_ssh_signer",
-   # ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
   }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.
@@ -135,14 +135,14 @@ module "web_02"  {
   memory_size    = 512
   repo_name      = var.repo_name
   env_name       = var.env_name
-  node_name      = var.proxmox_node_name
+  proxmox_node_name      = var.proxmox_node_name
   image_id       = proxmox_virtual_environment_download_file.ubuntu-24-04-server-cloudimg-amd64.id
   kv_store_path  = module.kv_engine.kv_store_path
   user_name      = "ansible"
   ansible_groups = ["nginx"]
   ansible_variables = {
     ansible_connection = "vault_ssh_signer",
-    # ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
+    ansible_ssh_jumphost = "paris.thisisfashion.tv" # Add jumphost for internal web VM
   }
   # ssh_pub_key is now optional in the module and will default to null if not provided.
   # For this setup, we are intentionally omitting it to rely on Vault SSH CA.

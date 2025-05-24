@@ -20,7 +20,7 @@ variable "env_name" {
   type        = string
 }
 
-variable "node_name" {
+variable "proxmox_node_name" {
   description = "The Proxmox node to deploy the VM on."
   type        = string
 }
