@@ -8,7 +8,14 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", ".terraform/**", ".ansible/**"]
+      "outputs": [".next/**", "!.next/cache/**", ".terraform/**", ".ansible/**"],
+      "env": [
+        "ENV_NAME",
+        "PROXMOX_NODE_NAME",
+        "VAULT_ADDR",
+        "VAULT_TOKEN",
+        "TF_VAR_*",
+        "NEXT_PUBLIC_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
