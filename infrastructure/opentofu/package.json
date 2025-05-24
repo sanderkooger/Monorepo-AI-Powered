@@ -7,7 +7,7 @@
     "lint:tflint": "tflint --recursive --color --minimum-failure-severity='error'",
     "lint:tflint:fix": "tflint --fix --recursive --color --minimum-failure-severity='error'",
     "lint:checkov": "checkov --directory . --config-file .checkov.yaml",
-    "build": "pnpm plan",
+    "build": "tofu init -reconfigure && pnpm plan",
     "clean": "rimraf .terraform node_modules .turbo",
     "plan": "tofu plan",
     "apply": "tofu apply -auto-approve -var=\"vault_addr=${VAULT_ADDR}\" -var=\"env_name=${ENV_NAME}\"",
