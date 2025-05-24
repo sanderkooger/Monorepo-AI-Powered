@@ -72,7 +72,7 @@ jobs:
 
       - name: Run Turborepo Build
         run: npx turbo run build
-        # env:
-        #   TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-        #   TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
-        #   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+        env:
+          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+          TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
