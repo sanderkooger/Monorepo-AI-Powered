@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Call Reusable Setup
-        uses: ./.github/workflows/shared-base-install.yml
+        uses: ./.github/workflows/shared-base.yml
         with:
           node-version: '24'
 
