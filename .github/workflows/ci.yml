@@ -49,33 +49,27 @@ jobs:
       - name: Add tofu to PATH
         run: echo "/home/runner/.opentofu/bin" >> $GITHUB_PATH
 
-      - name: Cache OpenTofu modules
-        id: cache-tofu-modules
-        uses: actions/cache@v4
-        with:
-          path: infrastructure/opentofu/.terraform # Path to the .terraform directory
-          key: ${{ matrix.os }}-tofu-${{ hashFiles('infrastructure/opentofu/**/*.tf') }} # Cache key based on OS and .tf files
-          restore-keys: |
-            ${{ matrix.os }}-tofu-
+      # - name: Cache OpenTofu modules
+      #   id: cache-tofu-modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: infrastructure/opentofu/.terraform # Path to the .terraform directory
+      #     key: ${{ matrix.os }}-tofu-${{ hashFiles('infrastructure/opentofu/**/*.tf') }} # Cache key based on OS and .tf files
+      #     restore-keys: |
+      #       ${{ matrix.os }}-tofu-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+
          
 
 
       - name: Run Turborepo Lint
         run: npx turbo run lint
-        env: 
-          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+ 
 
       - name: Run Turborepo Build
         run: npx turbo run build
-        env:
-          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-          TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+        # env:
+        #   TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+        #   TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+        #   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
