@@ -20,6 +20,8 @@ jobs:
       ENV_NAME: ${{vars.ENV_NAME}}
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
       TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+      TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+      TF_VAR_vault_addr: ${{ vars.VAULT_ADDR }}
 
     steps:
       - name: Checkout code

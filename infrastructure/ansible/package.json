@@ -5,15 +5,15 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm python:install",
-    "lint": "ansible-lint",
+    "lint": ". ./.venv/bin/activate && ansible-lint",
     "clean": "rimraf .venv node_modules roles/galaxy .ansible .turbo",
-    "python:install": "./setup-venv.sh",
+    "python:install": "./install.sh",
     "configure": "ansible-playbook -i inventories/dynamic_inventory.py playbooks/site.yml",
-    "deploy-infra-configure": "npm run configure"
+    "deploy-infra-configure": "pnpm run configure"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "license": "MIT",
   "private": true,

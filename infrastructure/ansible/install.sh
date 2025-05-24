@@ -11,6 +11,7 @@ rm -rf .venv
 
 # Create fresh environment
 python3 -m venv .venv
+
 source .venv/bin/activate
 
 # Ensure pip is up-to-date
