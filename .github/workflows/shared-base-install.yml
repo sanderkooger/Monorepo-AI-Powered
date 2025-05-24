@@ -1,0 +1,57 @@
+name: Reusable Setup for Monorepo
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        default: '24'
+      cache-key-suffix:
+        required: false
+        type: string
+        default: '' # Allows callers to add a unique suffix to cache keys
+    outputs:
+      cache-hit:
+        description: "Whether the pnpm cache was a hit"
+        value: ${{ jobs.setup.outputs.cache-hit }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.pnpm-cache.outputs.cache-hit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        id: pnpm-setup
+        with:
+          version: 8
+          run_install: false # We'll run pnpm install explicitly later
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml # Ensure this points to your monorepo's lockfile
+
+      - name: Get pnpm store path
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}-${{ inputs.cache-key-suffix }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile

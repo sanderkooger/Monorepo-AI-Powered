@@ -1,55 +1,43 @@
-name: Deploy Infrastructure
+name: Infrastructure Deployment
 
 on:
   push:
     branches:
       - main
+      - accept
     paths:
-      - 'infrastructure/**'
-  workflow_run:
-    workflows: ["CI - Lint & Build All Workspaces"]
-    types:
-      - completed
-    branches:
-      - main
+      - 'infrastructure/opentofu/**'
+      - 'infrastructure/ansible/**'
+      - 'turbo.json'
+  workflow_dispatch:
 
 jobs:
   deploy-infra:
-    runs-on: ubuntu-latest
-    # IMPORTANT: Configure GitHub Environments (e.g., 'production', 'staging', 'dev')
-    # in your repository settings for proper secret management and deployment protection.
-    # Example: environment: production
-    if: github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'accept' && 'accept' || 'dev' }}
+    if: github.ref_name == 'main' || github.ref_name == 'accept'
+    env:
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      ENV_NAME: ${{ vars.ENV_NAME }}
+      TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+      TF_VAR_proxmox_node_name: ${{ secrets.TF_VAR_PROXMOX_NODE_NAME }}
+      ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js and pnpm
-        uses: actions/setup-node@v4
+      - name: Call Reusable Setup
+        uses: ./.github/workflows/shared-base-install.yml
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: '24'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Run Turborepo Deploy Infra Provision (OpenTofu Apply)
+        run: npx turbo run deploy-infra-provision --filter="infrastructure/opentofu"
 
-      - name: Authenticate with Vault (Placeholder)
-        # This step would involve fetching a Vault token using AppRole or OIDC
-        # For example:
-        # - uses: hashicorp/vault-action@v2
-        #   with:
-        #     url: ${{ secrets.VAULT_ADDR }}
-        #     method: approle
-        #     roleId: ${{ secrets.VAULT_ROLE_ID }}
-        #     secretId: ${{ secrets.VAULT_SECRET_ID }}
-        #     exportToken: true
-        # - run: echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
-        run: echo "VAULT_TOKEN_PLACEHOLDER_FOR_DEMO" # Replace with actual Vault auth
-
-      - name: Run Turborepo Infra Deployment
-        # This command will trigger both OpenTofu provisioning and Ansible configuration
-        # due to Turborepo's pipeline dependencies.
-        run: npx turbo run infra-deploy --filter=infrastructure/opentofu --filter=infrastructure/ansible
-        env:
-          VAULT_ADDR: ${{ secrets.VAULT_ADDR }} # Example: Vault address from GitHub Secrets
-          # Other environment variables needed by OpenTofu/Ansible, fetched from Vault
+      - name: Run Turborepo Deploy Infra Configure (Ansible Configure)
+        run: npx turbo run deploy-infra-configure --filter="infrastructure/ansible"

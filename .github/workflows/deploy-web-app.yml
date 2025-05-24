@@ -1,0 +1,46 @@
+name: Deploy Web Application
+
+on:
+  workflow_run:
+    workflows: ["CI - Lint, Build and Test All Workspaces"]
+    types:
+      - completed
+  push:
+    branches:
+      - main
+      - accept
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'turbo.json'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'accept' && 'accept' || 'dev' }}
+    if: github.ref_name == 'main' || github.ref_name == 'accept'
+    env:
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+    steps:
+      - name: Call Reusable Setup
+        uses: ./.github/workflows/shared-base-install.yml
+        with:
+          node-version: '24'
+
+      - name: Download Application Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: app-dist-artifacts
+          path: .
+
+      - name: Deploy Web App
+        run: |
+          npx vercel deploy --prebuilt --prod --token ${{ secrets.VERCEL_TOKEN }}
