@@ -50,6 +50,8 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with: 
           tofu_version: 1.9.1
+      - name: Add tofu to PATH
+        run: echo "/home/runner/.opentofu/bin" >> $GITHUB_PATH
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
