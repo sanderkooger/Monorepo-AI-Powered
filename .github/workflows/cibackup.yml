@@ -1,0 +1,79 @@
+name: CI - Lint, Build and Test All Workspaces
+
+on:
+  push:
+    branches:
+      - 'none' # Run on all branches
+  pull_request:
+    branches:
+      - 'none' # Run on all branches
+
+jobs:
+  lint-build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'accept' && 'accept' || 'dev' }}
+
+    env:
+      
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      ENV_NAME: ${{vars.ENV_NAME}}
+      TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}   
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      
+    
+      
+      
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm' # Use pnpm for caching
+      - name: Install TFLint
+        uses: terraform-linters/setup-tflint@v4
+      - name: Install openTofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_wrapper: false
+
+      - name: Add tofu to PATH
+        run: echo "/home/runner/.opentofu/bin" >> $GITHUB_PATH
+
+      # - name: Cache OpenTofu modules
+      #   id: cache-tofu-modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: infrastructure/opentofu/.terraform # Path to the .terraform directory
+      #     key: ${{ matrix.os }}-tofu-${{ hashFiles('infrastructure/opentofu/**/*.tf') }} # Cache key based on OS and .tf files
+      #     restore-keys: |
+      #       ${{ matrix.os }}-tofu-
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+         
+
+
+      - name: Run Turborepo Lint
+        run: npx turbo run lint
+ 
+
+      - name: Run Turborepo Build
+        run: npx turbo run build
+        env:
+          TF_VAR_proxmox_node_name: ${{ secrets.TF_VAR_PROXMOX_NODE_NAME }}
+        #   TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+        #   TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+        #   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+        #   VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
