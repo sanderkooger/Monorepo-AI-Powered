@@ -21,10 +21,9 @@ jobs:
       
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
       VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
       ENV_NAME: ${{vars.ENV_NAME}}
-      TF_VAR_vault_addr: ${{ vars.VAULT_ADDR }}
-      TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-      TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+      TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}   
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
     
       
@@ -72,7 +71,8 @@ jobs:
 
       - name: Run Turborepo Build
         run: npx turbo run build
-        env:
-          TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-          TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+        # env:
+        #   TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+        #   TF_VAR_vault_token: ${{ secrets.VAULT_TOKEN }}
+        #   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+        #   VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
