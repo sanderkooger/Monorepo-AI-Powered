@@ -10,7 +10,11 @@ on:
 
 jobs:
   lint-build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
     environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'accept' && 'accept' || 'dev' }}
 
     env:
@@ -38,6 +42,13 @@ jobs:
         with:
           node-version: '24'
           cache: 'pnpm' # Use pnpm for caching
+      - name: Cache plugin dir
+        uses: actions/cache@v4
+        with:
+          path: ~/.tflint.d/plugins
+          key: ${{ matrix.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
+      - name: Install TFLint
+        uses: tflint/tflint-action@v1
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
