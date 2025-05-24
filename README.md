@@ -1,6 +1,8 @@
 # Full-Stack DevOps Monorepo Platform 🚀
 
 <div align="center">
+  [![CI - Lint, Build and Test All Workspaces](https://github.com/sanderkooger/Monorepo-AI-Powered/actions/workflows/ci.yml/badge.svg)](https://github.com/sanderkooger/Monorepo-AI-Powered/actions/workflows/ci.yml)
+  <br><br>
   <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white" alt="Next.js">
   <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black" alt="React">
