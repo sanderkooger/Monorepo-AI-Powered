@@ -11,6 +11,7 @@ on:
 jobs:
   setup:
     uses: ./.github/workflows/shared-base.yml
+    secrets: inherit
     with:
       node-version: '24'
 

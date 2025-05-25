@@ -11,7 +11,7 @@ variable "repo_name" {
 variable "env_name" {
   description = "env name for environment segregation (prod, accept, or dev-<name>)"
   type        = string
-  default     = "prod"
+  default     = "dev"
 }
 
 

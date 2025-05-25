@@ -11,6 +11,9 @@ on:
         required: false
         type: string
         default: '' # Allows callers to add a unique suffix to cache keys
+     
+          
+
     outputs:
       cache-hit:
         description: "Whether the pnpm cache was a hit"
@@ -56,5 +59,7 @@ jobs:
         run: pnpm install --frozen-lockfile
         env:
           TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+          ENV_NAME: ${{ vars.ENV_NAME }}
+          TF_VAR_proxmox_node_name: ${{ secrets.TF_VAR_PROXMOX_NODE_NAME }}
  
       
