@@ -8,6 +8,7 @@
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm python:install",
     "lint": ". ./.venv/bin/activate && ansible-lint",
+    "test": "echo \"tests: to be implemented\" && exit 0",
     "clean": "rimraf .venv node_modules roles/galaxy .ansible .turbo",
     "python:install": "./install.sh",
     "configure": "ansible-playbook -i inventories/dynamic_inventory.py playbooks/site.yml",

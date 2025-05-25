@@ -8,6 +8,7 @@
     "lint:tflint:fix": "tflint --fix --recursive --color --minimum-failure-severity='error'",
     "lint:checkov": "checkov --directory . --config-file .checkov.yaml",
     "build": "tofu init -reconfigure && pnpm plan",
+    "test": "echo \"tests: to be implemented\" && exit 0",
     "clean": "rimraf .terraform node_modules .turbo",
     "plan": "tofu plan",
     "apply": "tofu apply -auto-approve ",

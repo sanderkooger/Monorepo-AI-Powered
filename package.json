@@ -12,6 +12,7 @@
     "lint:infra": "turbo run lint:infra",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
+    "test": "turbo run test",
     "dev-init": "./scripts/setup-dev-env.sh",
     "clean": "turbo run clean && rimraf .turbo node_modules"
   },

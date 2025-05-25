@@ -8,6 +8,7 @@
   "scripts": {
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
+    "test": "echo \"tests: to be implemented\" && exit 0",
     "check-types": "tsc --noEmit",
     "clean": "rimraf node_modules .turbo"
   },

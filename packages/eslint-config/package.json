@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "private": true,
+  "scripts": {
+    "test": "echo \"tests: to be implemented\" && exit 0"
+  },
   "exports": {
     "./base": "./base.js",
     "./next-js": "./next.js",
