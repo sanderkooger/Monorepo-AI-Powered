@@ -29,7 +29,6 @@ jobs:
         uses: pnpm/action-setup@v4
         id: pnpm-setup
         with:
-          version: 8
           run_install: false # We'll run pnpm install explicitly later
 
       - name: Setup Node.js
