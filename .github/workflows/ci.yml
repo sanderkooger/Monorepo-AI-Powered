@@ -30,7 +30,7 @@ jobs:
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
       ENV_NAME: ${{vars.ENV_NAME}}
       TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
-      TF_VAR_proxmox_node_name: ${{ secrets.TF_VAR_PROXMOX_NODE_NAME }}
+      TF_VAR_proxmox_node_name: ${{ vars.TF_VAR_PROXMOX_NODE_NAME }}
 
     steps:
       - uses: actions/checkout@v4
