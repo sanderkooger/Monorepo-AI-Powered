@@ -65,7 +65,9 @@ jobs:
 
       ## Install linters that are not installed by pnpm scripts
       - name: Install actionlint
-        uses: raven-actions/actionlint@v2
+        id: get_actionlint
+        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        shell: bash
 
       - name: Install TFLint
         uses: terraform-linters/setup-tflint@v4
