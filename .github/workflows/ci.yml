@@ -13,8 +13,7 @@ jobs:
     uses: ./.github/workflows/shared-base.yml
     secrets: inherit
     with:
-      node-version: '24'
-
+      node-version: 24
   lint-build-and-test:
     runs-on: ${{ matrix.os }}
     needs: [setup]
@@ -36,14 +35,38 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2 # fetch the parent commit in order to filter
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml # Ensure this points to your monorepo's lockfile
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Get pnpm store path
+        id: pnpm-cache-restore
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache-restore.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }} # Removed suffix as it's not passed from shared-base
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install actionlint
+        uses: raven-actions/actionlint@v2
+
       - name: Install TFLint
         uses: terraform-linters/setup-tflint@v4
       - name: Install OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
           tofu_wrapper: false
-      - name: Add tofu to PATH
-        run: echo "/home/runner/.opentofu/bin" >> $GITHUB_PATH
+
 
       - name: Run Turborepo Lint (Affected)
         run: npx turbo run lint --filter="[HEAD^1...HEAD]"
