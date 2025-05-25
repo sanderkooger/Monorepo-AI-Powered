@@ -15,6 +15,7 @@
     vault_version: "1.15.2" # HashiCorp Vault LTS
     kubectl_version: "1.29.3" # Check latest stable version
     actionlint_version: "latest" # Check latest stable version
+    shellcheck_version: "stable" # Check latest stable version
     # Helm version is usually handled by the install script (latest v3)
     # Determine NVM directory (adjust if user modifies $XDG_CONFIG_HOME)
     nvm_dir: "{{ ansible_env.HOME }}/.nvm"
@@ -285,6 +286,47 @@
         path: /tmp/download-actionlint.bash
         state: absent
       when: actionlint_check.rc != 0 # Only clean up if we downloaded it
+    # --- Shellcheck ---
+    - name: Check if shellcheck is installed
+      ansible.builtin.command: shellcheck --version
+      register: shellcheck_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Download shellcheck binary (Linux)
+      ansible.builtin.get_url:
+        url: "https://github.com/koalaman/shellcheck/releases/download/{{ shellcheck_version }}/shellcheck-{{ shellcheck_version }}.linux.x86_64.tar.xz"
+        dest: "/tmp/shellcheck-{{ shellcheck_version }}.linux.x86_64.tar.xz"
+        mode: '0644'
+      when:
+        - ansible_os_family != "Darwin"
+        - shellcheck_check.rc != 0
+
+    - name: Download shellcheck binary (macOS)
+      ansible.builtin.get_url:
+        url: "https://github.com/koalaman/shellcheck/releases/download/{{ shellcheck_version }}/shellcheck-{{ shellcheck_version }}.darwin.x86_64.tar.xz"
+        dest: "/tmp/shellcheck-{{ shellcheck_version }}.darwin.x86_64.tar.xz"
+        mode: '0644'
+      when:
+        - ansible_os_family == "Darwin"
+        - shellcheck_check.rc != 0
+
+    - name: Unarchive shellcheck binary to /usr/local/bin
+      become: true
+      ansible.builtin.unarchive:
+        src: "/tmp/shellcheck-{{ shellcheck_version }}.{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}.x86_64.tar.xz"
+        dest: "/usr/local/bin/"
+        remote_src: true
+        extra_opts: [--strip-components=1] # To extract directly into /usr/local/bin
+        creates: /usr/local/bin/shellcheck
+      when: shellcheck_check.rc != 0
+
+    - name: Clean up shellcheck tar.xz file
+      ansible.builtin.file:
+        path: "/tmp/shellcheck-{{ shellcheck_version }}.{{ (ansible_os_family == 'Darwin') | ternary('darwin', 'linux') }}.x86_64.tar.xz"
+        state: absent
+      when: shellcheck_check.rc != 0
+
     # ===========================================
     # NVM and Node.js Installation (as user)
     # ===========================================
