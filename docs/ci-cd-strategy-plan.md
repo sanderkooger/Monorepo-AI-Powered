@@ -4,15 +4,15 @@ The goal is to implement a modular CI/CD strategy for the Turborepo monorepo by 
 
 ## Phase 1: Create Reusable Setup Workflow
 
-1.  **Create `reusable-setup.yml`**:
-    *   **Path**: `.github/workflows/reusable-setup.yml`
-    *   **Purpose**: Encapsulate common setup steps for all CI/CD workflows.
-    *   **Content**:
-        *   `actions/checkout@v4`
-        *   `pnpm/action-setup@v4`
-        *   `actions/setup-node@v4` (Node.js 24, pnpm cache)
-        *   `actions/cache@v4` for `pnpm` modules.
-        *   `pnpm install --frozen-lockfile`
+1.  **Create `shared-base.yml`**:
+    *   **Path**: `.github/workflows/shared-base.yml`
+    *   **Purpose**: Reusable workflow for consistent environment setup across pipelines
+    *   **Key Features**:
+        *   Configurable Node.js version (default: 24)
+        *   PNPM caching with automatic store path detection
+        *   Frozen lockfile enforcement
+        *   Composite workflow outputs for cache status
+    *   **Called At**: Job level in dependent workflows
 
 ## Phase 2: Update Core CI Workflow
 
@@ -20,9 +20,9 @@ The goal is to implement a modular CI/CD strategy for the Turborepo monorepo by 
     *   **Path**: `.github/workflows/ci.yml`
     *   **Purpose**: Utilize the reusable setup and focus on linting, building, and testing affected workspaces.
     *   **Changes**:
-        *   Replace existing setup steps with a call to `reusable-setup.yml`.
-        *   Update `lint` and `build` steps to use `npx turbo run <task> --filter="[HEAD^1...HEAD]"`.
-        *   Add a `test` step using `npx turbo run test --filter="[HEAD^1...HEAD]"`.
+        *   Create dedicated `setup` job using `shared-base.yml` workflow
+        *   Add explicit `actions/checkout@v4` in dependent jobs
+        *   Establish job dependencies with `needs: [setup]`
         *   Add steps to install OpenTofu and TFLint, as these are specific to the `build` task (which includes OpenTofu planning).
         *   Add a step to upload application build artifacts.
 

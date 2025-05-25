@@ -9,8 +9,14 @@ on:
       - '**' # Run on all branches
 
 jobs:
+  setup:
+    uses: ./.github/workflows/shared-base.yml
+    with:
+      node-version: '24'
+
   lint-build-and-test:
     runs-on: ${{ matrix.os }}
+    needs: [setup]
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -26,11 +32,7 @@ jobs:
       TF_VAR_proxmox_node_name: ${{ secrets.TF_VAR_PROXMOX_NODE_NAME }}
 
     steps:
-      - name: Call Reusable Setup
-        uses: ./.github/workflows/shared-base.yml
-        with:
-          node-version: '24'
-
+      - uses: actions/checkout@v4
       - name: Install TFLint
         uses: terraform-linters/setup-tflint@v4
       - name: Install OpenTofu
