@@ -66,7 +66,9 @@ jobs:
       ## Install linters that are not installed by pnpm scripts
       - name: Install actionlint
         id: get_actionlint
-        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          echo "$(pwd)" >> $GITHUB_PATH # Add the current directory (where actionlint is installed) to PATH
         shell: bash
 
       - name: Install TFLint
