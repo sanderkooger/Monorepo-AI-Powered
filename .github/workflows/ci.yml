@@ -36,7 +36,7 @@ jobs:
         with:
           fetch-depth: 2 # fetch the parent commit in order to filter
 
-          ## PNPM STUFF 
+      ## PNPM STUFF 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Get pnpm store path
@@ -52,20 +52,25 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }} # Removed suffix as it's not passed from shared-base
           restore-keys: |
             ${{ runner.os }}-pnpm-
-  ## NODE ISNTALL STUFF
+
+
+      ## NODE ISNTALL STUFF
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml # Ensure this points to your monorepo's lockfile
-## Install linters that are not installed by pnpm scripts
 
+
+      ## Install linters that are not installed by pnpm scripts
       - name: Install actionlint
         uses: raven-actions/actionlint@v2
 
       - name: Install TFLint
         uses: terraform-linters/setup-tflint@v4
+
+      ## Install tofu
       - name: Install OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
