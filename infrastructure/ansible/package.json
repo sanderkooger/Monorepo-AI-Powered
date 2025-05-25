@@ -2,6 +2,8 @@
   "name": "@monorepo/ansible",
   "version": "0.1.0",
   "description": "Ansible environment management package",
+  "license": "MIT",
+  "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm python:install",
@@ -11,12 +13,7 @@
     "configure": "ansible-playbook -i inventories/dynamic_inventory.py playbooks/site.yml",
     "deploy-infra-configure": "pnpm run configure"
   },
-  "packageManager": "pnpm@9.0.0",
-  "engines": {
-    "node": ">=24"
-  },
-  "license": "MIT",
-  "private": true,
+  
   "dependencies": {},
   "devDependencies": {
     "rimraf": "^6.0.1"

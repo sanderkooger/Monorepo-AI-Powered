@@ -8,12 +8,13 @@
 
   vars:
     # Define desired versions (adjust as needed)
-    node_version: "lts/*" # Use NVM alias for latest LTS
+    node_version: "24" # Use NVM alias for latest LTS
     nvm_version: "0.39.7" # Check latest NVM version
-    pnpm_version: "10.11.0" # Check latest stable version
+    pnpm_version: "10.11.0" # Check latest stable versio
     opentofu_version: "1.9.1" # Check latest stable version
     vault_version: "1.15.2" # HashiCorp Vault LTS
     kubectl_version: "1.29.3" # Check latest stable version
+    actionlint_version: "latest" # Check latest stable version
     # Helm version is usually handled by the install script (latest v3)
     # Determine NVM directory (adjust if user modifies $XDG_CONFIG_HOME)
     nvm_dir: "{{ ansible_env.HOME }}/.nvm"
@@ -257,6 +258,33 @@
         mode: '0755'
       when: checkov_check.rc != 0
 
+# --- Actionlint ---
+    - name: Check if actionlint is installed
+      ansible.builtin.command: actionlint --version
+      register: actionlint_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Download actionlint install script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash
+        dest: /tmp/download-actionlint.bash
+        mode: '0755'
+      when: actionlint_check.rc != 0
+
+    - name: Install actionlint using script
+      become: true
+      ansible.builtin.command:
+        cmd: bash /tmp/download-actionlint.bash {{ actionlint_version }} /usr/local/bin
+        creates: /usr/local/bin/actionlint # Assumes script installs to /usr/local/bin
+      changed_when: true # Assume changed if script runs
+      when: actionlint_check.rc != 0
+
+    - name: Clean up actionlint install script
+      ansible.builtin.file:
+        path: /tmp/download-actionlint.bash
+        state: absent
+      when: actionlint_check.rc != 0 # Only clean up if we downloaded it
     # ===========================================
     # NVM and Node.js Installation (as user)
     # ===========================================

@@ -54,3 +54,7 @@ jobs:
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          TF_VARbackend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+ 
+      

@@ -1,0 +1,15 @@
+{
+  "name": "gh-workflows",
+  "version": "0.1.0",
+  "description": "GitHub Actions workflows package",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "lint": "actionlint",
+    "clean": "rimraf node_modules"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}
