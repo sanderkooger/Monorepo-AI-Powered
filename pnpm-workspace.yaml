@@ -1,4 +1,6 @@
 packages:
+  
+  - ".github/workflows/*" 
   - "apps/*"
   - "packages/*"
   - "infrastructure/*"
