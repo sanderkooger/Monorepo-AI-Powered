@@ -6,8 +6,7 @@ on:
       - main
       - accept
     paths:
-      - 'infrastructure/opentofu/**'
-      - 'infrastructure/ansible/**'
+      - 'infrastructure/**'
       - 'turbo.json'
   workflow_dispatch:
 
