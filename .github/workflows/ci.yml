@@ -43,7 +43,7 @@ jobs:
         id: pnpm-cache-restore
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm modules
         uses: actions/cache@v4
@@ -68,7 +68,7 @@ jobs:
         id: get_actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          echo "$(pwd)" >> $GITHUB_PATH # Add the current directory (where actionlint is installed) to PATH
+          pwd >> "$GITHUB_PATH" # Add the current directory (where actionlint is installed) to PATH
         shell: bash
 
       - name: Install TFLint
