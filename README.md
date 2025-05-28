@@ -178,17 +178,20 @@ git clone  https://github.com/sanderkooger/Monorepo-AI-Powered.git
 cd devops-monorepo
 pnpm install
 
-# Set up local development environment tools
-# This script ensures required tools are installed via Ansible:
-# - Ansible (installed by script if missing)
-# - NVM (v0.39.7)
-# - Node.js (Latest LTS via NVM)
-# - Packer (v1.10.3)
-# - OpenTofu (v1.7.2)
-# It also enables Corepack to manage pnpm (using version from package.json).
-# Note: The script may prompt for sudo password for installations.
-pnpm dev-init
-
 # Start development servers
 pnpm dev
 ```
+
+### Dependency Management
+
+This monorepo employs a decentralized dependency management strategy. All dependencies, including non-npm ones (e.g., system binaries, Python packages), are managed through the `pnpm install` process.
+
+Each project is responsible for its own dependencies. This is achieved by including a `postinstall` script in the project's `package.json` that executes a project-specific `install.sh` script. This `install.sh` script handles the setup of all necessary tools and environments for that particular project.
+
+**Key Principles:**
+*   **`pnpm install` is King:** Running `pnpm install` at the monorepo root (or within a project) will trigger all necessary setup.
+*   **Project-Specific `install.sh`:** Each project will have an `install.sh` script (hooked via `postinstall` in `package.json`) responsible for its unique dependencies.
+*   **Binary Installation Preference:** When installing binaries, prefer `~/.local/bin` to ensure broad compatibility across Linux distributions.
+*   **Language Agnostic Setup:** `install.sh` scripts will manage language-specific setups (e.g., Python virtual environments, package installations).
+
+This approach deprecates the use of `dev-init` scripts and centralized Ansible playbooks for dependency setup, promoting a more scalable and autonomous project structure.

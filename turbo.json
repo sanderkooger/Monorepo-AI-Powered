@@ -23,15 +23,15 @@
     "test": {
       "dependsOn": ["^build"]
     },
-    "deploy-infra-provision": {
+    "deploy-infra:provision": {
       "outputs": []
     },
-    "deploy-infra-configure": {
+    "deploy-infra:configure": {
       "dependsOn": ["deploy-infra-provision"],
       "outputs": []
     },
-    "infra-deploy": {
-      "dependsOn": ["deploy-infra-provision", "deploy-infra-configure"],
+    "deploy-infra": {
+      "dependsOn": ["deploy-infra:provision", "deploy-infra:configure"],
       "outputs": []
     },
     "deploy-docs": {

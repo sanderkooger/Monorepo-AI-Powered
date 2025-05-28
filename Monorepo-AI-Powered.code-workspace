@@ -1,13 +1,20 @@
 {
     "folders": [
-        {
+        {   "name": "Monorepo AI Powered",
             "path": "."
         },
-        {
-            "path": "infrastructure/ansible"
+        {   "name": "ansible",
+            "path": "infrastructure/ansible",
+            "settings": {
+                "ansible.python.interpreterPath": "/home/sander/code/Monorepo-AI-Powered/infrastructure/ansible/.venv/bin/python"
+            },
+        },
+         {   "name": "opentofu",
+            "path": "infrastructure/opentofu",
         }
     ],
     "settings": {
         "ansible.python.interpreterPath": "/home/sander/code/Monorepo-AI-Powered/infrastructure/ansible/.venv/bin/python"
-    }
+    },
+
 }
