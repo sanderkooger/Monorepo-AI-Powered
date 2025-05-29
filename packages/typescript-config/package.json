@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "echo \"tests: to be implemented\" && exit 0"
+    "test": "echo \"tests: to be implemented\" && exit 0",
+    "postinstall": "echo \"postinstall goes here\" && exit 0"
   },
   "license": "MIT",
   "publishConfig": {

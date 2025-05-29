@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "pnpm python:install",
+    "postinstall": "echo \"postinstall goes here\" && exit 0",
     "lint": ". ./.venv/bin/activate && ansible-lint",
     "test": "echo \"tests: to be implemented\" && exit 0",
     "clean": "rimraf .venv node_modules roles/galaxy .ansible .turbo",
