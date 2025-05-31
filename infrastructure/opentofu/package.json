@@ -12,7 +12,7 @@
     "clean": "rimraf .terraform node_modules .turbo",
     "plan": "tofu plan",
     "apply": "tofu apply -auto-approve ",
-    "deploy-infra-provision": "npm run apply"
+    "deploy-infra-provision": "pnpm run apply"
   },
   "dependencies": {},
   "devDependencies": {
