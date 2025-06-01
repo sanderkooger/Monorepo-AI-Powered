@@ -1,12 +1,4 @@
-import { type Config } from "prettier";
+import defaultConfig from "./default-config";
 
-const config: Config = {
-  endOfLine: "lf",
-  semi: true,
-  singleQuote: true,
-  tabWidth: 2,
-  trailingComma: "es5",
-  printWidth: 100,
-};
-
-export default config;
+export { defaultConfig };
+export default defaultConfig;
