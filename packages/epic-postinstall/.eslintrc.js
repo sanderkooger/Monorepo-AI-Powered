@@ -1,7 +1,8 @@
-import { config } from "../../packages/eslint-config/base.js";
+import { nodejs } from "@repo/eslint-config/";
 
+/** @type {import("eslint").Linter.Config} */
 export default [
-  ...config,
+  ...nodejs,
   {
     files: ["**/*.ts"],
     rules: {},
