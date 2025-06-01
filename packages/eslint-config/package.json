@@ -8,10 +8,7 @@
     "postinstall": "echo \"postinstall goes here\" && exit 0"
   },
   "exports": {
-    "./base": "./base.js",
-    "./next-js": "./next.js",
-    "./react-internal": "./react-internal.js",
-    "./node-js": "./node-js.js"
+    ".": "./index.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
