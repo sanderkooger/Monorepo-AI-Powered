@@ -1,1 +1,1 @@
-module.exports = require('./packages/prettier-config/dist');
+export { defaultConfig } from "./packages/prettier-config/dist";
