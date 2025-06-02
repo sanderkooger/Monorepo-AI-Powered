@@ -1,5 +1,5 @@
 {
-  "extends": "../../packages/typescript-config/base.json",
+  "extends": "../../packages/typescript-config/base-dom.json",
   "include": ["index.ts"],
   "compilerOptions": {
     "outDir": "dist",
