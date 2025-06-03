@@ -6,16 +6,16 @@ export interface SystemInfo {
   packageManagers: string[];
 }
 
-function isCommandAvailable(command: string): boolean {
+const isCommandAvailable = (command: string): boolean => {
   try {
     execSync(`command -v ${command}`, { stdio: 'ignore' });
     return true;
-  } catch (e) {
+  } catch (_e) { // eslint-disable-line @typescript-eslint/no-unused-vars
     return false;
   }
-}
+};
 
-export function getSystemInfo(): SystemInfo {
+export const getSystemInfo = (): SystemInfo => {
   let os: SystemInfo['os'] = 'unknown';
   const arch = process.arch;
   const packageManagers: string[] = [];

@@ -1,10 +1,12 @@
-import { nodeJS } from "@repo/eslint-config/";
+import { nodeJS } from "@repo/eslint-config";
 
 /** @type {import("eslint").Linter.Config} */
 export default [
   ...nodeJS,
   {
     files: ["**/*.ts"],
-    rules: {},
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    },
   },
 ];

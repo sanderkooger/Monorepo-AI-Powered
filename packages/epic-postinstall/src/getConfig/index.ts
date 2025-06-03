@@ -43,7 +43,7 @@ export interface EpicPostinstallConfig {
  *
  * @returns {EpicPostinstallConfig | null} The loaded configuration object, or null if no configuration is found.
  */
-export function getConfig(): EpicPostinstallConfig | null {
+export const getConfig = (): EpicPostinstallConfig | null => {
   const moduleName = 'epicpostinstall';
   const explorerSync = cosmiconfigSync(moduleName, {
     searchPlaces: [

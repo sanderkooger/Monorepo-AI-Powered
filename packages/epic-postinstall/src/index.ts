@@ -3,7 +3,7 @@
 import { getConfig } from './getConfig/index.js';
 import { getSystemInfo } from './getSystemInfo/index.js';
 
-async function run() {
+const run = async () => {
   const args = process.argv.slice(2);
   const isUninstall = args.includes("--uninstall");
 
