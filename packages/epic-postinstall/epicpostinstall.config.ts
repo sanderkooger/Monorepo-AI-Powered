@@ -1,18 +1,13 @@
 import { EpicPostinstallConfig } from './src/getConfig';
 
 const config: EpicPostinstallConfig = {
-  message: "Hello from epic-postinstall configTS!",
+  
   binaries: {
     "shellcheck": {
       "cmd": "shellcheck",
       "version": "0.10.0",
       "githubRepo": "https://github.com/koalaman/shellcheck",
       "homebrewPackageName": "shellcheck"
-    },
-    "shfmt": {
-      "cmd": "shfmt",
-      "githubRepo": "https://github.com/mvdan/sh",
-      "homebrewPackageName": "shfmt"
     }
   },
   python: {

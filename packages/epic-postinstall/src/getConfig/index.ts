@@ -1,4 +1,5 @@
 import { cosmiconfigSync } from 'cosmiconfig';
+import { debug, error } from '../logger/index.js';
 
 /**
  * Represents the structure of the configuration object.
@@ -44,6 +45,7 @@ export interface EpicPostinstallConfig {
  * @returns {EpicPostinstallConfig | null} The loaded configuration object, or null if no configuration is found.
  */
 export const getConfig = (): EpicPostinstallConfig | null => {
+  debug('Initializing cosmiconfig for epic-postinstall...');
   const moduleName = 'epicpostinstall';
   const explorerSync = cosmiconfigSync(moduleName, {
     searchPlaces: [
@@ -56,10 +58,13 @@ export const getConfig = (): EpicPostinstallConfig | null => {
       'package.json'
     ],
   });
+  debug('Searching for configuration file...');
   const result = explorerSync.search();
 
   if (!result || !result.config) {
+    error('No epic-postinstall configuration found. Please create an .epicpostinstallrc file or epicpostinstall.config.ts.');
     throw new Error('No epic-postinstall configuration found. Please create an .epicpostinstallrc file or epicpostinstall.config.ts.');
   }
+  debug(`Configuration found at: ${result.filepath}`);
   return result.config as EpicPostinstallConfig;
 }

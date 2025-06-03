@@ -2,28 +2,39 @@
 
 import { getConfig } from './getConfig/index.js';
 import { getSystemInfo } from './getSystemInfo/index.js';
+import { LogLevel, setLogLevel, error, info } from './logger/index.js';
 
 const run = async () => {
   const args = process.argv.slice(2);
   const isUninstall = args.includes("--uninstall");
+  const isVerbose = args.includes("--verbose");
+  const isDebug = args.includes("--debug");
+
+  if (isDebug) {
+    setLogLevel(LogLevel.DEBUG);
+  } else if (isVerbose) {
+    setLogLevel(LogLevel.INFO);
+  } else {
+    setLogLevel(LogLevel.ERROR); // Default to only showing errors if no flags are set
+  }
 
   try {
-    console.log('Loading epic-postinstall configuration...');
+    info('Loading epic-postinstall configuration...');
     const config = getConfig();
 
-    console.log('\nDetecting system information...');
+    info('\nDetecting system information...');
     const systemInfo = getSystemInfo();
-    console.log('System Information:');
-    console.log(JSON.stringify(systemInfo, null, 2));
+    info('System Information:');
+    info(JSON.stringify(systemInfo, null, 2));
 
     if (isUninstall) {
-      console.log("Uninstalling epic-postinstall...");
+      info("Uninstalling epic-postinstall...");
     } else {
-      console.log('\nConfiguration loaded successfully:');
-      console.log(JSON.stringify(config, null, 2));
+      info('\nConfiguration loaded successfully:');
+      info(JSON.stringify(config, null, 2));
     }
-  } catch (error) {
-    console.error(`Error: ${(error as Error).message}`);
+  } catch (err) {
+    error(`Error: ${(err as Error).message}`);
     process.exit(1);
   }
 }
