@@ -1,4 +1,4 @@
-import { defaultConfig } from "./packages/prettier-config/dist/index.js";
+import{ defaultConfig } from "@repo/prettier-config";
 
 export default {
   ...defaultConfig,

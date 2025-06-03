@@ -1,8 +1,8 @@
-import js from "@eslint/js";
-import eslintConfigPrettier from "eslint-config-prettier";
-import tseslint from "typescript-eslint";
-import globals from "globals";
-import { config as baseConfig } from "./base.js";
+import js from '@eslint/js'
+import eslintConfigPrettier from 'eslint-config-prettier'
+import tseslint from 'typescript-eslint'
+import globals from 'globals'
+import { config as baseConfig } from './base.js'
 
 /**
  * A custom ESLint configuration for Node.js packages.
@@ -16,8 +16,13 @@ export const nodeJsConfig = [
   {
     languageOptions: {
       globals: {
-        ...globals.node,
-      },
-    },
+        ...globals.node
+      }
+    }
   },
-];
+  {
+    rules: {
+
+    }
+  }
+]
