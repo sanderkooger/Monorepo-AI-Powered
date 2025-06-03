@@ -6,7 +6,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test": "echo \"tests: to be implemented\" && exit 0",
-    "postinstall": "echo \"postinstall goes here\" && exit 0"
+    "postinstall": "echo \"postinstall goes here\" && exit 0",
+    "clean": "rimraf dist node_modules .turbo"
   },
   "exports": {
     ".": "./index.js"
@@ -21,6 +22,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-turbo": "^2.5.4",
     "globals": "^16.2.0",
+    "rimraf": "^6.0.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.0"
   }

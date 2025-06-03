@@ -14,7 +14,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "clean": "rimraf dist node_modules",
+    "clean": "rimraf dist node_modules .turbo",
     "postinstall": "echo \"postinstall goes here\" && exit 0",
     "build": "tsc ",
     "watch": "tsc --watch",
