@@ -2,9 +2,7 @@
   "name": "@repo/typescript-config",
   "version": "0.0.0",
   "private": true,
-  "scripts": {
-    
-    
+  "scripts": { 
   },
   "license": "MIT",
   "publishConfig": {
