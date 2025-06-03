@@ -6,63 +6,89 @@
  * - DEBUG: Detailed debug messages, info, warnings, and errors are logged.
  */
 export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
+  DEBUG = 0, // All messages (debug, verbose, info, warn, error)
+  VERBOSE = 1, // Verbose, info, warn, error
+  INFO = 2, // Info, warn, error (default)
+  WARN = 3, // Warn, error
+  ERROR = 4, // Only errors
+  NONE = 5, // No logs
 }
 
 let currentLogLevel: LogLevel = LogLevel.INFO;
 
-/**
- * Sets the global logging level. Messages with a level lower than the set level will not be displayed.
- * @param level The desired LogLevel.
- * @example
- * setLogLevel(LogLevel.DEBUG); // Enable all logs
- * setLogLevel(LogLevel.ERROR); // Only show errors
- */
-export const setLogLevel = (level: LogLevel) => {
-  currentLogLevel = level;
+export interface Logger {
+  debug: (...args: unknown[]) => void;
+  verbose: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+  setLogLevel: (level: LogLevel) => void;
+}
+
+const logger: Logger = {
+  /**
+   * Sets the global logging level. Messages with a level higher than the set level will not be displayed.
+   * @param level The desired LogLevel.
+   * @example
+   * logger.setLogLevel(LogLevel.DEBUG); // Enable all logs
+   * logger.setLogLevel(LogLevel.ERROR); // Only show errors
+   */
+  setLogLevel: (level: LogLevel) => {
+    currentLogLevel = level;
+  },
+
+  /**
+   * Logs a debug message to the console. Displayed only if log level is DEBUG.
+   * Use for detailed internal process information.
+   * @param args The messages or objects to log.
+   * @example
+   * logger.debug('Processing user input:', userInput);
+   */
+  debug: (...args: unknown[]) => {
+    if (currentLogLevel <= LogLevel.DEBUG) console.debug('[DEBUG]', ...args);
+  },
+
+  /**
+   * Logs a verbose message to the console. Displayed if log level is VERBOSE or DEBUG.
+   * Use for more detailed information than INFO, but less than DEBUG.
+   * @param args The messages or objects to log.
+   * @example
+   * logger.verbose('Starting module initialization.');
+   */
+  verbose: (...args: unknown[]) => {
+    if (currentLogLevel <= LogLevel.VERBOSE) console.log('[VERBOSE]', ...args);
+  },
+
+  /**
+   * Logs an informational message to the console. Displayed if log level is INFO, WARN, ERROR, VERBOSE, or DEBUG.
+   * This is the default logging level.
+   * @param args The messages or objects to log.
+   * @example
+   * logger.info('Application started successfully.');
+   */
+  info: (...args: unknown[]) => {
+    if (currentLogLevel <= LogLevel.INFO) console.info('[INFO]', ...args);
+  },
+
+  /**
+   * Logs a warning message to the console. Displayed if log level is WARN, ERROR, VERBOSE, or DEBUG.
+   * @param args The messages or objects to log.
+   * @example
+   * logger.warn('This operation might have unintended side effects.');
+   */
+  warn: (...args: unknown[]) => {
+    if (currentLogLevel <= LogLevel.WARN) console.warn('[WARN]', ...args);
+  },
+
+  /**
+   * Logs an error message to the console. These messages are always displayed if log level is ERROR, WARN, INFO, VERBOSE, or DEBUG.
+   * @param args The messages or objects to log.
+   * @example
+   * logger.error('Something critical happened!');
+   */
+  error: (...args: unknown[]) => {
+    if (currentLogLevel <= LogLevel.ERROR) console.error('[ERROR]', ...args);
+  },
 };
 
-/**
- * Logs a debug message to the console. Displayed only if log level is DEBUG.
- * Use for detailed internal process information.
- * @param args The messages or objects to log.
- * @example
- * debug('Processing user input:', userInput);
- */
-export const debug = (...args: unknown[]) => {
-  if (currentLogLevel <= LogLevel.DEBUG) console.debug('[DEBUG]', ...args);
-};
-
-/**
- * Logs an informational message to the console. Displayed if log level is INFO, WARN, or ERROR.
- * This is the default logging level.
- * @param args The messages or objects to log.
- * @example
- * info('Application started successfully.');
- */
-export const info = (...args: unknown[]) => {
-  if (currentLogLevel <= LogLevel.INFO) console.info('[INFO]', ...args);
-};
-
-/**
- * Logs a warning message to the console. Displayed if log level is WARN or ERROR.
- * @param args The messages or objects to log.
- * @example
- * warn('This operation might have unintended side effects.');
- */
-export const warn = (...args: unknown[]) => {
-  if (currentLogLevel <= LogLevel.WARN) console.warn('[WARN]', ...args);
-};
-
-/**
- * Logs an error message to the console. These messages are always displayed.
- * @param args The messages or objects to log.
- * @example
- * error('Something critical happened!');
- */
-export const error = (...args: unknown[]) => {
-  if (currentLogLevel <= LogLevel.ERROR) console.error('[ERROR]', ...args);
-};
+export default logger;
