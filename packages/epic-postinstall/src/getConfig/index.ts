@@ -43,7 +43,7 @@ export interface EpicPostinstallConfig {
  *
  * @returns {EpicPostinstallConfig | null} The loaded configuration object, or null if no configuration is found.
  */
-export function loadConfig(): EpicPostinstallConfig | null {
+export function getConfig(): EpicPostinstallConfig | null {
   const moduleName = 'epicpostinstall';
   const explorerSync = cosmiconfigSync(moduleName, {
     searchPlaces: [
@@ -58,8 +58,8 @@ export function loadConfig(): EpicPostinstallConfig | null {
   });
   const result = explorerSync.search();
 
-  if (result && result.config) {
-    return result.config as EpicPostinstallConfig;
+  if (!result || !result.config) {
+    throw new Error('No epic-postinstall configuration found. Please create an .epicpostinstallrc file or epicpostinstall.config.ts.');
   }
-  return null;
+  return result.config as EpicPostinstallConfig;
 }

@@ -1,23 +1,30 @@
 #!/usr/bin/env node
 
-import { loadConfig } from './config-loader/index.js';
+import { getConfig } from './getConfig/index.js';
+import { getSystemInfo } from './getSystemInfo/index.js';
 
 async function run() {
   const args = process.argv.slice(2);
   const isUninstall = args.includes("--uninstall");
 
-  console.log('Loading epic-postinstall configuration...');
-  const config = loadConfig();
+  try {
+    console.log('Loading epic-postinstall configuration...');
+    const config = getConfig();
 
-  if (isUninstall) {
-    console.log("Uninstalling epic-postinstall...");
-  } else {
-    if (config) {
-      console.log('Configuration loaded successfully:');
-      console.log(JSON.stringify(config, null, 2));
+    console.log('\nDetecting system information...');
+    const systemInfo = getSystemInfo();
+    console.log('System Information:');
+    console.log(JSON.stringify(systemInfo, null, 2));
+
+    if (isUninstall) {
+      console.log("Uninstalling epic-postinstall...");
     } else {
-      console.log('No epic-postinstall configuration found.');
+      console.log('\nConfiguration loaded successfully:');
+      console.log(JSON.stringify(config, null, 2));
     }
+  } catch (error) {
+    console.error(`Error: ${(error as Error).message}`);
+    process.exit(1);
   }
 }
 
