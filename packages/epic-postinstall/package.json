@@ -3,36 +3,27 @@
   "version": "0.0.1",
   "description": "A utility package for post-installation and cleanup scripts.",
   "type": "module",
-  "main": "./dist/cjs/index.cjs",
-  "types": "./dist/esm/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.mjs"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.cts",
-        "default": "./dist/cjs/index.cjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     }
   },
   "scripts": {
     "clean": "rimraf dist node_modules",
     "postinstall": "echo \"postinstall goes here\" && exit 0",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build": "pnpm run build:esm && pnpm run build:cjs",
-    "watch:esm": "tsc -p tsconfig.esm.json --watch",
-    "watch:cjs": "tsc -p tsconfig.cjs.json --watch",
-    "watch": "pnpm run watch:esm & pnpm run watch:cjs",
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
     "lint": "eslint . --ext .ts",
-    "start": "node dist/esm/index.mjs",
-    "run": "node dist/esm/index.mjs",
-    "uninstall": "node dist/esm/index.mjs --uninstall"
+    "start": "node dist/index.js",
+    "run": "node dist/index.js",
+    "uninstall": "node dist/index.js --uninstall"
   },
   "bin": {
-    "epic-postinstall": "./dist/esm/index.mjs"
+    "epic-postinstall": "./dist/index.js"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

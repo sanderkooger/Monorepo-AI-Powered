@@ -1,11 +1,10 @@
 {
-  "extends": "@repo/typescript-config/base.json",
+  "extends": "@repo/typescript-config/node-esm.json",
   "compilerOptions": {
     "rootDir": "src",
-    "noEmit": true,
-    
-    "declarationMap": false,
-    "declaration": false,
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
