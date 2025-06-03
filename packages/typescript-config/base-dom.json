@@ -4,11 +4,8 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-
-    "isolatedModules": true,
     "lib": ["DOM", "DOM.Iterable"],
     "moduleDetection": "force",
-    "noUncheckedIndexedAccess": true,
-    "resolveJsonModule": true
+    "noUncheckedIndexedAccess": true
   }
 }

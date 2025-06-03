@@ -7,6 +7,9 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "incremental": true,
-    "lib": ["es2022"]
+    "isolatedModules": true,
+    "lib": ["ES2022"],
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true
   }
 }

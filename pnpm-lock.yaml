@@ -222,6 +222,12 @@ importers:
 
   packages/prettier-config:
     devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.15.29
+        version: 22.15.29
       prettier:
         specifier: ^3.5.3
         version: 3.5.3

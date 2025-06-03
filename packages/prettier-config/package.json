@@ -14,6 +14,8 @@
     "postinstall": "pnpm build"
   },
   "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.29",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3"
   }

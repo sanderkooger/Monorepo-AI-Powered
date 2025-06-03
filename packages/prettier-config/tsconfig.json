@@ -1,12 +1,10 @@
 {
-  "extends": "../../packages/typescript-config/base-dom.json",
-  "include": ["index.ts"],
+  "extends": "@repo/typescript-config/node-esm.json",
+  
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": ".",
-    "declaration": true,
-    "declarationMap": true,
-    "module": "nodenext",
-    "moduleResolution": "NodeNext"
-  }
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
