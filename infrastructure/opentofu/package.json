@@ -1,6 +1,7 @@
 {
   "name": "opentofu",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "postinstall": "echo \"postinstall goes here\" && exit 0",
     "lint": "pnpm npm-run-all lint:tflint lint:validate",
     "lint:validate":"tofu validate",

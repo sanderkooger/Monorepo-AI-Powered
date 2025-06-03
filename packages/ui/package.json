@@ -6,6 +6,7 @@
     "./*": "./src/*.tsx"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "lint": "eslint . --max-warnings 0",
     "postinstall": "echo \"postinstall goes here\" && exit 0",
     "generate:component": "turbo gen react-component",

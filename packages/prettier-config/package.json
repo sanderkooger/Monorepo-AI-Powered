@@ -9,6 +9,7 @@
     "dist"
   ],
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "tsc",
     "postinstall": "pnpm build"
   },

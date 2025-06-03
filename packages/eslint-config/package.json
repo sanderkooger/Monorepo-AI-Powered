@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "test": "echo \"tests: to be implemented\" && exit 0",
     "postinstall": "echo \"postinstall goes here\" && exit 0"
   },

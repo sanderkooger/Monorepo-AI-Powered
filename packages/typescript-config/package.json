@@ -2,7 +2,8 @@
   "name": "@repo/typescript-config",
   "version": "0.0.0",
   "private": true,
-  "scripts": { 
+  "scripts": {
+    "preinstall": "npx only-allow pnpm"
   },
   "license": "MIT",
   "publishConfig": {

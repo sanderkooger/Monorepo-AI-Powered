@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "next dev --turbopack --port 3001",
     "postinstall": "echo \"postinstall goes here\" && exit 0",
     "build": "next build",

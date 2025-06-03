@@ -13,6 +13,7 @@
     }
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist node_modules",
     "postinstall": "echo \"postinstall goes here\" && exit 0",
     "build": "tsc ",
