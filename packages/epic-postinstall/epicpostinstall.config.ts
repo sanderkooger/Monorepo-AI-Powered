@@ -1,4 +1,4 @@
-import { EpicPostinstallConfig } from './src/config-loader';
+import { EpicPostinstallConfig } from './src/getConfig';
 
 const config: EpicPostinstallConfig = {
   message: "Hello from epic-postinstall configTS!",

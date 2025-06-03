@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A utility package for post-installation and cleanup scripts.",
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
       "import": {
@@ -15,16 +15,14 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist node_modules .turbo",
-    "postinstall": "echo \"postinstall goes here\" && exit 0",
-    "build": "tsc ",
+    "build": "tsc",
     "watch": "tsc --watch",
-    "start": "node dist/index.js",
-    "run": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "uninstall": "node dist/index.js --uninstall",
     "lint": "eslint . --ext .ts --max-warnings 0"
   },
   "bin": {
-    "epic-postinstall": "./dist/index.js"
+    "epic-postinstall": "./dist/src/index.js"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
