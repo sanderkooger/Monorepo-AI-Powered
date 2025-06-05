@@ -1,40 +1,45 @@
-import { cosmiconfigSync } from 'cosmiconfig';
-import logger from '../logger/index.js';
+import { cosmiconfigSync } from 'cosmiconfig'
+import logger from '../logger/index.js'
 
 /**
  * Represents the structure of the configuration object.
  */
 export interface EpicPostinstallConfig {
-  message?: string;
+  message?: string
   binaries?: {
     [name: string]: {
-      cmd: string;
-      version?: string;
-      githubRepo?: string;
-      homebrewPackageName?: string;
-    };
-  };
+      cmd: string
+      version: string
+      githubRepo: string
+      homebrew?: HomebrewPackage
+    }
+  }
   python?: {
-    version?: string;
+    version?: string
     virtualEnv?: {
-      name: string;
-      path?: string;
-      requirementsFile?: string;
-      packages?: string[];
-    };
+      name: string
+      path?: string
+      requirementsFile?: string
+      packages?: string[]
+    }
     scripts?: {
-      name: string;
-      path: string;
-      args?: string[];
-    }[];
-  };
+      name: string
+      path: string
+      args?: string[]
+    }[]
+  }
   scripts?: {
-    name: string;
-    path: string;
-    args?: string[];
-    runOn?: ('preinstall' | 'postinstall' | 'always')[];
-    platforms?: ('linux' | 'windows' | 'macos')[];
-  }[];
+    name: string
+    path: string
+    args?: string[]
+    runOn?: ('preinstall' | 'postinstall' | 'always')[]
+    platforms?: ('linux' | 'windows' | 'macos')[]
+  }[]
+}
+
+interface HomebrewPackage {
+  name: string
+  tap?: string
 }
 
 /**
@@ -45,8 +50,8 @@ export interface EpicPostinstallConfig {
  * @returns {EpicPostinstallConfig | null} The loaded configuration object, or null if no configuration is found.
  */
 export const getConfig = (): EpicPostinstallConfig | null => {
-  logger.debug('Initializing cosmiconfig for epic-postinstall...');
-  const moduleName = 'epicpostinstall';
+  logger.debug('Initializing cosmiconfig for epic-postinstall...')
+  const moduleName = 'epicpostinstall'
   const explorerSync = cosmiconfigSync(moduleName, {
     searchPlaces: [
       'epicpostinstall.config.ts',
@@ -56,15 +61,19 @@ export const getConfig = (): EpicPostinstallConfig | null => {
       '.epicpostinstallrc.json',
       '.epicpostinstallrc',
       'package.json'
-    ],
-  });
-  logger.debug('Searching for configuration file...');
-  const result = explorerSync.search();
+    ]
+  })
+  logger.debug('Searching for configuration file...')
+  const result = explorerSync.search()
 
   if (!result || !result.config) {
-    logger.error('No epic-postinstall configuration found. Please create an .epicpostinstallrc file or epicpostinstall.config.ts.');
-    throw new Error('No epic-postinstall configuration found. Please create an .epicpostinstallrc file or epicpostinstall.config.ts.');
+    logger.error(
+      'No epic-postinstall configuration found. Please create an .epicpostinstallrc file or epicpostinstall.config.ts.'
+    )
+    throw new Error(
+      'No epic-postinstall configuration found. Please create an .epicpostinstallrc file or epicpostinstall.config.ts.'
+    )
   }
-  logger.debug(`Configuration found at: ${result.filepath}`);
-  return result.config as EpicPostinstallConfig;
+  logger.debug(`Configuration found at: ${result.filepath}`)
+  return result.config as EpicPostinstallConfig
 }
