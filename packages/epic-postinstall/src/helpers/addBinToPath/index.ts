@@ -45,8 +45,8 @@ const addBinToPath = async (targetPath: string, systemInfo: SystemInfo): Promise
       let content = '';
       try {
         content = await fs.readFile(configFile, 'utf8');
-      } catch (readError: any) {
-        if (readError.code === 'ENOENT') {
+      } catch (readError: unknown) {
+        if (readError && typeof readError === 'object' && 'code' in readError && (readError as NodeJS.ErrnoException).code === 'ENOENT') {
           logger.debug(`Config file '${configFile}' not found, will create.`);
         } else {
           throw readError;
