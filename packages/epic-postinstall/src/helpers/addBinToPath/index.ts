@@ -1,7 +1,7 @@
 import { homedir } from 'os';
-import getSystemInfo from '@helpers/getSystemInfo/index.js';
 import logger from '@src/logger/index.js';
 import { promises as fs } from 'fs';
+import { SystemInfo } from '@helpers/getSystemInfo/index.js';
 
 /**
  * Ensures that a given directory is part of the system's PATH environment variable.
@@ -9,9 +9,8 @@ import { promises as fs } from 'fs';
  * @param targetPath The directory to ensure is in the PATH.
  * @returns True if the path is already present or was successfully added, false otherwise.
  */
-const addBinToPath = async (targetPath: string): Promise<boolean> => {
+const addBinToPath = async (targetPath: string, systemInfo: SystemInfo): Promise<boolean> => {
   logger.info(`Checking if '${targetPath}' is in the system PATH...`);
-  const systemInfo = getSystemInfo();
   const currentPath = process.env.PATH || '';
   const homeDir = homedir();
   const resolvedTargetPath = targetPath.replace(/^~/, homeDir);

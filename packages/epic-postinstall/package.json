@@ -16,7 +16,7 @@
     "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist node_modules .turbo",
     "build": "tsc && tsc-alias",
-    "watch": "tsc --watch",
+    "watch": "concurrently \"tsc --watch\" \"wait-on dist/src/index.js && tsc-alias\"",
     "start": "node dist/src/index.js",
     "uninstall": "node dist/src/index.js --uninstall",
     "lint": "eslint . --ext .ts --max-warnings 0"
@@ -31,12 +31,14 @@
     "@types/node": "^22.15.30",
     "@typescript-eslint/eslint-plugin": "^8.33.1",
     "@typescript-eslint/parser": "^8.33.1",
+    "concurrently": "^9.1.2",
     "cosmiconfig": "^9.0.0",
     "eslint": "^9.28.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.8.3",
-    "tsc-alias": "^1.8.10"
+    "wait-on": "^8.0.3"
   }
 }
