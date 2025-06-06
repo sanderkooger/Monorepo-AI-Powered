@@ -23,8 +23,8 @@ const runInstaller = async (args: InstallerArgs) => {
   }
     // get releases for repo 
   const releases = await getReleases(args.githubUrl, githubToken);
-  logger.info('Releases fetched successfully:');
-  logger.info(JSON.stringify(releases, null, 2));
+  
+  
 }
 
 export default runInstaller

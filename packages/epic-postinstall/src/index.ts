@@ -45,19 +45,19 @@ const run = async () => {
       process.exit(1)
     }
 
-    // Temporarily implement installer for the first binary only
     if (config?.binaries) {
       const binaryNames = Object.keys(config.binaries)
       if (binaryNames.length > 0) {
-        const firstBinaryName = binaryNames[0]
-        const firstBinary = config.binaries[firstBinaryName]
-        logger.info(`Attempting to install: ${firstBinaryName}`)
-        await runInstaller({
-          systemInfo,
-          version: firstBinary.version,
-          githubUrl: firstBinary.githubRepo,
-          targetBinPath
-        })
+        for (const binaryName of binaryNames) {
+          const binary = config.binaries[binaryName]
+          logger.info(`Attempting to install: ${binaryName}`)
+          await runInstaller({
+            systemInfo,
+            version: binary.version,
+            githubUrl: binary.githubRepo,
+            targetBinPath
+          })
+        }
       } else {
         logger.warn('No binaries found in configuration to install.')
       }
