@@ -15,7 +15,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist node_modules .turbo",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "watch": "tsc --watch",
     "start": "node dist/src/index.js",
     "uninstall": "node dist/src/index.js --uninstall",
@@ -36,6 +36,7 @@
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "tsc-alias": "^1.8.10"
   }
 }
