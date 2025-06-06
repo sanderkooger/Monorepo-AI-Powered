@@ -1,4 +1,4 @@
-import { EpicPostinstallConfig } from './src/getConfig';
+import { EpicPostinstallConfig } from './src/helpers/getConfig';
 
 const config: EpicPostinstallConfig = {
   

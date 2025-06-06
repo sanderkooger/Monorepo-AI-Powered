@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import getConfig from '@helpers/getConfig/index.js'
-import getSystemInfo from '@helpers/getSystemInfo/index.js';
-import logger, { LogLevel } from '@src/logger/index.js';
-import addBinToPath from '@helpers/addBinToPath/index.js';
-import { runInstaller } from '@src/installer/index.js';
+import getSystemInfo from '@helpers/getSystemInfo/index.js'
+import logger, { LogLevel } from '@src/logger/index.js'
+import addBinToPath from '@helpers/addBinToPath/index.js'
+import runInstaller from '@src/installer/index.js'
 
 const run = async () => {
   const args = process.argv.slice(2)
@@ -21,7 +21,6 @@ const run = async () => {
   }
 
   try {
-    
     const config = getConfig()
 
     logger.info(config?.message)
@@ -31,7 +30,6 @@ const run = async () => {
 
     // Ensure ~/.local/bin is in PATH for Linux/macOS
     if (systemInfo.os === 'linux' || systemInfo.os === 'macos') {
-    
       const pathEnsured = await addBinToPath(targetBinPath, systemInfo)
       if (!pathEnsured) {
         logger.error(
@@ -49,28 +47,28 @@ const run = async () => {
 
     // Temporarily implement installer for the first binary only
     if (config?.binaries) {
-      const binaryNames = Object.keys(config.binaries);
+      const binaryNames = Object.keys(config.binaries)
       if (binaryNames.length > 0) {
-        const firstBinaryName = binaryNames[0];
-        const firstBinary = config.binaries[firstBinaryName];
-        logger.info(`Attempting to install: ${firstBinaryName}`);
+        const firstBinaryName = binaryNames[0]
+        const firstBinary = config.binaries[firstBinaryName]
+        logger.info(`Attempting to install: ${firstBinaryName}`)
         await runInstaller({
           systemInfo,
           version: firstBinary.version,
-          githubUrl: firstBinary.githubRepo,
-        });
+          githubUrl: firstBinary.githubRepo
+        })
       } else {
-        logger.warn('No binaries found in configuration to install.');
+        logger.warn('No binaries found in configuration to install.')
       }
     } else {
-      logger.warn('No binaries section found in configuration.');
+      logger.warn('No binaries section found in configuration.')
     }
- 
-     if (isUninstall) {
-       logger.info('Uninstalling epic-postinstall...')
-       logger.info('to be implemented...')
-       // to be implemented
-     }
+
+    if (isUninstall) {
+      logger.info('Uninstalling epic-postinstall...')
+      logger.info('to be implemented...')
+      // to be implemented
+    }
   } catch (err) {
     logger.error(`Error: ${(err as Error).message}`)
     process.exit(1)
