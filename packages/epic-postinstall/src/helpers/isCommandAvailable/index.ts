@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import logger from '../logger/index.js';
+import logger from '../../logger/index.js';
 
 /**
  * Checks if a command is available and optionally returns its version.
@@ -7,7 +7,7 @@ import logger from '../logger/index.js';
  * @param command The command to check.
  * @returns An object indicating availability and the version string if found, otherwise null.
  */
-export const isCommandAvailable = (command: string): { available: boolean; version: string | null } => {
+const isCommandAvailable = (command: string): { available: boolean; version: string | null } => {
   logger.debug(`Checking if command '${command}' is available...`);
   try {
     execSync(`command -v ${command}`, { stdio: 'ignore' });
@@ -35,3 +35,5 @@ export const isCommandAvailable = (command: string): { available: boolean; versi
     return { available: false, version: null };
   }
 };
+
+export default isCommandAvailable;

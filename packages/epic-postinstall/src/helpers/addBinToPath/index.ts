@@ -1,6 +1,6 @@
 import { homedir } from 'os';
-import { getSystemInfo } from '../getSystemInfo/index.js';
-import logger from '../logger/index.js';
+import getSystemInfo from '@helpers/getSystemInfo/index.js';
+import logger from '@src/logger/index.js';
 import { promises as fs } from 'fs';
 
 /**
@@ -9,7 +9,7 @@ import { promises as fs } from 'fs';
  * @param targetPath The directory to ensure is in the PATH.
  * @returns True if the path is already present or was successfully added, false otherwise.
  */
-export const addBinToPath = async (targetPath: string): Promise<boolean> => {
+const addBinToPath = async (targetPath: string): Promise<boolean> => {
   logger.info(`Checking if '${targetPath}' is in the system PATH...`);
   const systemInfo = getSystemInfo();
   const currentPath = process.env.PATH || '';
@@ -73,3 +73,4 @@ export const addBinToPath = async (targetPath: string): Promise<boolean> => {
     return false;
   }
 };
+export default addBinToPath

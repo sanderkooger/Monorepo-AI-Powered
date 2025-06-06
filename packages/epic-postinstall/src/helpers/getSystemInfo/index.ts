@@ -1,5 +1,5 @@
-import logger from '../logger/index.js';
-import { isCommandAvailable } from '../helpers/commandExists.js';
+import logger from '@src/logger/index.js';
+import isCommandAvailable from '@src/helpers/isCommandAvailable/index.js';
 
 export interface SystemInfo {
   os: 'linux' | 'macos' | 'windows' | 'unknown';
@@ -7,7 +7,7 @@ export interface SystemInfo {
   packageManagers: { name: string; version: string | null }[];
 }
 
-export const getSystemInfo = (): SystemInfo => {
+const getSystemInfo = (): SystemInfo => {
   logger.debug('Starting system information detection...');
   let os: SystemInfo['os'] = 'unknown';
   const arch = process.arch;
@@ -75,3 +75,4 @@ export const getSystemInfo = (): SystemInfo => {
     packageManagers,
   };
 }
+export default getSystemInfo;

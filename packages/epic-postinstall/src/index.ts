@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { getConfig } from './getConfig/index.js'
-import { getSystemInfo } from './getSystemInfo/index.js';
-import logger, { LogLevel } from './logger/index.js';
-import { addBinToPath } from './helpers/addBinToPath.js';
+import { getConfig } from '@src/getConfig/index.js'
+import getSystemInfo from '@helpers/getSystemInfo/index.js';
+import logger, { LogLevel } from '@src/logger/index.js';
+import addBinToPath from '@helpers/addBinToPath/index.js';
 
 const run = async () => {
   const args = process.argv.slice(2)

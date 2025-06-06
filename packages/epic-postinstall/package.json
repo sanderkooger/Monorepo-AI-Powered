@@ -3,26 +3,26 @@
   "version": "0.0.1",
   "description": "A utility package for post-installation and cleanup scripts.",
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.mjs"
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.mjs"
       }
     }
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist node_modules .turbo",
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.mjs --minify --sourcemap --external:cosmiconfig && esbuild epicpostinstall.config.ts --platform=node --format=esm --outfile=dist/epicpostinstall.config.mjs --minify --sourcemap",
-    "watch": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap --watch --external:cosmiconfig",
-    "start": "node dist/index.mjs",
-    "uninstall": "node dist/index.mjs --uninstall",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/src/index.js",
+    "uninstall": "node dist/src/index.js --uninstall",
     "lint": "eslint . --ext .ts --max-warnings 0"
   },
   "bin": {
-    "epic-postinstall": "./dist/index.mjs"
+    "epic-postinstall": "./dist/src/index.js"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -32,7 +32,6 @@
     "@typescript-eslint/eslint-plugin": "^8.33.1",
     "@typescript-eslint/parser": "^8.33.1",
     "cosmiconfig": "^9.0.0",
-    "esbuild": "^0.25.5",
     "eslint": "^9.28.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",

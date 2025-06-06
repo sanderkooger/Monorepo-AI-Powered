@@ -1,11 +1,14 @@
 {
-  "extends": "@repo/typescript-config/node-esm-esbuild.json",
+  "extends": "@repo/typescript-config/node-esm.json",
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./dist",
-    "emitDeclarationOnly": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@helpers/*": ["./src/helpers/*"]
+    }
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"]
