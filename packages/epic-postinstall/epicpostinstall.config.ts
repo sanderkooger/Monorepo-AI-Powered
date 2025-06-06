@@ -57,13 +57,13 @@ const config: EpicPostinstallConfig = {
     {
       "name": "setup_project",
       "path": "./scripts/setup.sh",
-      "runOn": ["postinstall"],
-      "platforms": ["linux", "macos"]
+      
+  
     },
     {
       "name": "cleanup_cache",
       "path": "./scripts/cleanup.sh",
-      "runOn": ["always"]
+     
     }
   ]
 };

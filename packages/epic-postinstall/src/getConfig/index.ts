@@ -16,7 +16,7 @@ export interface EpicPostinstallConfig {
   }
   python?: {
     version?: string
-    virtualEnv?: {
+    virtualEnv: {
       name: string
       path?: string
       requirementsFile?: string
@@ -32,8 +32,7 @@ export interface EpicPostinstallConfig {
     name: string
     path: string
     args?: string[]
-    runOn?: ('preinstall' | 'postinstall' | 'always')[]
-    platforms?: ('linux' | 'windows' | 'macos')[]
+    
   }[]
 }
 
