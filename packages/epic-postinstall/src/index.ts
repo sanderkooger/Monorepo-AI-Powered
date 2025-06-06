@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { getConfig } from '@src/getConfig/index.js'
+import getConfig from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js';
 import logger, { LogLevel } from '@src/logger/index.js';
 import addBinToPath from '@helpers/addBinToPath/index.js';

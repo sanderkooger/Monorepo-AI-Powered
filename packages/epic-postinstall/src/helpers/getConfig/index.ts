@@ -1,5 +1,5 @@
 import { cosmiconfigSync } from 'cosmiconfig'
-import logger from '../logger/index.js'
+import logger from '@src/logger/index.js'
 
 /**
  * Represents the structure of the configuration object.
@@ -48,7 +48,7 @@ interface HomebrewPackage {
  *
  * @returns {EpicPostinstallConfig | null} The loaded configuration object, or null if no configuration is found.
  */
-export const getConfig = (): EpicPostinstallConfig | null => {
+const getConfig = (): EpicPostinstallConfig | null => {
   logger.debug('Initializing cosmiconfig for epic-postinstall...')
   const moduleName = 'epicpostinstall'
   const explorerSync = cosmiconfigSync(moduleName, {
@@ -76,3 +76,4 @@ export const getConfig = (): EpicPostinstallConfig | null => {
   logger.debug(`Configuration found at: ${result.filepath}`)
   return result.config as EpicPostinstallConfig
 }
+export default getConfig
