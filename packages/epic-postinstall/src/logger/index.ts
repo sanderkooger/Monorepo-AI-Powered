@@ -77,7 +77,7 @@ const logger: Logger = {
    * logger.warn('This operation might have unintended side effects.');
    */
   warn: (...args: unknown[]) => {
-    if (currentLogLevel <= LogLevel.WARN) console.warn('[WARN]', ...args);
+    if (currentLogLevel <= LogLevel.WARN) console.warn('\x1b[33m[WARN]', ...args, '\x1b[0m'); // Yellow
   },
 
   /**
@@ -87,7 +87,7 @@ const logger: Logger = {
    * logger.error('Something critical happened!');
    */
   error: (...args: unknown[]) => {
-    if (currentLogLevel <= LogLevel.ERROR) console.error('[ERROR]', ...args);
+    if (currentLogLevel <= LogLevel.ERROR) console.error('\x1b[31m[ERROR]', ...args, '\x1b[0m'); // Red
   },
 };
 

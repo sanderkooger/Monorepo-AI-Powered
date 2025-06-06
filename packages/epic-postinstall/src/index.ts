@@ -20,6 +20,15 @@ const run = async () => {
     logger.setLogLevel(LogLevel.INFO) // Default to INFO if no flags are set
   }
 
+  // eslint-disable-next-line turbo/no-undeclared-env-vars
+  const githubToken = process.env.GITHUB_TOKEN; // Retrieve token from environment variable
+
+  if (githubToken) {
+    logger.info('GitHub token found in environment variables.');
+  } else {
+    logger.warn('No GitHub token found in environment variables. Proceeding with unauthenticated requests.');
+  }
+
   try {
     const config = getConfig()
 
@@ -55,7 +64,7 @@ const run = async () => {
             systemInfo,
             version: binary.version,
             githubUrl: binary.githubRepo,
-            targetBinPath
+            targetBinPath,
           })
         }
       } else {
