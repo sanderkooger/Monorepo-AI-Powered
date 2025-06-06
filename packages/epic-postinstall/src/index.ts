@@ -55,7 +55,8 @@ const run = async () => {
         await runInstaller({
           systemInfo,
           version: firstBinary.version,
-          githubUrl: firstBinary.githubRepo
+          githubUrl: firstBinary.githubRepo,
+          targetBinPath
         })
       } else {
         logger.warn('No binaries found in configuration to install.')

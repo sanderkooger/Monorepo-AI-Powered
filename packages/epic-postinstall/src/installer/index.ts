@@ -6,6 +6,7 @@ interface InstallerArgs {
   systemInfo: SystemInfo
   version: string
   githubUrl: string
+  targetBinPath: string
 }
 
 const runInstaller = async (args: InstallerArgs) => {
@@ -20,7 +21,7 @@ const runInstaller = async (args: InstallerArgs) => {
   } else {
     logger.warn('No GitHub token found in environment variables. Proceeding with unauthenticated requests.');
   }
-
+    // get releases for repo 
   const releases = await getReleases(args.githubUrl, githubToken);
   logger.info('Releases fetched successfully:');
   logger.info(JSON.stringify(releases, null, 2));
