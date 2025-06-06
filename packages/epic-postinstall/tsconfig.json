@@ -3,11 +3,11 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
       "@src/*": ["./src/*"],
-      "@helpers/*": ["./src/helpers/*"]
+      "@helpers/*": ["./src/helpers/*"],
+      "@clients/*": ["./src/clients/*"],
     }
   },
   "ts-node": {
