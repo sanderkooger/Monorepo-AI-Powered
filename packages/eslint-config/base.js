@@ -19,7 +19,8 @@ export const config = [
     },
     rules: {
       'turbo/no-undeclared-env-vars': 'warn',
-      'func-style': ['warn', 'expression', { allowArrowFunctions: true }],
+      
+    
       'prefer-arrow-callback': 'warn'
     }
   },

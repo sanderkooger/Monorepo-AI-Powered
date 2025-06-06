@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": ["PATH", "SHELL"],
   "tasks": {
     "clean": {
       "dependsOn": ["^clean"]

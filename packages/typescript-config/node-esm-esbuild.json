@@ -1,0 +1,7 @@
+{
+  "extends": "./node-esm.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler"
+  }
+}
