@@ -6,6 +6,7 @@ import { promisify } from 'node:util';
 import { Writable } from 'node:stream';
 import logger from '../logger/index.js';
 import { GitBinary } from '@src/helpers/getConfig/index.js';
+import { randomUUID } from 'node:crypto';
 
 const execPromise = promisify(exec);
 
@@ -14,11 +15,54 @@ const execPromise = promisify(exec);
  * Creates ~/.local.bin if it does not exist. Overwrites previous versions.
  * @param releaseUrl The URL of the release asset to download.
  */
+/**
+ * Recursively searches a directory for an executable file.
+ * @param directory The directory to search.
+ * @param executableName The name of the executable to find.
+ * @returns The full path to the executable if found, otherwise undefined.
+ */
+async function findExecutableInDirectory(directory: string, executableName: string): Promise<string | undefined> {
+  const entries = await fs.readdir(directory, { withFileTypes: true });
+  let foundExecutable: string | undefined;
+  const foundExecutables: string[] = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isFile() && entry.name === executableName) {
+      foundExecutables.push(fullPath);
+      // For now, we'll just take the first one, but log a warning if multiple are found.
+      if (!foundExecutable) {
+        foundExecutable = fullPath;
+      }
+    } else if (entry.isDirectory()) {
+      const nestedExecutable = await findExecutableInDirectory(fullPath, executableName);
+      if (nestedExecutable) {
+        foundExecutables.push(nestedExecutable);
+        if (!foundExecutable) {
+          foundExecutable = nestedExecutable;
+        }
+      }
+    }
+  }
+
+  if (foundExecutables.length > 1) {
+    logger.warn(`Multiple binaries named '${executableName}' found in archive. Using the first one found: ${foundExecutable}`);
+  }
+
+  return foundExecutable;
+}
+
+/**
+ * Downloads a release asset, unpacks it, and places the executable in ~/.local.bin.
+ * Creates ~/.local.bin if it does not exist. Overwrites previous versions.
+ * @param releaseUrl The URL of the release asset to download.
+ */
 export async function binInstaller(releaseUrl: string, targetBinPath: string, gitBinary: GitBinary): Promise<void> {
   const fileName = path.basename(releaseUrl);
-  const executableName = path.parse(fileName).name;
+  const executableName = gitBinary.cmd; // Use gitBinary.cmd for the expected executable name
   const finalTargetPath = path.join(targetBinPath, executableName);
-  let downloadedFilePath: string | undefined; // Declare here for finally block scope
+  let downloadedFilePath: string | undefined;
+  let unpackDir: string | undefined; // Declare unpackDir here for finally block scope
 
   try {
     // Create targetBinPath if it doesn't exist
@@ -34,23 +78,38 @@ export async function binInstaller(releaseUrl: string, targetBinPath: string, gi
     if (fileName.endsWith('.tar.gz') || fileName.endsWith('.tgz') || fileName.endsWith('.zip') || fileName.endsWith('.tar.xz')) {
       // For archives, download to a temporary file first
       downloadedFilePath = path.join(os.tmpdir(), fileName);
+      unpackDir = path.join(os.tmpdir(), `epic-postinstall-${randomUUID()}`);
+      await fs.mkdir(unpackDir, { recursive: true });
+
       logger.info(`Downloading archive ${releaseUrl} to ${downloadedFilePath}...`);
       const arrayBuffer = await response.arrayBuffer();
       await fs.writeFile(downloadedFilePath, Buffer.from(arrayBuffer));
-      logger.info('Archive download complete.');
+      logger.verbose('Archive download complete.');
 
       let command = '';
       if (fileName.endsWith('.tar.gz') || fileName.endsWith('.tgz')) {
-        command = `tar -xzf ${downloadedFilePath} -C ${targetBinPath}`;
+        command = `tar -xzf ${downloadedFilePath} -C ${unpackDir}`;
       } else if (fileName.endsWith('.tar.xz')) {
-        command = `tar -xJf ${downloadedFilePath} -C ${targetBinPath}`;
+        command = `tar -xJf ${downloadedFilePath} -C ${unpackDir}`;
       } else if (fileName.endsWith('.zip')) {
-        command = `unzip -o ${downloadedFilePath} -d ${targetBinPath}`;
+        command = `unzip -o ${downloadedFilePath} -d ${unpackDir}`;
       }
 
-      logger.info(`Unpacking ${fileName} to ${targetBinPath}...`);
+      logger.verbose(`Unpacking ${fileName} to ${unpackDir}...`);
       await execPromise(command);
-      logger.success(`Successfully unpacked and installed from ${fileName} to ${targetBinPath}`);
+      logger.info(`Successfully unpacked ${fileName} to ${unpackDir}`);
+
+      const foundBinaryPath = await findExecutableInDirectory(unpackDir, executableName);
+
+      if (!foundBinaryPath) {
+        throw new Error(`Executable '${executableName}' not found in the unpacked archive.`);
+      }
+
+      // Use copyFile and unlink instead of rename for cross-device compatibility
+      await fs.copyFile(foundBinaryPath, finalTargetPath);
+      await fs.unlink(foundBinaryPath); // Remove the original file after copying
+      await fs.chmod(finalTargetPath, '755'); // Make it executable
+      logger.success(`Successfully installed ${executableName} to ${finalTargetPath}`);
 
     } else {
       // For direct executables, stream directly to the final target path
@@ -74,6 +133,15 @@ export async function binInstaller(releaseUrl: string, targetBinPath: string, gi
         logger.debug(`Cleaned up temporary file: ${downloadedFilePath}`);
       } catch (cleanupError) {
         logger.warn(`Failed to clean up temporary file ${downloadedFilePath}: ${cleanupError}`);
+      }
+    }
+    // Clean up temporary unpack directory if it was created
+    if (unpackDir) {
+      try {
+        await fs.rm(unpackDir, { recursive: true, force: true });
+        logger.debug(`Cleaned up temporary unpack directory: ${unpackDir}`);
+      } catch (cleanupError) {
+        logger.warn(`Failed to clean up temporary unpack directory ${unpackDir}: ${cleanupError}`);
       }
     }
   }
