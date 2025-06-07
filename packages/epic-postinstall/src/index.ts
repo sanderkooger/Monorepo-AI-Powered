@@ -6,6 +6,7 @@ import logger, { LogLevel } from '@src/logger/index.js'
 import addBinToPath from '@helpers/addBinToPath/index.js'
 import runInstaller from '@src/installer/index.js'
 
+
 const run = async () => {
   const args = process.argv.slice(2)
   const isUninstall = args.includes('--uninstall')
@@ -54,11 +55,11 @@ const run = async () => {
       process.exit(1)
     }
 
-    if (config?.binaries) {
-      const binaryNames = Object.keys(config.binaries)
+    if (config?.gitBinaries) {
+      const binaryNames = Object.keys(config.gitBinaries)
       if (binaryNames.length > 0) {
         for (const binaryName of binaryNames) {
-          const binary = config.binaries[binaryName]
+          const binary = config.gitBinaries[binaryName]
           logger.info(`Attempting to install: ${binaryName}`)
           await runInstaller({
             systemInfo,
@@ -68,10 +69,10 @@ const run = async () => {
           })
         }
       } else {
-        logger.warn('No binaries found in configuration to install.')
+        logger.warn('No gitBinaries found in configuration to install.')
       }
     } else {
-      logger.warn('No binaries section found in configuration.')
+      logger.warn('No gitBinaries section found in configuration.')
     }
 
     if (isUninstall) {

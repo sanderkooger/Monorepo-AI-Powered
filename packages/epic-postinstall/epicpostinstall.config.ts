@@ -1,7 +1,7 @@
 import { EpicPostinstallConfig } from './src/helpers/getConfig'
 
 const config: EpicPostinstallConfig = {
-  binaries: {
+  gitBinaries: {
     shellcheck: {
       cmd: 'shellcheck',
       version: '0.10.0',

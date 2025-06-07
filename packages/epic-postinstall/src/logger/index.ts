@@ -12,6 +12,7 @@ export enum LogLevel {
   WARN = 3, // Warn, error
   ERROR = 4, // Only errors
   NONE = 5, // No logs
+  SUCCESS = 6, // Always displayed, for success messages
 }
 
 let currentLogLevel: LogLevel = LogLevel.INFO;
@@ -22,6 +23,7 @@ export interface Logger {
   info: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
+  success: (...args: unknown[]) => void; // New success log type
   setLogLevel: (level: LogLevel) => void;
 }
 
@@ -88,6 +90,16 @@ const logger: Logger = {
    */
   error: (...args: unknown[]) => {
     if (currentLogLevel <= LogLevel.ERROR) console.error('\x1b[31m[ERROR]', ...args, '\x1b[0m'); // Red
+  },
+
+  /**
+   * Logs a success message to the console. These messages are always displayed.
+   * @param args The messages or objects to log.
+   * @example
+   * logger.success('Operation completed successfully!');
+   */
+  success: (...args: unknown[]) => {
+    console.log('\x1b[32m[SUCCESS]', ...args, '\x1b[0m'); // Green
   },
 };
 

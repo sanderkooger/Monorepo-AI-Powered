@@ -6,7 +6,7 @@ import logger from '@src/logger/index.js'
  */
 export interface EpicPostinstallConfig {
   message?: string
-  binaries?: {
+  gitBinaries?: {
     [name: string]: {
       cmd: string
       version: string
