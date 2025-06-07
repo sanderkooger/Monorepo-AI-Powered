@@ -214,7 +214,7 @@ graph TD
     C --> E[Unpack archive to temp directory];
     E --> F[Find executable within unpacked directory];
     F --> G[Copy executable to ~/.local/bin];
-    G --> H[Set executable permissions (chmod 755)];
+    G --> H[Set executable permissions chmod 755];
     D --> H;
     H --> I{Is postInstallScript configured?};
     I -- Yes --> J{Script Type?};
