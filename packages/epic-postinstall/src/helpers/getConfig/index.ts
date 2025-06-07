@@ -4,41 +4,44 @@ import logger from '@src/logger/index.js'
 /**
  * Represents the structure of the configuration object.
  */
+export interface HomebrewPackage {
+  name: string
+  tap?: string
+}
+
+export interface GitBinary {
+  cmd: string
+  version: string
+  githubRepo: string
+  homebrew?: HomebrewPackage
+}
+
+export interface PythonVirtualEnv {
+  name: string
+  path?: string
+  requirementsFile?: string
+  packages?: string[]
+}
+
+export interface ScriptConfig {
+  name: string
+  path: string
+  args?: string[]
+}
+
+export interface PythonConfig {
+  version?: string
+  virtualEnv: PythonVirtualEnv
+  scripts?: ScriptConfig[]
+}
+
 export interface EpicPostinstallConfig {
   message?: string
   gitBinaries?: {
-    [name: string]: {
-      cmd: string
-      version: string
-      githubRepo: string
-      homebrew?: HomebrewPackage
-    }
+    [name: string]: GitBinary
   }
-  python?: {
-    version?: string
-    virtualEnv: {
-      name: string
-      path?: string
-      requirementsFile?: string
-      packages?: string[]
-    }
-    scripts?: {
-      name: string
-      path: string
-      args?: string[]
-    }[]
-  }
-  scripts?: {
-    name: string
-    path: string
-    args?: string[]
-    
-  }[]
-}
-
-interface HomebrewPackage {
-  name: string
-  tap?: string
+  python?: PythonConfig
+  scripts?: ScriptConfig[]
 }
 
 /**

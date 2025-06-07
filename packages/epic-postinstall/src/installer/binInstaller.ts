@@ -5,6 +5,7 @@ import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import { Writable } from 'node:stream';
 import logger from '../logger/index.js';
+import { GitBinary } from '@src/helpers/getConfig/index.js';
 
 const execPromise = promisify(exec);
 
@@ -13,7 +14,7 @@ const execPromise = promisify(exec);
  * Creates ~/.local.bin if it does not exist. Overwrites previous versions.
  * @param releaseUrl The URL of the release asset to download.
  */
-export async function binInstaller(releaseUrl: string, targetBinPath: string): Promise<void> {
+export async function binInstaller(releaseUrl: string, targetBinPath: string, gitBinary: GitBinary): Promise<void> {
   const fileName = path.basename(releaseUrl);
   const executableName = path.parse(fileName).name;
   const finalTargetPath = path.join(targetBinPath, executableName);

@@ -1,3 +1,4 @@
+import { GitBinary } from '@src/helpers/getConfig/index.js';
 import { fetchGitHubReleases } from '../../clients/githubApiClient.js';
 import { parseGitHubRepoUrl } from '../../helpers/parseGitHubRepoUrl/index.js';
 import logger from '../../logger/index.js';
@@ -8,12 +9,12 @@ export interface Releases {
   [version: string]: GithubRelease;
 }
 
-async function getReleases(repoUrl: string): Promise<Releases> {
-  logger.info(`Attempting to get releases for repository URL: ${repoUrl}`);
+async function getReleases(gitBinary: GitBinary): Promise<Releases> {
+  logger.info(`Attempting to get releases for repository URL: ${gitBinary.githubRepo}`);
   
   const githubToken = process.env.GITHUB_TOKEN; // Use provided token or fallback to env variable
   try {
-    const { owner, repo } = parseGitHubRepoUrl(repoUrl);
+    const { owner, repo } = parseGitHubRepoUrl(gitBinary.githubRepo);
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
 
     logger.info(`Fetching releases from GitHub API: ${apiUrl}`);
@@ -25,12 +26,12 @@ async function getReleases(repoUrl: string): Promise<Releases> {
     });
     logger.info(`Successfully found ${Object.keys(releases).length} releases from GitHub API.`);
     if (Object.keys(releases).length === 0) {
-      logger.error(`No releases available for ${repoUrl}.`);
-      throw new Error(`No releases available for ${repoUrl}.`);
+      logger.error(`No releases available for ${gitBinary.githubRepo}.`);
+      throw new Error(`No releases available for ${gitBinary.githubRepo}.`);
     }
     return releases;
   } catch (error) {
-    logger.error(`Failed to get releases from GitHub API for ${repoUrl}:`, error);
+    logger.error(`Failed to get releases from GitHub API for ${gitBinary.githubRepo}:`, error);
     throw error;
   }
 }

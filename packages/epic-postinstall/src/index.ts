@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import * as os from 'node:os'
+import * as path from 'node:path'
 import getConfig from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
@@ -12,7 +14,7 @@ const run = async () => {
   const isUninstall = args.includes('--uninstall')
   const isVerbose = args.includes('--verbose')
   const isDebug = args.includes('--debug')
-  const targetBinPath = '~/.local/bin'
+  const targetBinPath = path.join(os.homedir(), '.local', 'bin')
   if (isDebug) {
     logger.setLogLevel(LogLevel.DEBUG)
   } else if (isVerbose) {
@@ -59,12 +61,11 @@ const run = async () => {
       const binaryNames = Object.keys(config.gitBinaries)
       if (binaryNames.length > 0) {
         for (const binaryName of binaryNames) {
-          const binary = config.gitBinaries[binaryName]
+          const gitBinary = config.gitBinaries[binaryName]
           logger.info(`Attempting to install: ${binaryName}`)
           await runInstaller({
             systemInfo,
-            version: binary.version,
-            githubUrl: binary.githubRepo,
+            gitBinary,
             targetBinPath,
           })
         }
