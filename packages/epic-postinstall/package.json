@@ -14,6 +14,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm build",
     "clean": "rimraf dist node_modules .turbo",
     "build": "tsc && tsc-alias",
     "start": "node dist/src/index.js",

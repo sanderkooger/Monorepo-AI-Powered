@@ -7,11 +7,12 @@ import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
 import addBinToPath from '@helpers/addBinToPath/index.js'
 import runInstaller from '@src/installer/index.js'
-
+import { uninstallBinaries } from '@src/uninstaller/index.js'
 
 const run = async () => {
   const args = process.argv.slice(2)
   const isUninstall = args.includes('--uninstall')
+
   const isVerbose = args.includes('--verbose')
   const isDebug = args.includes('--debug')
   const targetBinPath = path.join(os.homedir(), '.local', 'bin')
@@ -23,17 +24,30 @@ const run = async () => {
     logger.setLogLevel(LogLevel.INFO) // Default to INFO if no flags are set
   }
 
-  // eslint-disable-next-line turbo/no-undeclared-env-vars
-  const githubToken = process.env.GITHUB_TOKEN; // Retrieve token from environment variable
+
+  const githubToken = process.env.GITHUB_TOKEN // Retrieve token from environment variable
 
   if (githubToken) {
-    logger.info('GitHub token found in environment variables.');
+    logger.info('GitHub token found in environment variables.')
   } else {
-    logger.warn('No GitHub token found in environment variables. Proceeding with unauthenticated requests.');
+    logger.warn(
+      'No GitHub token found in environment variables. Proceeding with unauthenticated requests.'
+    )
   }
 
   try {
     const config = getConfig()
+
+    // If uninstall flag is provided, run uninstaller and exit
+    if (isUninstall) {
+      logger.info('Uninstall flag detected. Proceeding with uninstallation.')
+      if (config?.gitBinaries) {
+        await uninstallBinaries(config.gitBinaries, targetBinPath)
+      } else {
+        logger.warn('No gitBinaries found in configuration to uninstall.')
+      }
+      return // Exit the script after uninstallation
+    }
 
     logger.info(config?.message)
 
@@ -66,7 +80,7 @@ const run = async () => {
           await runInstaller({
             systemInfo,
             gitBinary,
-            targetBinPath,
+            targetBinPath
           })
         }
       } else {
@@ -74,12 +88,6 @@ const run = async () => {
       }
     } else {
       logger.warn('No gitBinaries section found in configuration.')
-    }
-
-    if (isUninstall) {
-      logger.info('Uninstalling epic-postinstall...')
-      logger.info('to be implemented...')
-      // to be implemented
     }
   } catch (err) {
     logger.error(`Error: ${(err as Error).message}`)
