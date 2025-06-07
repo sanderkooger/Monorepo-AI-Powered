@@ -1,6 +1,6 @@
 {
   "extends": "@repo/typescript-config/node-esm.json",
-  
+
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "."

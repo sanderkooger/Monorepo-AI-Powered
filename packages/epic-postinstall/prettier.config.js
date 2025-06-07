@@ -1,6 +1,6 @@
-import{ defaultConfig } from "@repo/prettier-config";
+import prettierConfig from "@repo/prettier-config";
 
 export default {
-  ...defaultConfig,
+  ...prettierConfig,
   "ignorePatterns": [".next/**", "node-modules"]
 }
