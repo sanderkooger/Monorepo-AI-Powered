@@ -5,10 +5,41 @@ import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import { Writable } from 'node:stream';
 import logger from '../logger/index.js';
-import { GitBinary } from '@src/helpers/getConfig/index.js';
+import { GitBinary, PostInstallScript } from '@src/helpers/getConfig/index.js';
 import { randomUUID } from 'node:crypto';
 
 const execPromise = promisify(exec);
+
+async function executePostInstallScript(scriptConfig: PostInstallScript, installedBinaryPath: string): Promise<void> {
+  if (scriptConfig.inline) {
+    logger.info(`Executing inline post-install script for ${installedBinaryPath}...`);
+    try {
+      const { stdout, stderr } = await execPromise(scriptConfig.inline, { cwd: path.dirname(installedBinaryPath) });
+      if (stdout) logger.debug(`Script stdout: ${stdout}`);
+      if (stderr) logger.warn(`Script stderr: ${stderr}`);
+      logger.success('Inline post-install script executed successfully.');
+    } catch (error) {
+      logger.error(`Failed to execute inline post-install script: ${error instanceof Error ? error.message : error}`);
+      throw error;
+    }
+  } else if (scriptConfig.path) {
+    const scriptPath = path.resolve(scriptConfig.path); // Resolve to an absolute path
+    logger.info(`Executing post-install script from file: ${scriptPath} for ${installedBinaryPath}...`);
+    try {
+      // Ensure the script is executable
+      await fs.chmod(scriptPath, '755');
+      const { stdout, stderr } = await execPromise(scriptPath, { cwd: path.dirname(installedBinaryPath) });
+      if (stdout) logger.debug(`Script stdout: ${stdout}`);
+      if (stderr) logger.warn(`Script stderr: ${stderr}`);
+      logger.success('Post-install script file executed successfully.');
+    } catch (error) {
+      logger.error(`Failed to execute post-install script from file ${scriptPath}: ${error instanceof Error ? error.message : error}`);
+      throw error;
+    }
+  } else {
+    logger.warn('Post-install script configuration found but no inline script or path specified.');
+  }
+}
 
 /**
  * Downloads a release asset, unpacks it, and places the executable in ~/.local.bin.
@@ -120,6 +151,11 @@ export async function binInstaller(releaseUrl: string, targetBinPath: string, gi
       await fileHandle.close();
       await fs.chmod(finalTargetPath, '755'); // Make it executable
       logger.success(`Successfully installed ${executableName} to ${finalTargetPath}`);
+    }
+
+    // Execute post-install script if configured
+    if (gitBinary.postInstallScript) {
+      await executePostInstallScript(gitBinary.postInstallScript, finalTargetPath);
     }
 
   } catch (error) {

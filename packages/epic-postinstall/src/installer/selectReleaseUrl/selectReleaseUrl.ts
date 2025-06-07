@@ -37,15 +37,12 @@ const filterAssetsByArch = (assets: GithubReleaseAsset[], systemInfo: SystemInfo
 };
 const ARCHIVE_PRIORITY_ORDER = ['.zip', '.tar.gz', '.tgz', '.tar.xz'];
 
-const selectPreferredArchiveAsset = (assets: GithubReleaseAsset[]): GithubReleaseAsset | null => {
+const selectPreferredAsset = (assets: GithubReleaseAsset[]): GithubReleaseAsset | null => {
+  // First, try to find a preferred archived asset
   const archiveAssets = assets.filter(asset => {
     const assetName = asset.name.toLowerCase();
     return ARCHIVE_PRIORITY_ORDER.some(ext => assetName.endsWith(ext));
   });
-
-  if (archiveAssets.length === 0) {
-    return null;
-  }
 
   for (const preferredExt of ARCHIVE_PRIORITY_ORDER) {
     const foundAsset = archiveAssets.find(asset => asset.name.toLowerCase().endsWith(preferredExt));
@@ -54,7 +51,22 @@ const selectPreferredArchiveAsset = (assets: GithubReleaseAsset[]): GithubReleas
     }
   }
 
-  return archiveAssets[0]; // Fallback, should ideally not be reached if ARCHIVE_PRIORITY_ORDER is comprehensive
+  // If no preferred archived asset is found, look for a non-archived binary
+  const nonArchivedAssets = assets.filter(asset => {
+    const assetName = asset.name.toLowerCase();
+    return !ARCHIVE_PRIORITY_ORDER.some(ext => assetName.endsWith(ext));
+  });
+
+  if (nonArchivedAssets.length > 0) {
+    // Prioritize .exe for windows, otherwise just take the first one
+    const windowsExe = nonArchivedAssets.find(asset => asset.name.toLowerCase().endsWith('.exe'));
+    if (windowsExe) {
+      return windowsExe;
+    }
+    return nonArchivedAssets[0];
+  }
+
+  return null;
 };
 
 const selectReleaseUrl = (
@@ -76,7 +88,7 @@ const selectReleaseUrl = (
 
   const osSpecificAssets = filterAssetsByOs(versionedRelease.assets, systemInfo);
   const archSpecificAssets = filterAssetsByArch(osSpecificAssets, systemInfo);
-  const selectedAsset = selectPreferredArchiveAsset(archSpecificAssets);
+  const selectedAsset = selectPreferredAsset(archSpecificAssets);
 
   if (!selectedAsset) {
     logger.error('No preferred archive asset found for the specified OS, architecture, and archive format.');

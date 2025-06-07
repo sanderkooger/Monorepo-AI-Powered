@@ -26,12 +26,26 @@ const config: EpicPostinstallConfig = {
         name: 'actionlint',
         tap: 'rhysd/actionlint'
       }
+    },
+    direnv: {
+      cmd: 'direnv',
+      version: '2.36.0',
+      githubRepo: 'https://github.com/direnv/direnv',
+      homebrew: {
+        name: 'direnv'
+      },
+      // IMPORTANT: Executing post-install scripts can pose security risks if the script source is untrusted.
+      // Ensure that any inline scripts or script paths are from trusted sources.
+      postInstallScript: {
+        // inline: 'eval "$(direnv hook bash)" >> ~/.bashrc' // Commented out for testing script file
+        path: './scripts/direnv_hook_setup.sh'
+      }
     }
   },
   python: {
-    version: '3.9',
+    version: '3.1',
     virtualEnv: {
-      name: 'epic-env',
+      name: '.venv',
       requirementsFile: 'requirements.txt',
       packages: ['black', 'flake8']
     },
@@ -47,10 +61,6 @@ const config: EpicPostinstallConfig = {
     {
       name: 'setup_project',
       path: './scripts/setup.sh'
-    },
-    {
-      name: 'cleanup_cache',
-      path: './scripts/cleanup.sh'
     }
   ]
 }

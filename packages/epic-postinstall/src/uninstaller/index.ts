@@ -17,7 +17,7 @@ export async function uninstallBinaries(
       await fs.access(binaryPath, fs.constants.F_OK)
       logger.info(`Found ${binary.cmd} at ${binaryPath}. Attempting to remove...`)
       await fs.unlink(binaryPath)
-      logger.info(`Successfully removed ${binary.cmd}.`)
+      logger.success(`Successfully removed ${binary.cmd}.`)
     } catch (error: unknown) {
       if (isNodeJS_ErrnoException(error) && error.code === 'ENOENT') {
         logger.info(`${binary.cmd} not found at ${binaryPath}. Skipping removal.`)

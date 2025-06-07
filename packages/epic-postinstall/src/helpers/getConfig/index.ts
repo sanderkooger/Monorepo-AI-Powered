@@ -9,11 +9,17 @@ export interface HomebrewPackage {
   tap?: string
 }
 
+export interface PostInstallScript {
+  inline?: string;
+  path?: string;
+}
+
 export interface GitBinary {
   cmd: string
   version: string
   githubRepo: string
   homebrew?: HomebrewPackage
+  postInstallScript?: PostInstallScript
 }
 
 export interface PythonVirtualEnv {
