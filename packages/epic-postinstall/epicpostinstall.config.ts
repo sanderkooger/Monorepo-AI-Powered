@@ -1,6 +1,13 @@
 import { EpicPostinstallConfig } from './src/helpers/getConfig'
 
 const config: EpicPostinstallConfig = {
+  asdf: {
+    version: '0.18.0', // Specify the desired ASDF version
+    tools: {
+      // Example: 'nodejs': { version: '20.11.0' },
+      // 'python': { version: '3.10.0' }
+    }
+  },
   gitBinaries: {
     shellcheck: {
       cmd: 'shellcheck',
@@ -63,6 +70,7 @@ const config: EpicPostinstallConfig = {
       path: './scripts/setup.sh'
     }
   ]
+  
 }
 
 export default config

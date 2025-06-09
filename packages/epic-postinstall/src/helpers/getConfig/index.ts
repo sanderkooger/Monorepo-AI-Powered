@@ -41,13 +41,25 @@ export interface PythonConfig {
   scripts?: ScriptConfig[]
 }
 
+export interface AsdfTool {
+  version: string;
+}
+
+export interface AsdfConfig {
+  version: string;
+  tools?: {
+    [toolName: string]: AsdfTool;
+  };
+}
+
 export interface EpicPostinstallConfig {
-  message?: string
+  message?: string;
   gitBinaries?: {
-    [name: string]: GitBinary
-  }
-  python?: PythonConfig
-  scripts?: ScriptConfig[]
+    [name: string]: GitBinary;
+  };
+  python?: PythonConfig;
+  scripts?: ScriptConfig[];
+  asdf?: AsdfConfig;
 }
 
 /**

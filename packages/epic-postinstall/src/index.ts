@@ -6,8 +6,9 @@ import getConfig from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
 import addBinToPath from '@helpers/addBinToPath/index.js'
-import runInstaller from '@src/installer/index.js'
+import runInstaller from '@src/gitBinInstaller/index.js'
 import { uninstallBinaries } from '@src/uninstaller/index.js'
+import isCommandAvailable from '@helpers/isCommandAvailable/index.js'
 
 const run = async () => {
   const args = process.argv.slice(2)
@@ -71,6 +72,61 @@ const run = async () => {
       process.exit(1)
     }
 
+
+
+    /*
+     * =========================================
+     *           ASDF INSTALLATION LOGIC
+     * =========================================
+     */
+
+  if (config?.asdf) {
+      logger.info('\nChecking ASDF installation...')
+      const asdfConfig = config.asdf
+      const asdfCommand = 'asdf'
+      const { available: asdfAvailable, version: installedAsdfVersion } = isCommandAvailable(asdfCommand)
+
+      if (asdfAvailable) {
+        logger.info(`ASDF is installed. Version: ${installedAsdfVersion}`)
+        if (installedAsdfVersion && installedAsdfVersion !== asdfConfig.version) {
+          logger.warn(`Installed ASDF version (${installedAsdfVersion}) does not match configured version (${asdfConfig.version}). Attempting to update...`)
+          // For ASDF, updating usually involves pulling the latest changes from the git repo
+          // and then potentially running `asdf update`.
+          // For simplicity, we'll just reinstall using the gitBinInstaller for now.
+          await runInstaller({
+            systemInfo,
+            gitBinary: {
+              cmd: asdfCommand,
+              version: asdfConfig.version,
+              githubRepo: 'https://github.com/asdf-vm/asdf',
+            },
+            targetBinPath,
+          });
+        } else {
+          logger.info('ASDF is already at the correct version.')
+        }
+      } else {
+        logger.info('ASDF is not installed. Attempting to install...')
+        await runInstaller({
+          systemInfo,
+          gitBinary: {
+            cmd: asdfCommand,
+            version: asdfConfig.version,
+            githubRepo: 'https://github.com/asdf-vm/asdf',
+          },
+          targetBinPath,
+        });
+      }
+    } else {
+      logger.warn('No ASDF section found in configuration. Skipping ASDF installation.')
+    }
+
+    /*
+     * =========================================
+     *         INSTALL SEPERATE GIT BINARIES
+     * =========================================
+     */
+
     if (config?.gitBinaries) {
       const binaryNames = Object.keys(config.gitBinaries)
       if (binaryNames.length > 0) {
@@ -89,6 +145,9 @@ const run = async () => {
     } else {
       logger.warn('No gitBinaries section found in configuration.')
     }
+
+    
+
   } catch (err) {
     logger.error(`Error: ${(err as Error).message}`)
     process.exit(1)
