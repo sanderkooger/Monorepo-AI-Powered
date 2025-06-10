@@ -1,5 +1,6 @@
 import { cosmiconfigSync } from 'cosmiconfig'
 import logger from '@src/logger/index.js'
+import { ShellUpdaterData } from '@src/shellUpdater/index.js';
 
 /**
  * Represents the structure of the configuration object.
@@ -19,6 +20,7 @@ export interface GitBinary {
   version: string
   githubRepo: string
   homebrew?: HomebrewPackage
+  shellUpdate?: ShellUpdaterData
   postInstallScript?: PostInstallScript
 }
 

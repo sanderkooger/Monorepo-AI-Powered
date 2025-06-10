@@ -41,6 +41,9 @@ const config: EpicPostinstallConfig = {
       homebrew: {
         name: 'direnv'
       },
+      shellUpdate: { 
+        bash: {snippet: 'eval "$(direnv hook bash)"' }
+      },
       // IMPORTANT: Executing post-install scripts can pose security risks if the script source is untrusted.
       // Ensure that any inline scripts or script paths are from trusted sources.
       postInstallScript: {
@@ -70,7 +73,6 @@ const config: EpicPostinstallConfig = {
       path: './scripts/setup.sh'
     }
   ]
-  
 }
 
 export default config

@@ -5,7 +5,7 @@ import * as path from 'node:path'
 import getConfig from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
-import addBinToPath from '@helpers/addBinToPath/index.js'
+import shellUpdater from '@src/shellUpdater/index.js'
 import runInstaller from '@src/gitBinInstaller/index.js'
 import { uninstallBinaries } from '@src/uninstaller/index.js'
 import isCommandAvailable from '@helpers/isCommandAvailable/index.js'
@@ -37,7 +37,20 @@ const run = async () => {
   }
 
   try {
+    
+    logger.info('\nDetecting system information...')
+    const systemInfo = getSystemInfo()
+
+    if (systemInfo.os !== 'linux' && systemInfo.os !== 'macos') {
+      logger.error(
+        `Operating System '${systemInfo.os}' is not currently supported. This script is only compatible with Linux and macOS.`
+      )
+      process.exit(1)
+    }
+
     const config = getConfig()
+    logger.info(config?.message)
+    
 
     // If uninstall flag is provided, run uninstaller and exit
     if (isUninstall) {
@@ -50,26 +63,20 @@ const run = async () => {
       return // Exit the script after uninstallation
     }
 
-    logger.info(config?.message)
-
-    logger.info('\nDetecting system information...')
-    const systemInfo = getSystemInfo()
+    
 
     // Ensure ~/.local/bin is in PATH for Linux/macOS
-    if (systemInfo.os === 'linux' || systemInfo.os === 'macos') {
-      const pathEnsured = await addBinToPath(targetBinPath, systemInfo)
-      if (!pathEnsured) {
-        logger.error(
-          `Failed to ensure '${targetBinPath}' is in PATH. Installation may not function correctly. Please add it manually.`
-        )
-        // Decide whether to exit or continue with a warning
-        // For now, we'll continue but log an error.
-      }
-    } else {
+    const pathExportLine = `export PATH="${targetBinPath}:$PATH"`;
+    const pathEnsured = await shellUpdater(pathExportLine, systemInfo, {
+      reason: 'Ensure ~/.local/bin is in PATH for installed binaries.',
+      programName: 'epic-postinstall',
+    });
+    if (!pathEnsured) {
       logger.error(
-        `Operating System '${systemInfo.os}' is not currently supported. This script is only compatible with Linux and macOS.`
+        `Failed to ensure '${targetBinPath}' is in PATH. Installation may not function correctly. Please add it manually.`
       )
-      process.exit(1)
+      // Decide whether to exit or continue with a warning
+      // For now, we'll continue but log an error.
     }
 
 
@@ -81,42 +88,39 @@ const run = async () => {
      */
 
   if (config?.asdf) {
-      logger.info('\nChecking ASDF installation...')
-      const asdfConfig = config.asdf
-      const asdfCommand = 'asdf'
-      const { available: asdfAvailable, version: installedAsdfVersion } = isCommandAvailable(asdfCommand)
+     logger.info('\nChecking ASDF installation...');
+     const asdfConfig = config.asdf;
+     const asdfCommand = 'asdf';
+     const { available: asdfAvailable, version: installedAsdfVersion } = isCommandAvailable(asdfCommand);
 
-      if (asdfAvailable) {
-        logger.info(`ASDF is installed. Version: ${installedAsdfVersion}`)
-        if (installedAsdfVersion && installedAsdfVersion !== asdfConfig.version) {
-          logger.warn(`Installed ASDF version (${installedAsdfVersion}) does not match configured version (${asdfConfig.version}). Attempting to update...`)
-          // For ASDF, updating usually involves pulling the latest changes from the git repo
-          // and then potentially running `asdf update`.
-          // For simplicity, we'll just reinstall using the gitBinInstaller for now.
-          await runInstaller({
-            systemInfo,
-            gitBinary: {
-              cmd: asdfCommand,
-              version: asdfConfig.version,
-              githubRepo: 'https://github.com/asdf-vm/asdf',
-            },
-            targetBinPath,
-          });
-        } else {
-          logger.info('ASDF is already at the correct version.')
-        }
-      } else {
-        logger.info('ASDF is not installed. Attempting to install...')
-        await runInstaller({
-          systemInfo,
-          gitBinary: {
-            cmd: asdfCommand,
-            version: asdfConfig.version,
-            githubRepo: 'https://github.com/asdf-vm/asdf',
-          },
-          targetBinPath,
-        });
-      }
+     if (asdfAvailable) {
+       const cleanedInstalledVersion = installedAsdfVersion?.match(/(\d+\.\d+\.\d+)/)?.[1];
+       if (cleanedInstalledVersion && cleanedInstalledVersion === asdfConfig.version) {
+         logger.success(`ASDF is installed and at the correct version: ${installedAsdfVersion}`);
+       } else {
+         logger.warn(`ASDF is installed but version mismatch detected. Installed: ${installedAsdfVersion || 'N/A'}, Configured: ${asdfConfig.version}. Attempting to update...`);
+         await runInstaller({
+           systemInfo,
+           gitBinary: {
+             cmd: asdfCommand,
+             version: asdfConfig.version,
+             githubRepo: 'https://github.com/asdf-vm/asdf',
+           },
+           targetBinPath,
+         });
+       }
+     } else {
+       logger.info('ASDF is not installed. Attempting to install...');
+       await runInstaller({
+         systemInfo,
+         gitBinary: {
+           cmd: asdfCommand,
+           version: asdfConfig.version,
+           githubRepo: 'https://github.com/asdf-vm/asdf',
+         },
+         targetBinPath,
+       });
+     }
     } else {
       logger.warn('No ASDF section found in configuration. Skipping ASDF installation.')
     }
