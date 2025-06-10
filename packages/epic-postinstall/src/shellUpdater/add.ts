@@ -1,8 +1,7 @@
 
 import { promises as fs } from 'fs';
 import logger from '@src/logger/index.js';
-import { ShellUpdaterOptions, Posix } from './types.js'; // Re-add Posix
-import { SystemInfo } from '@helpers/getSystemInfo/index.js'; // Explicitly import SystemInfo
+import { ShellUpdaterOptions} from './types.js'; // Re-add Posix
 import { detectInstalledShells, getShellConfigPath, getCommentBlockIdentifier, generateShellScriptBlock } from './utils.js';
 
 /**
@@ -12,9 +11,10 @@ import { detectInstalledShells, getShellConfigPath, getCommentBlockIdentifier, g
  * @returns A promise that resolves to true if all configurations were successfully added or already existed, false otherwise.
  */
 export async function add(options: ShellUpdaterOptions): Promise<boolean> {
-  const { programName, systemInfo, shellUpdaterData } = options;
+  const { programName, shellUpdaterData } = options;
   const installedShells = await detectInstalledShells();
   let overallSuccess = true;
+  const configuredFilePaths = new Set<string>(); // Track files that have been processed
 
   for (const detectedShell of installedShells) {
     let snippetContent: string | undefined;
@@ -52,7 +52,7 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
         break;
       case 'fish':
         snippetContent = shellUpdaterData.fish;
-        isLoginShell = false; // Irrelevant for fish, but set for consistency
+       
         break;
       case 'nu': // Nushell
       case 'nushell':
@@ -63,9 +63,12 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
         snippetContent = shellUpdaterData.elvish;
         isLoginShell = false; // Elvish typically has one config file
         break;
+      case 'tmux': // tmux is a terminal multiplexer, not a shell, so we should ignore it.
+        logger.debug(`Detected 'tmux', which is a terminal multiplexer, not a shell. Skipping configuration for '${programName}'.`);
+        continue; // Skip to the next detected shell
       default:
-        // For any other detected shell not explicitly handled, warn and skip
-        logger.warn(`Detected shell '${detectedShell}' is not explicitly supported by shellUpdater. Skipping configuration for '${programName}'.`);
+        // For any other detected shell not explicitly handled, debug log and skip
+        logger.debug(`Detected shell '${detectedShell}' is not explicitly supported by shellUpdater. Skipping configuration for '${programName}'.`);
         continue; // Skip to the next detected shell
     }
 
@@ -76,6 +79,12 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
 
     try {
       const targetFilePath = getShellConfigPath(detectedShell, isLoginShell);
+
+      // If this file has already been configured by a previous shell, skip
+      if (configuredFilePaths.has(targetFilePath)) {
+        continue;
+      }
+
       const fullSnippetBlock = generateShellScriptBlock(detectedShell, programName, snippetContent);
       const { start: blockStartIdentifier } = getCommentBlockIdentifier(programName);
 
@@ -96,9 +105,11 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
 
       if (fileContent.includes(blockStartIdentifier)) {
         logger.info(`Configuration for '${programName}' already exists in '${targetFilePath}'. Skipping.`);
+        configuredFilePaths.add(targetFilePath); // Mark as configured
       } else {
         await fs.appendFile(targetFilePath, `\n${fullSnippetBlock}\n`, 'utf8');
         logger.success(`Successfully added configuration for '${programName}' to '${targetFilePath}'.`);
+        configuredFilePaths.add(targetFilePath); // Mark as configured
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

@@ -29,9 +29,9 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.15.30",
-    "@typescript-eslint/eslint-plugin": "^8.33.1",
-    "@typescript-eslint/parser": "^8.33.1",
+    "@types/node": "^24.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
     "concurrently": "^9.1.2",
     "cosmiconfig": "^9.0.0",
     "eslint": "^9.28.0",
@@ -44,7 +44,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "axios": "^1.9.0",
-    "cheerio": "^1.0.0"
+    "axios": "^1.9.0"
   }
 }

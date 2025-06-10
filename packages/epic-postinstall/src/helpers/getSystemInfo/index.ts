@@ -1,9 +1,11 @@
+import * as os from 'node:os'; // Import the 'os' module
 import logger from '@src/logger/index.js';
 import isCommandAvailable from '@src/helpers/isCommandAvailable/index.js';
 
 export interface SystemInfo {
   os: 'linux' | 'macos' | 'windows' | 'unknown';
   arch: string;
+  homeDir: string; // Add homeDir property
   homebrewAvailable?: boolean;
 }
 
@@ -12,6 +14,7 @@ const getSystemInfo = (): SystemInfo => {
   const result: SystemInfo = {
     os: 'unknown',
     arch: process.arch,
+    homeDir: os.homedir(), // Populate homeDir
   };
 
   logger.debug(`Detected platform: ${process.platform}`);

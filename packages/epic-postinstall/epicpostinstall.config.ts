@@ -48,7 +48,7 @@ const config: EpicPostinstallConfig = {
       // Ensure that any inline scripts or script paths are from trusted sources.
       postInstallScript: {
         // inline: 'eval "$(direnv hook bash)" >> ~/.bashrc' // Commented out for testing script file
-        path: './scripts/direnv_hook_setup.sh'
+       // path: './scripts/direnv_hook_setup.sh'
       }
     }
   },
