@@ -5,7 +5,7 @@ import * as path from 'node:path'
 import getConfig from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
-import shellUpdater from '@src/shellUpdater/index.js'
+import shellUpdater, { ShellUpdaterOptions } from '@src/shellUpdater/index.js'
 import runInstaller from '@src/gitBinInstaller/index.js'
 import { uninstallBinaries } from '@src/uninstaller/index.js'
 import isCommandAvailable from '@helpers/isCommandAvailable/index.js'
@@ -52,25 +52,21 @@ const run = async () => {
     logger.info(config?.message)
     
 
-    // If uninstall flag is provided, run uninstaller and exit
-    if (isUninstall) {
-      logger.info('Uninstall flag detected. Proceeding with uninstallation.')
-      if (config?.gitBinaries) {
-        await uninstallBinaries(config.gitBinaries, targetBinPath)
-      } else {
-        logger.warn('No gitBinaries found in configuration to uninstall.')
-      }
-      return // Exit the script after uninstallation
-    }
 
     
 
     // Ensure ~/.local/bin is in PATH for Linux/macOS
-    const pathExportLine = `export PATH="${targetBinPath}:$PATH"`;
-    const pathEnsured = await shellUpdater(pathExportLine, systemInfo, {
-      reason: 'Ensure ~/.local/bin is in PATH for installed binaries.',
-      programName: 'epic-postinstall',
-    });
+   const pathExportLine = `export PATH="${targetBinPath}:$PATH"`;
+   const shellUpdateOptions: ShellUpdaterOptions = {
+     programName: 'epic-postinstall-path', // A unique identifier for this specific PATH update
+     systemInfo: systemInfo,
+     shellUpdaterData: {
+       bash: { loginShell: false, snippet: pathExportLine }, // Target .bashrc
+       zsh: { loginShell: false, snippet: pathExportLine },  // Target .zshrc
+       fish: `set -gx PATH "${targetBinPath}" $PATH`, // Fish-specific PATH update
+     },
+   };
+   const pathEnsured = await shellUpdater.add(shellUpdateOptions);
     if (!pathEnsured) {
       logger.error(
         `Failed to ensure '${targetBinPath}' is in PATH. Installation may not function correctly. Please add it manually.`
@@ -135,13 +131,23 @@ const run = async () => {
       const binaryNames = Object.keys(config.gitBinaries)
       if (binaryNames.length > 0) {
         for (const binaryName of binaryNames) {
-          const gitBinary = config.gitBinaries[binaryName]
-          logger.info(`Attempting to install: ${binaryName}`)
+          const gitBinary = config.gitBinaries[binaryName];
+          logger.info(`Attempting to install: ${binaryName}`);
+          // install binary
           await runInstaller({
             systemInfo,
             gitBinary,
             targetBinPath
-          })
+          });
+          // If gitBinary has shellUpdate config
+          if (gitBinary.shellUpdate) {
+            const binaryShellUpdateOptions: ShellUpdaterOptions = {
+              programName: gitBinary.cmd, // Pass gitBinary.cmd as programName
+              systemInfo: systemInfo,
+              shellUpdaterData: gitBinary.shellUpdate,
+            };
+            await shellUpdater.add(binaryShellUpdateOptions);
+          }
         }
       } else {
         logger.warn('No gitBinaries found in configuration to install.')
@@ -150,6 +156,16 @@ const run = async () => {
       logger.warn('No gitBinaries section found in configuration.')
     }
 
+    // If uninstall flag is provided, run uninstaller and exit
+    if (isUninstall) {
+      logger.info('Uninstall flag detected. Proceeding with uninstallation.')
+      if (config?.gitBinaries) {
+        await uninstallBinaries(config.gitBinaries, targetBinPath, systemInfo)
+      } else {
+        logger.warn('No gitBinaries found in configuration to uninstall.')
+      }
+      return // Exit the script after uninstallation
+    }
     
 
   } catch (err) {
