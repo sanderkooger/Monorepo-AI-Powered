@@ -19,7 +19,7 @@ export const installBinaries = async ({
   // Ensure ~/.local/bin is in PATH for Linux/macOS
   const pathExportLine = `export PATH="${targetBinPath}:$PATH"`
   const shellUpdateOptions: ShellUpdaterOptions = {
-    programName: 'epic-postinstall-path', // A unique identifier for this specific PATH update
+    programName: 'epic-postinstall-path-installation', // A unique identifier for this specific PATH update
     systemInfo: systemInfo,
     shellUpdaterData: {
       bash: { loginShell: false, snippet: pathExportLine }, // Target .bashrc
