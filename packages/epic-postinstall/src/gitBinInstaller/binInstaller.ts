@@ -36,7 +36,11 @@ async function executePostInstallScript(scriptConfig: PostInstallScript, install
       logger.error(`Failed to execute post-install script from file ${scriptPath}: ${error instanceof Error ? error.message : error}`);
       throw error;
     }
-  } else {
+  } else if (Object.keys(scriptConfig).length === 0) {
+    // If scriptConfig is an empty object, skip the warning as it implies no script is intended.
+    logger.debug('Post-install script configuration is an empty object, skipping.');
+  }
+  else {
     logger.warn('Post-install script configuration found but no inline script or path specified.');
   }
 }

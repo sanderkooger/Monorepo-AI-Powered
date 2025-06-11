@@ -17,42 +17,30 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
   const configuredFilePaths = new Set<string>(); // Track files that have been processed
 
   for (const detectedShell of installedShells) {
-    let snippetContent: string | undefined;
+    let snippetContent: string | string[] | undefined;
     let isLoginShell = false; // Default for interactive shells
 
     // Determine snippet content and loginShell status based on detected shell and provided data
     switch (detectedShell) {
       case 'bash':
-        if (typeof shellUpdaterData.bash === 'string') {
-          snippetContent = shellUpdaterData.bash;
-          isLoginShell = false; // Default for string is .bashrc
-        } else if (shellUpdaterData.bash) {
-          snippetContent = shellUpdaterData.bash.snippet;
+        if (shellUpdaterData.bash) {
+          snippetContent = shellUpdaterData.bash.snippets;
           isLoginShell = shellUpdaterData.bash.loginShell;
         }
         break;
       case 'zsh':
       case 'sh': // Treat sh like zsh for fallback logic
-        if (detectedShell === 'zsh' && typeof shellUpdaterData.zsh === 'string') {
-          snippetContent = shellUpdaterData.zsh;
-          isLoginShell = false; // Default for string is .zshrc
-        } else if (detectedShell === 'zsh' && shellUpdaterData.zsh) {
-          snippetContent = shellUpdaterData.zsh.snippet;
+        if (detectedShell === 'zsh' && shellUpdaterData.zsh) {
+          snippetContent = shellUpdaterData.zsh.snippets;
           isLoginShell = shellUpdaterData.zsh.loginShell;
         } else if (shellUpdaterData.bash) { // Zsh/sh fallback to Bash config
-          if (typeof shellUpdaterData.bash === 'string') {
-            snippetContent = shellUpdaterData.bash;
-            isLoginShell = false;
-          } else {
-            snippetContent = shellUpdaterData.bash.snippet;
-            isLoginShell = shellUpdaterData.bash.loginShell;
-          }
+          snippetContent = shellUpdaterData.bash.snippets;
+          isLoginShell = shellUpdaterData.bash.loginShell;
           logger.info(`Using Bash configuration for ${detectedShell} as no specific ${detectedShell} configuration was provided for '${programName}'.`);
         }
         break;
       case 'fish':
         snippetContent = shellUpdaterData.fish;
-       
         break;
       case 'nu': // Nushell
       case 'nushell':

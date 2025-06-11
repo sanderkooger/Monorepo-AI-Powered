@@ -41,11 +41,12 @@ const config: EpicPostinstallConfig = {
       homebrew: {
         name: 'direnv'
       },
-      shellUpdate: { 
-        bash: {snippet: 'eval "$(direnv hook bash)"' }
+      shellUpdate: {
+        bash: {
+          snippets: ['eval "$(direnv hook bash)"']
+        }
       },
-      // IMPORTANT: Executing post-install scripts can pose security risks if the script source is untrusted.
-      // Ensure that any inline scripts or script paths are from trusted sources.
+
       postInstallScript: {
         // inline: 'eval "$(direnv hook bash)" >> ~/.bashrc' // Commented out for testing script file
        // path: './scripts/direnv_hook_setup.sh'

@@ -66,12 +66,12 @@ export const installBinaries = async ({
     programName: 'epic-postinstall-path-installation', // A unique identifier for this specific PATH update
     systemInfo: systemInfo,
     shellUpdaterData: {
-      bash: { loginShell: false, snippet: pathExportLine }, // Target .bashrc
-      zsh: { loginShell: false, snippet: pathExportLine }, // Target .zshrc
-      sh: { loginShell: true, snippet: pathExportLine }, // Target .profile
-      fish: `set -gx PATH "${targetBinPath}" $PATH`, // Fish-specific PATH update
-      nushell: `let target_bin_path = "${targetBinPath}"\\n$env.PATH = ( $env.PATH | split row (char esep) | where { |p| $p != $target_bin_path } | prepend $target_bin_path )`,
-      elvish: `var target_bin_path = "${targetBinPath}"\\nif (not (has-value $paths $target_bin_path)) {\\n  set paths = [$target_bin_path $@paths]\\n}`
+      bash: { loginShell: false, snippets: [pathExportLine] }, // Target .bashrc
+      zsh: { loginShell: false, snippets: [pathExportLine] }, // Target .zshrc
+      sh: { loginShell: true, snippets: [pathExportLine] }, // Target .profile
+      fish: [`set -gx PATH "${targetBinPath}" $PATH`], // Fish-specific PATH update
+      nushell: `let target_bin_path = "${targetBinPath}"\n$env.PATH = ( $env.PATH | split row (char esep) | where { |p| $p != $target_bin_path } | prepend $target_bin_path )`.split('\n'),
+      elvish: `var target_bin_path = "${targetBinPath}"\nif (not (has-value $paths $target_bin_path)) {\n  set paths = [$target_bin_path $@paths]\n}`.split('\n')
     }
   }
   const pathEnsured = await shellUpdater.add(shellUpdateOptions)
@@ -103,26 +103,24 @@ export const installBinaries = async ({
       shellUpdate: {
         bash: {
           loginShell: true, // Targeting ~/.bash_profile for shims and completions
-          snippet: ["export PATH=\"${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH\"",
+          snippets: ["export PATH=\"${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH\"",
                     ". <(asdf completion bash)"]
-                    
         },
         zsh: {
           loginShell: false, // Targeting ~/.zshrc for shims and completions
-          snippet: ["export PATH=\"${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH\"",
+          snippets: ["export PATH=\"${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH\"",
                     ". <(asdf completion bash)"]
         },
         sh: {
           loginShell: true, // Targeting ~/.profile for shims
-          snippet: ["export PATH=\"${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH\"",
+          snippets: ["export PATH=\"${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH\"",
                     ". <(asdf completion bash)"]
         },
-        nushell: "let shims_dir = (\\n  if ( $env | get --ignore-errors ASDF_DATA_DIR | is-empty ) {\\n    $env.HOME | path join '.asdf'\\n  } else {\\n    $env.ASDF_DATA_DIR\\n  } | path join 'shims'\\n)\\n$env.PATH = ( $env.PATH | split row (char esep) | where { |p| $p != $shims_dir } | prepend $shims_dir )\\n\\n# ASDF completions for nushell (requires manual generation of ~/.asdf/completions/nushell.nu)\\nlet asdf_data_dir = (\\n  if ( $env | get --ignore-errors ASDF_DATA_DIR | is-empty ) {\\n    $env.HOME | path join '.asdf'\\n  } else {\\n    $env.ASDF_DATA_DIR\\n  }\\n)\\n. \"$asdf_data_dir/completions/nushell.nu\"",
-        elvish: "var asdf_data_dir = ~'/.asdf'\\nif (and (has-env ASDF_DATA_DIR) (!=s $E:ASDF_DATA_DIR '')) {\\n  set asdf_data_dir = $E:ASDF_DATA_DIR\\n}\\n\\nif (not (has-value $paths $asdf_data_dir'/shims')) {\\n  set paths = [$path $@paths]\\n}\\n\\n# ASDF completions for elvish (requires manual generation and appending to rc.elv)\\n# The guide suggests: asdf completion elvish >> ~/.config/elvish/rc.elv\\n# and then: echo \"\\n\"'set edit:completion:arg-completer[asdf] = $_asdf:arg-completer~' >> ~/.config/elvish/rc.elv\\n# For now, we'll assume the user handles the generation and direct sourcing is not needed here.\\n# If a snippet is needed to source a generated file, it would be similar to fish/nushell.\\n# For now, leaving it as just the shims and a comment about completions.",
-        fish: '# ASDF configuration code\\nif test -z $ASDF_DATA_DIR\\n    set _asdf_shims "$HOME/.asdf/shims"\\nelse\\n    set _asdf_shims "$ASDF_DATA_DIR/shims"\\nend\\n\\n# Do not use fish_add_path (added in Fish 3.2) because it\\n# potentially changes the order of items in PATH\\nif not contains $_asdf_shims $PATH\\n    set -gx --prepend PATH $_asdf_shims\\nend\\nset --erase _asdf_shims\\n\\n# ASDF completions for fish (requires manual generation of ~/.config/fish/completions/asdf.fish)\\nif status is-interactive\\n    if test -f "$ASDF_DATA_DIR/completions/asdf.fish"\\n        source "$ASDF_DATA_DIR/completions/asdf.fish"\\n    else if test -f "$HOME/.asdf/completions/asdf.fish"\\n        source "$HOME/.asdf/completions/asdf.fish"\\n    end\\nend'
+        nushell: `let shims_dir = (\n  if ( $env | get --ignore-errors ASDF_DATA_DIR | is-empty ) {\n    $env.HOME | path join '.asdf'\n  } else {\n    $env.ASDF_DATA_DIR\n  } | path join 'shims'\n)\n$env.PATH = ( $env.PATH | split row (char esep) | where { |p| $p != $shims_dir } | prepend $shims_dir )\n\n# ASDF completions for nushell (requires manual generation of ~/.asdf/completions/nushell.nu)\nlet asdf_data_dir = (\n  if ( $env | get --ignore-errors ASDF_DATA_DIR | is-empty ) {\n    $env.HOME | path join '.asdf'\n  } else {\n    $env.ASDF_DATA_DIR\n  }\n)\n. "$asdf_data_dir/completions/nushell.nu"`.split('\n'),
+        elvish: `var asdf_data_dir = ~'/.asdf'\nif (and (has-env ASDF_DATA_DIR) (!=s $E:ASDF_DATA_DIR '')) {\n  set asdf_data_dir = $E:ASDF_DATA_DIR\n}\n\nif (not (has-value $paths $asdf_data_dir'/shims')) {\n  set paths = [$path $@paths]\n}\n\n# ASDF completions for elvish (requires manual generation and appending to rc.elv)\n# The guide suggests: asdf completion elvish >> ~/.config/elvish/rc.elv\n# and then: echo "\\n"'set edit:completion:arg-completer[asdf] = $_asdf:arg-completer~' >> ~/.config/elvish/rc.elv\n# For now, we'll assume the user handles the generation and direct sourcing is not needed here.\n# If a snippet is needed to source a generated file, it would be similar to fish/nushell.\n# For now, leaving it as just the shims and a comment about completions.`.split('\n'),
+        fish: `# ASDF configuration code\nif test -z $ASDF_DATA_DIR\n    set _asdf_shims "$HOME/.asdf/shims"\nelse\n    set _asdf_shims "$ASDF_DATA_DIR/shims"\nend\n\n# Do not use fish_add_path (added in Fish 3.2) because it\n# potentially changes the order of items in PATH\nif not contains $_asdf_shims $PATH\n    set -gx --prepend PATH $_asdf_shims\nend\nset --erase _asdf_shims\n\n# ASDF completions for fish (requires manual generation of ~/.config/fish/completions/asdf.fish)\nif status is-interactive\n    if test -f "$ASDF_DATA_DIR/completions/asdf.fish"\n        source "$ASDF_DATA_DIR/completions/asdf.fish"\n    else if test -f "$HOME/.asdf/completions/asdf.fish"\n        source "$HOME/.asdf/completions/asdf.fish"\n    end\nend`.split('\n')
       }
     }
-
     if (asdfAvailable) {
       const cleanedInstalledVersion =
         installedAsdfVersion?.match(/(\d+\.\d+\.\d+)/)?.[1]
