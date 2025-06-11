@@ -10,8 +10,9 @@ export interface ShellUpdaterData {
   sh?: Posix
   zsh?: Posix;
   fish?: string[];
-  nushell?: string[]; 
-  elvish?: string[]; 
+  nushell?: string[];
+  elvish?: string[];
+  pwsh?: string[];
 } 
 export interface ShellUpdaterOptions {
   programName: string; // e.g., 'direnv', 'asdf', 'epic-postinstall-path'

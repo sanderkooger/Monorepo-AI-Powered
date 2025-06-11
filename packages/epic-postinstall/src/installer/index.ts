@@ -6,6 +6,8 @@ import runInstaller from '@src/gitBinInstaller/index.js'
 import isCommandAvailable from '@helpers/isCommandAvailable/index.js'
 import { findProjectRoot } from '@helpers/findProjectRoot/index.js';
 import { EpicPostinstallStateManager } from '@src/stateManager/index.js';
+import { InstallationRecord } from '@src/stateManager/types.js';
+import path from 'path';
 
 /**
  * Handles the installation of a single Git binary, including running the installer,
@@ -18,26 +20,38 @@ async function handleGitBinaryInstallation(
   stateManager: EpicPostinstallStateManager
 ): Promise<void> {
   logger.info(`Attempting to install: ${gitBinary.cmd}`);
-  await runInstaller({
+  const installedBinaryPath = await runInstaller({
     systemInfo,
     gitBinary,
     targetBinPath
   });
-  await stateManager.addInstallation({ ...gitBinary, timestamp: new Date().toISOString() });
 
-  if (gitBinary.shellUpdate) {
-    const binaryShellUpdateOptions: ShellUpdaterOptions = {
-      programName: `${gitBinary.cmd}-shell-update`, // Unique identifier for this binary's shell update
-      systemInfo: systemInfo,
-      shellUpdaterData: gitBinary.shellUpdate
-    };
-    const shellUpdateApplied = await shellUpdater.add(binaryShellUpdateOptions);
-    if (!shellUpdateApplied) {
-      logger.warn(`Failed to apply shell updates for ${gitBinary.cmd}. Please configure your shell manually.`);
-    } else {
-      logger.debug(`Shell updates applied for ${gitBinary.cmd}.`);
-    }
+  const installationRecord: InstallationRecord = {
+    ...gitBinary,
+    timestamp: new Date().toISOString(),
+    binaryPath: installedBinaryPath,
+  };
+
+  if (gitBinary.cmd === 'asdf') {
+    installationRecord.asdfHome = path.join(systemInfo.homeDir, '.asdf');
   }
+
+  await stateManager.addInstallation(installationRecord);
+if (gitBinary.shellUpdate) {
+  const shellUpdateProgramName = `${gitBinary.cmd}-shell-update`; // Unique identifier for this binary's shell update
+  const binaryShellUpdateOptions: ShellUpdaterOptions = {
+    programName: shellUpdateProgramName,
+    systemInfo: systemInfo,
+    shellUpdaterData: gitBinary.shellUpdate
+  };
+  const shellUpdateApplied = await shellUpdater.add(binaryShellUpdateOptions);
+  if (!shellUpdateApplied) {
+    logger.warn(`Failed to apply shell updates for ${gitBinary.cmd}. Please configure your shell manually.`);
+  } else {
+    logger.debug(`Shell updates applied for ${gitBinary.cmd}.`);
+    installationRecord.shellUpdateProgramName = shellUpdateProgramName; // Store the programName
+  }
+}
 }
 
 interface InstallerOptions {

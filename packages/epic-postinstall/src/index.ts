@@ -6,7 +6,7 @@ import getConfig from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
 
-import { uninstallBinaries, uninstallAsdf } from '@src/uninstaller/index.js'
+import { uninstall } from '@src/uninstaller/index.js'
 import { installBinaries } from '@src/installer/index.js'
 
 const run = async () => {
@@ -52,15 +52,7 @@ const run = async () => {
     // If uninstall flag is provided, run uninstaller and exit
     if (isUninstall) {
       logger.info('Uninstall flag detected. Proceeding with uninstallation.')
-      if (config?.gitBinaries) {
-        const { asdf, ...otherBinaries } = config.gitBinaries; // Separate asdf from other binaries
-        await uninstallBinaries(otherBinaries, targetBinPath, systemInfo); // Uninstall other binaries first
-        if (asdf) {
-          await uninstallAsdf(asdf, targetBinPath, systemInfo); // Uninstall asdf last
-        }
-      } else {
-        logger.warn('No gitBinaries found in configuration to uninstall.')
-      }
+      await uninstall(process.cwd(), targetBinPath, systemInfo);
       return // Exit the script after uninstallation
     } else {
       // Installation logic

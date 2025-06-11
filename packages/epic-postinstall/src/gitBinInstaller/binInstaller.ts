@@ -92,7 +92,7 @@ async function findExecutableInDirectory(directory: string, executableName: stri
  * Creates ~/.local.bin if it does not exist. Overwrites previous versions.
  * @param releaseUrl The URL of the release asset to download.
  */
-export async function binInstaller(releaseUrl: string, targetBinPath: string, gitBinary: GitBinary): Promise<void> {
+export async function binInstaller(releaseUrl: string, targetBinPath: string, gitBinary: GitBinary): Promise<string> {
   const fileName = path.basename(releaseUrl);
   const executableName = gitBinary.cmd; // Use gitBinary.cmd for the expected executable name
   const finalTargetPath = path.join(targetBinPath, executableName);
@@ -161,6 +161,7 @@ export async function binInstaller(releaseUrl: string, targetBinPath: string, gi
     if (gitBinary.postInstallScript) {
       await executePostInstallScript(gitBinary.postInstallScript, finalTargetPath);
     }
+    return finalTargetPath;
 
   } catch (error) {
     logger.error(`Error during installation: ${error instanceof Error ? error.message : error}`);
