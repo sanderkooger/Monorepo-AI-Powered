@@ -1,4 +1,4 @@
-import { EpicPostinstallConfig } from './src/helpers/getConfig'
+import { EpicPostinstallConfig } from './src/index.js'
 
 const config: EpicPostinstallConfig = {
   asdf: {

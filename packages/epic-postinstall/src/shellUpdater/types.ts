@@ -1,7 +1,7 @@
 import { SystemInfo } from '@helpers/getSystemInfo/index.js';
 
 export interface Posix {
-  loginShell: boolean; // true for login shell files (~/.profile, ~/.bash_profile, ~/.zprofile), false for interactive non-login files (~/.bashrc, ~/.zshrc)
+  loginShell?: boolean; // true for login shell files (~/.profile, ~/.bash_profile, ~/.zprofile), false for interactive non-login files (~/.bashrc, ~/.zshrc)
   snippets: string[]; // Renamed from 'script', now supports single string or array of strings
 }
 

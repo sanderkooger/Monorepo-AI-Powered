@@ -2,7 +2,7 @@
 
 import * as os from 'node:os'
 import * as path from 'node:path'
-import getConfig from '@helpers/getConfig/index.js'
+import getConfig, { EpicPostinstallConfig } from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
 
@@ -65,3 +65,5 @@ const run = async () => {
 }
 
 run()
+
+export type { EpicPostinstallConfig };

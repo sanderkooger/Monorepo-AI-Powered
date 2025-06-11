@@ -1,5 +1,5 @@
 {
-  "name": "epic-postinstall",
+  "name": "@repo/epic-postinstall",
   "version": "0.0.1",
   "description": "A utility package for post-installation and cleanup scripts.",
   "type": "module",
