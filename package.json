@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "echo \"postinstall goes here\" && exit 0",
+    "postinstall": "epic-postinstall",
     "prepare": "husky",
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -16,6 +16,7 @@
     "test": "turbo run test",
     "dev-init": "./scripts/setup-dev-env.sh",
     "clean": "turbo run clean && rimraf .turbo node_modules"
+    
   },
   "config": {
     "commitizen": {
@@ -27,17 +28,18 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@commitlint/types": "^19.8.0",
+    "@commitlint/types": "^19.8.1",
     "conventional-changelog-atom": "^5.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.0",
-    "@commitlint/config-conventional": "^19.8.0",
+    "@repo/epic-postinstall": "workspace:*",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@repo/prettier-config": "workspace:*",
     "husky": "^9.1.7",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
-    "turbo": "^2.5.3",
+    "turbo": "^2.5.4",
     "typescript": "5.8.3"
   }
 }
