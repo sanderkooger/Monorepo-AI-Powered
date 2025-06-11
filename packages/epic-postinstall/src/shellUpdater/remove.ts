@@ -30,8 +30,7 @@ export async function remove(options: ShellUpdaterOptions): Promise<boolean> {
     } else if (detectedShell === 'elvish') {
       potentialPaths.push({ path: getShellConfigPath(detectedShell, false), isLoginShell: false });
     } else {
-      // For any other detected shell not explicitly handled, warn and skip
-      logger.warn(`Detected shell '${detectedShell}' is not explicitly supported by shellUpdater for removal. Skipping.`);
+      // For any other detected shell not explicitly handled, skip without warning.
       continue; // Skip to the next detected shell
     }
 

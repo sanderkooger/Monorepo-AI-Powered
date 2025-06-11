@@ -52,7 +52,6 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
         isLoginShell = false; // Elvish typically has one config file
         break;
       case 'tmux': // tmux is a terminal multiplexer, not a shell, so we should ignore it.
-        logger.debug(`Detected 'tmux', which is a terminal multiplexer, not a shell. Skipping configuration for '${programName}'.`);
         continue; // Skip to the next detected shell
       default:
         // For any other detected shell not explicitly handled, debug log and skip
