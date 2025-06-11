@@ -38,7 +38,7 @@ async function handleGitBinaryInstallation(
 
   await stateManager.addInstallation(installationRecord);
 if (gitBinary.shellUpdate) {
-  const shellUpdateProgramName = `${gitBinary.cmd}-shell-update`; // Unique identifier for this binary's shell update
+  const shellUpdateProgramName = `${gitBinary.cmd}`; // Unique identifier for this binary's shell update
   const binaryShellUpdateOptions: ShellUpdaterOptions = {
     programName: shellUpdateProgramName,
     systemInfo: systemInfo,
