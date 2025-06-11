@@ -1,7 +1,6 @@
 import { promises as fs } from 'fs';
 import logger from '@src/logger/index.js';
 import { ShellUpdaterOptions } from './types.js';
-import { SystemInfo } from '@helpers/getSystemInfo/index.js'; // Explicitly import SystemInfo
 import { detectInstalledShells, getShellConfigPath, getCommentBlockIdentifier } from './utils.js';
 
 /**
@@ -11,7 +10,7 @@ import { detectInstalledShells, getShellConfigPath, getCommentBlockIdentifier } 
  * @returns A promise that resolves to true if all configurations were successfully removed or not found, false otherwise.
  */
 export async function remove(options: ShellUpdaterOptions): Promise<boolean> {
-  const { programName, systemInfo} = options;
+  const { programName } = options;
   const installedShells = await detectInstalledShells();
   let overallSuccess = true;
 

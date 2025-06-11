@@ -127,9 +127,17 @@ export function getCommentBlockIdentifier(programName: string): { start: string;
  * @param snippetContent The raw shell snippet to wrap.
  * @returns The full shell script block with comments.
  */
-export function generateShellScriptBlock(shell: string, programName: string, snippetContent: string): string {
+export function generateShellScriptBlock(shell: string, programName: string, snippetContent: string | string[]): string {
   const { start, end } = getCommentBlockIdentifier(programName);
+  let contentToEmbed: string;
+
+  if (Array.isArray(snippetContent)) {
+    contentToEmbed = snippetContent.join('\n');
+  } else {
+    contentToEmbed = snippetContent;
+  }
+
   // For now, comment syntax is the same across these shells.
   // If other shells require different comment syntax, this function would need to adapt.
-  return `${start}\n${snippetContent}\n${end}`;
+  return `${start}\n${contentToEmbed}\n${end}`;
 }
