@@ -55,7 +55,6 @@ export interface AsdfConfig {
 }
 
 export interface EpicPostinstallConfig {
-  message?: string;
   gitBinaries?: {
     [name: string]: GitBinary;
   };

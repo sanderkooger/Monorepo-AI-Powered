@@ -47,7 +47,7 @@ const run = async () => {
     }
 
     const config = getConfig()
-    logger.info(config?.message)
+    
 
     // If uninstall flag is provided, run uninstaller and exit
     if (isUninstall) {
