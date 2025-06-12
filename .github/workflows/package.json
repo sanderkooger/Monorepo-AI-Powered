@@ -5,11 +5,14 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "epic-postinstall",
     "lint": "actionlint",
-    "clean": "rimraf node_modules"
+    "clean": "epic-postinstall --uninstall && rimraf node_modules .turbo"
   },
   "dependencies": {},
   "devDependencies": {
+    "@repo/epic-postinstall": "workspace:*",
     "rimraf": "^6.0.1"
   }
 }

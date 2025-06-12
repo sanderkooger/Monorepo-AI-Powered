@@ -21,19 +21,26 @@ const config: EpicPostinstallConfig = {
           snippets: ['eval "$(direnv hook bash)"']
         }
       },
+      
 
       postInstallScript: {
         // inline: 'eval "$(direnv hook bash)" >> ~/.bashrc' // Commented out for testing script file
-       // path: './scripts/direnv_hook_setup.sh'
+        // path: './scripts/direnv_hook_setup.sh'
       }
-    }
+    },
+    shellCheck:{
+      cmd: 'shellcheck',
+      version: '0.10.0',
+      githubRepo: "https://github.com/koalaman/shellcheck",
+      homebrew:{name: 'shellcheck'},
+    },
   },
-  
+
   scripts: [
-    {
-      name: 'setup_project',
-      path: './scripts/setup.sh'
-    }
+    // {
+    //   name: 'setup_project',
+    //   path: './scripts/setup.sh'
+    // }
   ]
 }
 

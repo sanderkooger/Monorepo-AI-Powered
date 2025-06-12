@@ -2,7 +2,7 @@
   "name": "opentofu",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "echo \"postinstall goes here\" && exit 0",
+    "postinstall": "epic-postinstall",
     "lint": "pnpm npm-run-all lint:tflint lint:validate",
     "lint:validate":"tofu validate",
     "lint:tflint": "tflint --recursive --color --minimum-failure-severity='error'",
@@ -10,13 +10,14 @@
     "lint:checkov": "checkov --directory . --config-file .checkov.yaml",
     "build": "tofu init -reconfigure && pnpm plan",
     "test": "echo \"tests: to be implemented\" && exit 0",
-    "clean": "rimraf .terraform node_modules .turbo",
+    "clean": "epic-postinstall --uninstall && rimraf .terraform node_modules .turbo",
     "plan": "tofu plan",
     "apply": "tofu apply -auto-approve ",
     "deploy-infra-provision": "pnpm run apply"
   },
   "dependencies": {},
   "devDependencies": {
+    "@repo/epic-postinstall": "workspace:*",
     "npm-run-all": "^4.1.5",
     "rimraf": "^6.0.1"
   }
