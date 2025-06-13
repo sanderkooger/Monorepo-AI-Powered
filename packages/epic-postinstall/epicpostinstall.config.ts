@@ -21,16 +21,16 @@ const config: EpicPostinstallConfig = {
     scripts: [
       {
         name: 'run_tests',
-        path: './scripts/run_python_tests.py',
+        path: './scripts/run_python_tests.py', // this needs to just echo hello world (python install) in the script
         args: ['--verbose']
       }
     ]
   },
   scripts: [
-    // {
-    //   name: 'setup_project',
-    //   path: './scripts/setup.sh'
-    // }
+    {
+      name: 'setup_project',
+      path: './scripts/test_script.sh'
+    }
   ]
 }
 
