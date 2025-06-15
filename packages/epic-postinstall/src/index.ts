@@ -5,23 +5,27 @@ import * as path from 'node:path'
 import getConfig, { EpicPostinstallConfig } from '@helpers/getConfig/index.js'
 import getSystemInfo from '@helpers/getSystemInfo/index.js'
 import logger, { LogLevel } from '@src/logger/index.js'
+import argumentParser from '@helpers/argumentParser/index.js';
+import displaySplashScreen from '@helpers/splashscreen.js';
 
 import { uninstall } from '@src/uninstaller/index.js'
 import { installBinaries } from '@src/installer/index.js'
 
 const run = async () => {
-  const args = process.argv.slice(2)
-  const isUninstall = args.includes('--uninstall')
+  const args = process.argv.slice(2);
+  const { isUninstall, isVerbose, isDebug, isSplash } = argumentParser(args);
 
-  const isVerbose = args.includes('--verbose')
-  const isDebug = args.includes('--debug')
-  const targetBinPath = path.join(os.homedir(), '.local', 'bin')
+  if (isSplash) {
+    displaySplashScreen();
+  }
+
+  const targetBinPath = path.join(os.homedir(), '.local', 'bin');
   if (isDebug) {
-    logger.setLogLevel(LogLevel.DEBUG)
+    logger.setLogLevel(LogLevel.DEBUG);
   } else if (isVerbose) {
-    logger.setLogLevel(LogLevel.VERBOSE)
+    logger.setLogLevel(LogLevel.VERBOSE);
   } else {
-    logger.setLogLevel(LogLevel.INFO) // Default to INFO if no flags are set
+    logger.setLogLevel(LogLevel.INFO); // Default to INFO if no flags are set
   }
 
 

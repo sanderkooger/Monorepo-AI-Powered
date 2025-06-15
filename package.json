@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "epic-postinstall",
+    "postinstall": "epic-postinstall --splash",
     "prepare": "husky",
     "build": "turbo run build",
     "dev": "turbo run dev",

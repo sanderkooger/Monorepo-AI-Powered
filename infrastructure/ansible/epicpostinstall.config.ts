@@ -1,4 +1,4 @@
-import { EpicPostinstallConfig } from './src/index.js'
+import { EpicPostinstallConfig } from '@repo/epic-postinstall'
 
 const config: EpicPostinstallConfig = {
   python: {

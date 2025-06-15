@@ -14,9 +14,9 @@
     "configure": "ansible-playbook -i inventories/dynamic_inventory.py playbooks/site.yml",
     "deploy-infra-configure": "pnpm run configure"
   },
-  
   "dependencies": {},
   "devDependencies": {
+    "@repo/epic-postinstall": "workspace:*",
     "rimraf": "^6.0.1"
   }
 }
