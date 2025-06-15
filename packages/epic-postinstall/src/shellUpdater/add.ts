@@ -22,27 +22,26 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
 
   for (const detectedShell of installedShells) {
     let snippetContent: string | string[] | undefined
-    let isLoginShell = false // Default for interactive shells
+    let isLoginShell = false
 
     // Determine snippet content and loginShell status based on detected shell and provided data
     switch (detectedShell) {
       case 'bash':
         if (shellUpdaterData.bash) {
           snippetContent = shellUpdaterData.bash.snippets
-          isLoginShell = shellUpdaterData.bash.loginShell || false // Default to false if not specified
+          isLoginShell = shellUpdaterData.bash.loginShell ?? false
         }
         break
       case 'zsh':
-      case 'sh': // Treat sh like zsh for fallback logic
+      case 'sh': // Fallback for sh/zsh to bash if zsh config is not available
         if (detectedShell === 'zsh' && shellUpdaterData.zsh) {
           snippetContent = shellUpdaterData.zsh.snippets
-          isLoginShell = shellUpdaterData.zsh.loginShell || false // Default to false if not specified
+          isLoginShell = shellUpdaterData.zsh.loginShell ?? false
         } else if (shellUpdaterData.bash) {
-          // Zsh/sh fallback to Bash config
           snippetContent = shellUpdaterData.bash.snippets
-          isLoginShell = shellUpdaterData.bash.loginShell || false // Default to false if not specified
+          isLoginShell = shellUpdaterData.bash.loginShell ?? false
           logger.info(
-            `Using Bash configuration for ${detectedShell} as no specific ${detectedShell} configuration was provided for '${programName}'.`
+            `Using Bash configuration for ${detectedShell} as no specific configuration was provided for '${programName}'.`
           )
         }
         break
@@ -51,26 +50,24 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
         break
       case 'nu': // Nushell
       case 'nushell':
-        snippetContent = shellUpdaterData.nushell
-        isLoginShell = false // Nushell typically has one config file
-        break
       case 'elvish':
-        snippetContent = shellUpdaterData.elvish
-        isLoginShell = false // Elvish typically has one config file
+        // Nushell and Elvish typically have one config file, not distinguishing login/non-login
+        snippetContent = shellUpdaterData[detectedShell as 'nushell' | 'elvish']
+        isLoginShell = false
         break
       case 'tmux': // tmux is a terminal multiplexer, not a shell, so we should ignore it.
-        continue // Skip to the next detected shell
+        logger.debug(`Detected shell '${detectedShell}' is not a supported shell type. Skipping.`)
+        continue
       default:
-        // For any other detected shell not explicitly handled, debug log and skip
         logger.debug(
           `Detected shell '${detectedShell}' is not explicitly supported by shellUpdater. Skipping configuration for '${programName}'.`
         )
-        continue // Skip to the next detected shell
+        continue
     }
 
     if (!snippetContent) {
       logger.warn(
-        `No specific configuration provided for '${detectedShell}' shell for program '${programName}'. Skipping.`
+        `No configuration provided for '${detectedShell}' shell for program '${programName}'. Skipping.`
       )
       continue
     }
@@ -91,41 +88,42 @@ export async function add(options: ShellUpdaterOptions): Promise<boolean> {
       const { start: blockStartIdentifier } =
         getCommentBlockIdentifier(programName)
 
+      // Convert snippetContent to a single string for content checking
+      const rawSnippetContent = Array.isArray(snippetContent)
+        ? snippetContent.join('\n')
+        : snippetContent
+
       let fileContent = ''
       try {
         fileContent = await fs.readFile(targetFilePath, 'utf8')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (readError: any) {
-        if (readError.code === 'ENOENT') {
-          // File does not exist, will create it
-          logger.debug(
-            `Shell config file not found: ${targetFilePath}. It will be created.`
-          )
+        if ((readError as NodeJS.ErrnoException).code === 'ENOENT') {
+          logger.debug(`Shell config file not found: ${targetFilePath}. It will be created.`)
         } else {
-          logger.error(
-            `Failed to read shell config file ${targetFilePath}: ${readError.message}`
-          )
+          logger.error(`Failed to read shell config file ${targetFilePath}: ${(readError as Error).message}`)
           overallSuccess = false
           continue
         }
       }
 
-      if (fileContent.includes(blockStartIdentifier)) {
+      // Check if the full comment block or the raw snippet content already exists
+      if (fileContent.includes(blockStartIdentifier) || fileContent.includes(rawSnippetContent)) {
         logger.info(
           `Configuration for '${programName}' already exists in '${targetFilePath}'. Skipping.`
         )
-        configuredFilePaths.add(targetFilePath) // Mark as configured
       } else {
         await fs.appendFile(targetFilePath, `\n${fullSnippetBlock}\n`, 'utf8')
         logger.success(
           `Successfully added configuration for '${programName}' to '${targetFilePath}'.`
         )
-        configuredFilePaths.add(targetFilePath) // Mark as configured
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      configuredFilePaths.add(targetFilePath) // Mark as configured regardless of whether it was added or already existed
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
       logger.error(
-        `Error updating ${detectedShell} shell for '${programName}': ${error.message}`
+        `Error updating ${detectedShell} shell for '${programName}': ${errorMessage}`
       )
       overallSuccess = false
     }

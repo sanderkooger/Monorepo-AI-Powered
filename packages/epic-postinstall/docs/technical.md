@@ -31,6 +31,7 @@ export interface EpicPostinstallConfig {
   python?: PythonConfig; // Currently a placeholder, not fully implemented
   scripts?: ScriptConfig[]; // Currently a placeholder, not fully implemented
   asdf?: AsdfConfig;
+  direnv?: DirenvConfig; // Added direnv configuration
 }
 
 export interface GitBinary {
@@ -76,10 +77,15 @@ export interface AsdfTool {
 }
 
 export interface AsdfConfig {
-  version: string; // Desired ASDF version
+  version?: string; // Optional: Desired ASDF version. Defaults to '0.18.0'.
   tools?: {
     [toolName: string]: AsdfTool; // Map of ASDF tools and their versions
   };
+}
+
+export interface DirenvConfig {
+  version?: string; // Optional: Desired direnv version. Defaults to '2.36.0'.
+  // Future: Add other direnv specific options here if needed
 }
 ```
 
@@ -115,10 +121,15 @@ The `installer` module orchestrates the installation of binaries and tools defin
 2.  **`.gitignore` Entry**: Ensures that the `.epic-postinstall-state.json` file is added to the project's `.gitignore` to prevent it from being committed.
 3.  **PATH Environment Variable**: Adds `~/.local/bin` to the system's PATH environment variable for various shells (`bash`, `zsh`, `sh`, `fish`, `nushell`, `elvish`) using `shellUpdater`. This ensures that installed binaries are discoverable.
 4.  **ASDF Installation**:
-    *   Checks if ASDF is configured in `epicpostinstall.config.ts`.
+    *   Ensures `asdf` is installed. If `asdf` is not explicitly configured in `epicpostinstall.config.ts`, it defaults to version `0.18.0`.
     *   Verifies if ASDF is already installed and at the correct version.
-    *   If not installed or version mismatch, it triggers the installation of ASDF itself using `handleGitBinaryInstallation`.
+    *   If not installed or version mismatch, it triggers the installation or update of ASDF itself using `handleGitBinaryInstallation`.
     *   Applies necessary ASDF shell initializations (shims, completions) via `shellUpdater`.
+5.  **Direnv Installation**:
+    *   Ensures `direnv` is installed. If `direnv` is not explicitly configured in `epicpostinstall.config.ts`, it defaults to version `2.36.0`.
+    *   Verifies if `direnv` is already installed and at the correct version.
+    *   If not installed or version mismatch, it triggers the installation or update of `direnv` itself using `handleGitBinaryInstallation`.
+    *   Applies necessary `direnv` shell initializations (hooks) via `shellUpdater`.
 5.  **Git Binary Installation**:
     *   Iterates through each `gitBinary` defined in the configuration.
     *   For each binary, it calls `handleGitBinaryInstallation` to manage its lifecycle.

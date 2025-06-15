@@ -9,31 +9,7 @@ const config: EpicPostinstallConfig = {
     }
   },
   gitBinaries: {
-    direnv: {
-      cmd: 'direnv',
-      version: '2.36.0',
-      githubRepo: 'https://github.com/direnv/direnv',
-      homebrew: {
-        name: 'direnv'
-      },
-      shellUpdate: {
-        bash: {
-          snippets: ['eval "$(direnv hook bash)"']
-        }
-      },
-      
-
-      postInstallScript: {
-        // inline: 'eval "$(direnv hook bash)" >> ~/.bashrc' // Commented out for testing script file
-        // path: './scripts/direnv_hook_setup.sh'
-      }
-    },
-    shellCheck:{
-      cmd: 'shellcheck',
-      version: '0.10.0',
-      githubRepo: "https://github.com/koalaman/shellcheck",
-      homebrew:{name: 'shellcheck'},
-    },
+    
   },
 
   scripts: [

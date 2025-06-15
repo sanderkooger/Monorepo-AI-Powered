@@ -5,7 +5,8 @@
 ## Features
 
 *   **Automated Binary Installation**: Installs command-line tools and applications directly from their official GitHub releases, supporting various operating systems (Linux, macOS) and architectures.
-*   **ASDF Version Manager Integration**: Seamlessly installs and configures `asdf`, allowing for easy management of multiple language runtimes and tools.
+*   **ASDF Version Manager Integration**: Ensures `asdf` is always installed and configured, allowing for easy management of multiple language runtimes and tools. It will install a default version if not specified.
+*   **Direnv Integration**: Ensures `direnv` is always installed and configured, providing environment variable management. It will install a default version if not specified.
 *   **Shell Environment Updates**: Automatically updates common shell configuration files (e.g., `.bashrc`, `.zshrc`, `.profile`, `config.fish`, `init.nu`, `rc.elv`) to ensure installed binaries are in your PATH and shell completions are available.
 *   **Installation State Management**: Tracks installed binaries and their versions in a local state file (`.epic-postinstall-state.json`) for reliable uninstallation and idempotency.
 *   **Uninstallation Capabilities**: Provides a clean way to remove all binaries and configurations managed by `epic-postinstall`.
@@ -101,7 +102,7 @@ const config: EpicPostinstallConfig = {
     },
   },
   asdf: {
-    version: '0.14.0', // Version of ASDF itself
+    version: '0.18.0', // Optional: Specify the desired ASDF version. Defaults to '0.18.0' if not provided.
     tools: {
       nodejs: {
         version: '20.11.0', // Node.js version to install via ASDF
@@ -110,6 +111,9 @@ const config: EpicPostinstallConfig = {
         version: '3.10.12', // Python version to install via ASDF
       },
     },
+  },
+  direnv: {
+    version: '2.36.0', // Optional: Specify the desired direnv version. Defaults to '2.36.0' if not provided.
   },
   // python: { // Planned feature: Python virtual environment management
   //   virtualEnv: {
@@ -142,10 +146,12 @@ export default config;
         *   `tap` (optional, string): The Homebrew tap if the package is not in the core repository (e.g., `hashicorp/tap`).
     *   `shellUpdate` (optional, object): Defines shell snippets to add for PATH updates or shell completions. See `ShellUpdaterData` in the [Technical Deep Dive](docs/technical.md) for details.
     *   `postInstallScript` (optional, object): Defines a script to run after the binary is installed. Can be `inline` content or a `path` to a file.
-*   `asdf` (optional, object): Configures the installation and management of `asdf`.
-    *   `version` (string, required): The desired version of the `asdf` tool itself.
+*   `asdf` (optional, object): Configures the installation and management of `asdf`. If this object is not present, `asdf` will still be installed with a default version of `0.18.0`.
+    *   `version` (string, optional): The desired version of the `asdf` tool itself. Defaults to `0.18.0` if not specified.
     *   `tools` (optional, object): An object mapping ASDF tool names (e.g., `nodejs`, `python`) to `AsdfTool` objects.
         *   `version` (string, required): The desired version of the specific tool to install via ASDF.
+*   `direnv` (optional, object): Configures the installation and management of `direnv`. If this object is not present, `direnv` will still be installed with a default version of `2.36.0`.
+    *   `version` (string, optional): The desired version of the `direnv` tool itself. Defaults to `2.36.0` if not specified.
 *   `python` (optional, object): **(Planned Feature)** Configuration for Python virtual environments and package management.
 *   `scripts` (optional, array): **(Planned Feature)** An array of `ScriptConfig` objects to define and execute custom scripts.
 

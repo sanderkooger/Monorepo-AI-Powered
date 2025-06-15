@@ -48,10 +48,15 @@ export interface AsdfTool {
 }
 
 export interface AsdfConfig {
-  version: string;
+  version?: string; // Make ASDF version optional
   tools?: {
     [toolName: string]: AsdfTool;
   };
+}
+
+export interface DirenvConfig {
+  version?: string; // Optional direnv version
+  // Add other direnv specific options here if needed in the future
 }
 
 export interface EpicPostinstallConfig {
@@ -61,6 +66,7 @@ export interface EpicPostinstallConfig {
   python?: PythonConfig;
   scripts?: ScriptConfig[];
   asdf?: AsdfConfig;
+  direnv?: DirenvConfig; // Add optional direnv configuration
 }
 
 /**

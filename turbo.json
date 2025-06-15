@@ -10,7 +10,8 @@
         ".next/**",
         "!.next/cache/**",
         ".terraform/**",
-        ".ansible/**"
+        ".ansible/**",
+        "dist/**"
       ],
       "env": [
         "ENV_NAME",

@@ -15,40 +15,43 @@ export async function remove(options: ShellUpdaterOptions): Promise<boolean> {
   let overallSuccess = true;
 
   for (const detectedShell of installedShells) {
-    // For removal, we need to consider both login and non-login paths for Bash/Zsh
-    // as we don't necessarily know which one was used during 'add'.
-    // We'll try to remove from both if applicable.
-    const potentialPaths: { path: string; isLoginShell: boolean }[] = [];
+    const potentialPaths: string[] = [];
 
-    if (detectedShell === 'bash' || detectedShell === 'zsh' || detectedShell === 'sh') {
-      potentialPaths.push({ path: getShellConfigPath(detectedShell, true), isLoginShell: true });
-      potentialPaths.push({ path: getShellConfigPath(detectedShell, false), isLoginShell: false });
-    } else if (detectedShell === 'fish') {
-      potentialPaths.push({ path: getShellConfigPath(detectedShell, false), isLoginShell: false }); // isLoginShell is irrelevant for fish
-    } else if (detectedShell === 'nu' || detectedShell === 'nushell') {
-      potentialPaths.push({ path: getShellConfigPath(detectedShell, false), isLoginShell: false });
-    } else if (detectedShell === 'elvish') {
-      potentialPaths.push({ path: getShellConfigPath(detectedShell, false), isLoginShell: false });
-    } else {
-      // For any other detected shell not explicitly handled, skip without warning.
-      continue; // Skip to the next detected shell
+    // Determine potential configuration file paths for the detected shell.
+    // For Bash/Zsh/Sh, check both login and non-login shell config files.
+    // For other shells, check their primary config file.
+    switch (detectedShell) {
+      case 'bash':
+      case 'zsh':
+      case 'sh':
+        potentialPaths.push(getShellConfigPath(detectedShell, true));
+        potentialPaths.push(getShellConfigPath(detectedShell, false));
+        break;
+      case 'fish':
+      case 'nu':
+      case 'nushell':
+      case 'elvish':
+        potentialPaths.push(getShellConfigPath(detectedShell, false)); // isLoginShell is irrelevant for these shells
+        break;
+      default:
+        // For any other detected shell not explicitly handled, skip without warning.
+        continue;
     }
 
     const { start: blockStartIdentifier, end: blockEndIdentifier } = getCommentBlockIdentifier(programName);
     const regex = new RegExp(`\\n?${blockStartIdentifier}[\\s\\S]*?${blockEndIdentifier}\\n?`, 'g');
 
-    for (const { path: targetFilePath } of potentialPaths) {
+    for (const targetFilePath of potentialPaths) {
       try {
         let fileContent = '';
         try {
           fileContent = await fs.readFile(targetFilePath, 'utf8');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (readError: any) {
-          if (readError.code === 'ENOENT') {
+        } catch (readError: unknown) {
+          if ((readError as NodeJS.ErrnoException).code === 'ENOENT') {
             logger.debug(`Shell config file not found: ${targetFilePath}. Nothing to remove.`);
             continue; // File doesn't exist, nothing to remove from here
           } else {
-            logger.error(`Failed to read shell config file ${targetFilePath}: ${readError.message}`);
+            logger.error(`Failed to read shell config file ${targetFilePath}: ${(readError as Error).message}`);
             overallSuccess = false;
             continue;
           }
@@ -61,9 +64,8 @@ export async function remove(options: ShellUpdaterOptions): Promise<boolean> {
         } else {
           logger.info(`Configuration for '${programName}' not found in '${targetFilePath}'. Skipping removal.`);
         }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        logger.error(`Error removing from ${detectedShell} shell config file ${targetFilePath} for '${programName}': ${error.message}`);
+      } catch (error: unknown) {
+        logger.error(`Error removing from ${detectedShell} shell config file ${targetFilePath} for '${programName}': ${(error as Error).message}`);
         overallSuccess = false;
       }
     }
