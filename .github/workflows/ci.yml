@@ -62,23 +62,8 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml # Ensure this points to your monorepo's lockfile
 
-
-      ## Install linters that are not installed by pnpm scripts
-      - name: Install actionlint
-        id: get_actionlint
-        run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          pwd >> "$GITHUB_PATH" # Add the current directory (where actionlint is installed) to PATH
-        shell: bash
-
-      - name: Install TFLint
-        uses: terraform-linters/setup-tflint@v4
-
-      ## Install tofu
-      - name: Install OpenTofu
-        uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_wrapper: false
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --no-audit
 
 
       - name: Run Turborepo Lint (Affected)
@@ -98,6 +83,5 @@ jobs:
         with:
           name: app-dist-artifacts
           path: |
-            apps/*/dist
-            packages/*/dist
+            */dist
           retention-days: 1
