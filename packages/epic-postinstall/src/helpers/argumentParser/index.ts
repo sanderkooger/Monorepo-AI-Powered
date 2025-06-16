@@ -1,4 +1,4 @@
-import logger, { LogLevel } from '@src/logger/index.js';
+import logger from '@src/logger/index.js';
 
 export interface ParsedArguments {
   isUninstall: boolean;

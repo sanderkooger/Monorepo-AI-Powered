@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "epic-postinstall --splash",
+    "postinstall": "epic-postinstall",
     "prepare": "husky",
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -15,7 +15,7 @@
     "check-types": "turbo run check-types",
     "test": "turbo run test",
     "dev-init": "./scripts/setup-dev-env.sh",
-    "clean": "epic-postinstall --uninstall && rimraf .turbo node_modules"
+    "clean": "epic-postinstall --uninstall && turbo run clean && rimraf .turbo node_modules"
     
   },
   "config": {

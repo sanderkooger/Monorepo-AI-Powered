@@ -9,12 +9,23 @@ const config: EpicPostinstallConfig = {
       homebrew: {
         name: 'opentofu'
       },
+      
 
       postInstallScript: {
         // inline: 'eval "$(direnv hook bash)" >> ~/.bashrc' // Commented out for testing script file
         // path: './scripts/direnv_hook_setup.sh'
       }
-    }
+    },
+    tflint: {
+      cmd: 'tflint',
+      version: '0.58.0',
+      githubRepo: 'https://github.com/terraform-linters/tflint/',
+      homebrew: {
+        name: 'tflint'
+      },
+      postInstallScript: {}
+        
+    },
   }
 }
 

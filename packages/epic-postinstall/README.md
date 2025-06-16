@@ -115,20 +115,21 @@ const config: EpicPostinstallConfig = {
   direnv: {
     version: '2.36.0', // Optional: Specify the desired direnv version. Defaults to '2.36.0' if not provided.
   },
-  // python: { // Planned feature: Python virtual environment management
-  //   virtualEnv: {
-  //     name: 'my-venv',
-  //     path: './.venv',
-  //     requirementsFile: './requirements.txt',
-  //   },
-  // },
-  // scripts: [ // Planned feature: Custom script execution
-  //   {
-  //     name: 'setup-direnv-hook',
-  //     path: './scripts/direnv_hook_setup.sh',
-  //     args: ['--force'],
-  //   },
-  // ],
+  python: { // Configuration for Python virtual environments and package management
+    version: '3.12.4', // The desired Python version to install via ASDF
+    virtualEnv: {
+      name: '.venv', // The name of the virtual environment directory
+      requirementsFile: 'requirements.txt', // Path to your requirements file relative to project root
+      packages: ['black', 'flake8'] // Additional packages to install
+    },
+  },
+  scripts: [ // Custom script execution
+    {
+      name: 'setup-direnv-hook',
+      path: './scripts/direnv_hook_setup.sh',
+      args: ['--force'],
+    },
+  ],
 };
 
 export default config;
@@ -152,8 +153,8 @@ export default config;
         *   `version` (string, required): The desired version of the specific tool to install via ASDF.
 *   `direnv` (optional, object): Configures the installation and management of `direnv`. If this object is not present, `direnv` will still be installed with a default version of `2.36.0`.
     *   `version` (string, optional): The desired version of the `direnv` tool itself. Defaults to `2.36.0` if not specified.
-*   `python` (optional, object): **(Planned Feature)** Configuration for Python virtual environments and package management.
-*   `scripts` (optional, array): **(Planned Feature)** An array of `ScriptConfig` objects to define and execute custom scripts.
+*   `python` (optional, object): Configuration for Python virtual environments and package management.
+*   `scripts` (optional, array): An array of `ScriptConfig` objects to define and execute custom scripts.
 
 ## Contributing
 
@@ -165,3 +166,9 @@ This project is licensed under the [MIT License](../../LICENSE).
 
 ---
 For a detailed technical explanation of `epic-postinstall`'s architecture, components, and internal workings, please refer to the [Technical Deep Dive](docs/technical.md).
+
+## Python Environment Installation
+
+`epic-postinstall` provides robust support for setting up Python development environments, including managing Python versions with `asdf`, creating virtual environments, and installing dependencies.
+
+For a comprehensive guide on configuring and using the Python environment installer, refer to the [Python Environment Installer Technical Documentation](docs/python-environment-installer.md).

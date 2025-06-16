@@ -10,6 +10,7 @@ import displaySplashScreen from '@helpers/splashscreen.js';
 
 import { uninstall } from '@src/uninstaller/index.js'
 import { installBinaries } from '@src/installer/index.js'
+import { installPythonEnvironment } from '@src/env-installer/python.js';
 
 const run = async () => {
   const args = process.argv.slice(2);
@@ -61,6 +62,11 @@ const run = async () => {
     } else {
       // Installation logic
       await installBinaries({ config, systemInfo, targetBinPath });
+
+      if (config && config.python) {
+        logger.info('\nStarting Python environment setup...');
+        await installPythonEnvironment(config, process.cwd()); // Pass the full config
+      }
     }
   } catch (err) {
     logger.error(`Error: ${(err as Error).message}`)

@@ -81,7 +81,7 @@ export const installBinaries = async ({
     programName: 'epic-postinstall-bin-path', // A unique identifier for this specific PATH update
     systemInfo: systemInfo,
     shellUpdaterData: {
-      bash: { loginShell: false, snippets: [pathExportLine] }, // Target .bashrc
+      bash: { loginShell: true, snippets: [pathExportLine] }, // Target .bashrc
       zsh: { loginShell: false, snippets: [pathExportLine] }, // Target .zshrc
       sh: { loginShell: true, snippets: [pathExportLine] }, // Target .profile
       fish: [`set -gx PATH "${targetBinPath}" $PATH`], // Fish-specific PATH update

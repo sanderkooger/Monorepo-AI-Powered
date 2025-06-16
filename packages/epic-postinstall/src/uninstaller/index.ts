@@ -1,11 +1,9 @@
-import path from 'path';
 import { promises as fs } from 'fs';
 import logger from '../logger/index.js';
 import { isNodeJS_ErrnoException } from '../helpers/typeGuards.js';
 import shellUpdater, { ShellUpdaterOptions } from '../shellUpdater/index.js';
 import { SystemInfo } from '@src/helpers/getSystemInfo/index.js';
 import { EpicPostinstallStateManager } from '../stateManager/index.js';
-import { InstallationRecord } from '../stateManager/types.js';
 
 export async function uninstall(
   projectRoot: string,

@@ -1,19 +1,19 @@
 import { EpicPostinstallConfig } from '@repo/epic-postinstall'
 
 const config: EpicPostinstallConfig = {
-  python: {
-    version: '3.13',
+   python: {
+    version: '3.13.3',
     virtualEnv: {
       name: '.venv',
       requirementsFile: 'requirements.txt',
-      packages: ['black', 'flake8']
+      packages: []
     },
     scripts: [
-      {
-        name: 'run_tests',
-        path: './scripts/run_python_tests.py', // this needs to just echo hello world (python install) in the script
-        args: ['--verbose']
-      }
+      // {
+      //   name: 'example script',
+      //   path: './scripts/hello-world.py', // this needs to just echo hello world (python install) in the script
+      //   args: ['--verbose']
+      // }
     ]
   },
 

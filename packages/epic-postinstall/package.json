@@ -15,9 +15,9 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm build",
-    "clean": "rimraf dist node_modules .turbo",
+    "clean": "node dist/src/index.js --uninstall && rimraf .venv .envrc .tool-versions node_modules .turbo",
     "build": "tsc && tsc-alias",
-    "start": "node dist/src/index.js",
+    "start": "node dist/src/index.js --splash",
     "dev": "nodemon --watch src --ext ts --exec 'pnpm run build && pnpm start'",
     "uninstall": "node dist/src/index.js --uninstall",
     "lint": "eslint . --ext .ts --max-warnings 0"
@@ -35,7 +35,6 @@
     "concurrently": "^9.1.2",
     "cosmiconfig": "^9.0.0",
     "eslint": "^9.28.0",
-    "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",

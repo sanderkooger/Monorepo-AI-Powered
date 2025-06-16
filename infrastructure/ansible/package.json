@@ -6,11 +6,10 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "echo \"postinstall goes here\" && exit 0",
-    "lint": ". ./.venv/bin/activate && ansible-lint",
+    "postinstall": "epic-postinstall",
+    "lint": "source ./.venv/bin/activate && ansible-lint",
     "test": "echo \"tests: to be implemented\" && exit 0",
-    "clean": "rimraf .venv node_modules roles/galaxy .ansible .turbo",
-    "python:install": "./install.sh",
+    "clean": "epic-postinstall --uninstall && rimraf .venv node_modules roles/galaxy .ansible .turbo",
     "configure": "ansible-playbook -i inventories/dynamic_inventory.py playbooks/site.yml",
     "deploy-infra-configure": "pnpm run configure"
   },

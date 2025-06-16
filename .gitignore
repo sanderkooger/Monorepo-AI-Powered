@@ -51,6 +51,7 @@ __pycache__/
 *ssh_key
 *.pub
 .env
+.envrc
 
 
 # epic-postinstall state files (local installation tracking)

@@ -41,6 +41,7 @@ export interface PythonConfig {
   version?: string
   virtualEnv: PythonVirtualEnv
   scripts?: ScriptConfig[]
+  allowedEnvVars?: string[] // New: Python-specific allowed environment variables
 }
 
 export interface AsdfTool {
@@ -56,7 +57,7 @@ export interface AsdfConfig {
 
 export interface DirenvConfig {
   version?: string; // Optional direnv version
-  // Add other direnv specific options here if needed in the future
+  allowedEnvVars?: string[] // New: Globally allowed environment variables
 }
 
 export interface EpicPostinstallConfig {

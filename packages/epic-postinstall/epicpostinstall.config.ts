@@ -2,7 +2,7 @@ import { EpicPostinstallConfig } from './src/index.js'
 
 const config: EpicPostinstallConfig = {
   python: {
-    version: '3.13',
+    version: '3.12.4',
     virtualEnv: {
       name: '.venv',
       requirementsFile: 'requirements.txt',
@@ -10,8 +10,8 @@ const config: EpicPostinstallConfig = {
     },
     scripts: [
       {
-        name: 'run_tests',
-        path: './scripts/run_python_tests.py', // this needs to just echo hello world (python install) in the script
+        name: 'example script',
+        path: './scripts/hello-world.py', // this needs to just echo hello world (python install) in the script
         args: ['--verbose']
       }
     ]
