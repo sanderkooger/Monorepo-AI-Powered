@@ -63,7 +63,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml # Ensure this points to your monorepo's lockfile
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile 
 
 
       - name: Run Turborepo Lint (Affected)

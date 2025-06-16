@@ -37,10 +37,7 @@ jobs:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml # Ensure this points to your monorepo's lockfile
-      - name: Install openTofu
-        uses: opentofu/setup-opentofu@v1
-        with: 
-          tofu_wrapper: false
+     
       - name: Get pnpm store path
         id: pnpm-cache
         shell: bash
