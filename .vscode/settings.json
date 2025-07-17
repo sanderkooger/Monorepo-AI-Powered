@@ -6,6 +6,6 @@
   ],
   "flashpost.saveDataToWorkspace": true,
   "roo-cline.vsCodeLmModelSelector": {},
-  "ansible.python.interpreterPath": "/home/sander/code/Monorepo-AI-Powered/infrastructure/ansible/.venv/bin/python3",
-  "ansible.executionEnvironment.enabled": false
+  "ansible.python.interpreterPath": "/usr/bin/python",
+  "npm.packageManager": "pnpm"
 }

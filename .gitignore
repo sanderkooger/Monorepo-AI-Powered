@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Dependencies
-node_modules
+node_modules/
 .pnp
 .pnp.js
 
@@ -16,16 +16,18 @@ node_modules
 coverage
 
 # Turbo
-.turbo
+.turbo/
 
 # Vercel
-.vercel
+.vercel/
 
 # Build Outputs
 .next/
 out/
-build
-dist
+build/
+dist/
+tsconfig.tsbuildinfo
+
 
 
 # Debug
@@ -39,9 +41,18 @@ yarn-error.log*
 *-venv/
 .venv/
 venv/
-__pycache__
+__pycache__/
+.ansible/
+
+
 # Misc
 .DS_Store
 *.pem
+*ssh_key
+*.pub
 .env
+.envrc
 
+
+# epic-postinstall state files (local installation tracking)
+/.epic-postinstall-state.json

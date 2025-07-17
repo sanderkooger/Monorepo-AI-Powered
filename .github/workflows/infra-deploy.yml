@@ -1,0 +1,42 @@
+name: Infrastructure Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - accept
+    paths:
+      - 'infrastructure/**'
+      - 'turbo.json'
+  workflow_dispatch:
+
+jobs:
+  deploy-infra:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'accept' && 'accept' || 'dev' }}
+    if: github.ref_name == 'main' || github.ref_name == 'accept'
+    env:
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      ENV_NAME: ${{ vars.ENV_NAME }}
+      TF_VAR_backend_pg_conn_str: ${{ secrets.TF_VAR_BACKEND_PG_CONN_STR }}
+      TF_VAR_proxmox_node_name: ${{ secrets.TF_VAR_PROXMOX_NODE_NAME }}
+      ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+
+    steps:
+      - name: Call Reusable Setup
+        uses: ./.github/workflows/shared-base-install.yml
+        with:
+          node-version: '24'
+
+      - name: Run Turborepo Deploy Infra Provision (OpenTofu Apply)
+        run: npx turbo run deploy-infra-provision --filter="infrastructure/opentofu"
+
+      - name: Run Turborepo Deploy Infra Configure (Ansible Configure)
+        run: npx turbo run deploy-infra-configure --filter="infrastructure/ansible"

@@ -15,4 +15,10 @@ terraform {
       version = "0.77.0"
     }
   }
+
+  backend "pg" {
+    conn_str = var.backend_pg_conn_str
+    schema_name = "${var.repo_name}_${var.env_name}"
+   
+  }
 }

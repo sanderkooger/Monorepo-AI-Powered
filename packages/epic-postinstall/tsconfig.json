@@ -1,0 +1,18 @@
+{
+  "extends": "@repo/typescript-config/node-esm.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@helpers/*": ["./src/helpers/*"],
+      "@clients/*": ["./src/clients/*"],
+    }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

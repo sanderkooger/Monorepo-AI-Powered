@@ -2,21 +2,20 @@
   "name": "@monorepo/ansible",
   "version": "0.1.0",
   "description": "Ansible environment management package",
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "postinstall": "pnpm python:install",
-    "lint": "ansible-lint",
-    "clean": "rimraf .venv node_modules roles/galaxy .ansible .turbo",
-    "python:install": "./setup-venv.sh"
-  },
-  "packageManager": "pnpm@9.0.0",
-  "engines": {
-    "node": ">=22"
-  },
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "epic-postinstall",
+    "lint": "source ./.venv/bin/activate && ansible-lint",
+    "test": "echo \"tests: to be implemented\" && exit 0",
+    "clean": "epic-postinstall --uninstall && rimraf .venv node_modules roles/galaxy .ansible .turbo",
+    "configure": "ansible-playbook -i inventories/dynamic_inventory.py playbooks/site.yml",
+    "deploy-infra-configure": "pnpm run configure"
+  },
   "dependencies": {},
   "devDependencies": {
+    "@repo/epic-postinstall": "workspace:*",
     "rimraf": "^6.0.1"
   }
 }

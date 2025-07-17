@@ -4,14 +4,14 @@
 variable "repo_name" {
   type        = string
   description = "Manual repository name override"
-  default     = null
+  default     = "Monorepo-AI-Powered"
 }
 
 
 variable "env_name" {
   description = "env name for environment segregation (prod, accept, or dev-<name>)"
   type        = string
-  default     = null
+  default     = "dev"
 }
 
 
@@ -22,15 +22,9 @@ variable "proxmox_node_name" {
 
 }
 
-variable "vault_addr" {
-  description = "The address of the Vault server."
-  type        = string
-  default     = null # Or provide a sensible default if desired, though tfvars will override
-}
 
-variable "vault_token" {
-  description = "The Vault token to use for authentication."
+variable "backend_pg_conn_str" {
+  description = "PostgreSQL connection string for Vault backend"
   type        = string
-  sensitive   = true
-  default     = null # Or provide a sensible default if desired, though tfvars will override
+  default     = null
 }

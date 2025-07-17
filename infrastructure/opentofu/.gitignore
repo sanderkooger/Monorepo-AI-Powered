@@ -3,3 +3,5 @@
 *.tfstate.*
 .terraform
 node_modules
+# epic-postinstall state files (local installation tracking)
+/.epic-postinstall-state.json

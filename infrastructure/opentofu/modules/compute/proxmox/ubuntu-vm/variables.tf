@@ -1,5 +1,5 @@
 
-variable "domain_name" {
+variable "fqdn" {
   description = "Optional domain name to append for FQDN construction for Ansible (e.g., 'example.com'). If null, FQDN will be the instance name."
   type        = string
   default     = null
@@ -20,7 +20,7 @@ variable "env_name" {
   type        = string
 }
 
-variable "node_name" {
+variable "proxmox_node_name" {
   description = "The Proxmox node to deploy the VM on."
   type        = string
 }
@@ -33,16 +33,6 @@ variable "description" {
 
 variable "image_id" {
   description = "the id of the image hosted on proxmox."
-  type        = string
-}
-
-variable "ip_address" {
-  description = "The static IPv4 address to assign to the VM (without CIDR)."
-  type        = string
-}
-
-variable "gateway" {
-  description = "The IPv4 gateway for the VM."
   type        = string
 }
 
@@ -96,6 +86,13 @@ variable "memory_size" {
   description = "Memory size for the VM in MB."
   type        = number
   default     = 256
+  
+}
+
+variable "disk_size" {
+  description = "Disk size for the VM in GB."
+  type        = number
+  default     = 15
   
 }
 

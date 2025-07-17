@@ -1,4 +1,8 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "infrastructure/*"
+  - .github/*
+  - apps/*
+  - packages/*
+  - infrastructure/*
+onlyBuiltDependencies:
+  - core-js-pure
+  - sharp

@@ -1,19 +1,50 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": ["PATH", "SHELL"],
   "tasks": {
-    "clean": {
-      "dependsOn": ["^clean"]
-    },
+    "clean": {"dependsOn": ["^clean"]},
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".terraform/**",
+        ".ansible/**",
+        "dist/**"
+      ],
+      "env": [
+        "ENV_NAME",
+        "PROXMOX_NODE_NAME",
+        "VAULT_ADDR",
+        "VAULT_TOKEN",
+        "TF_VAR_*",
+        "NEXT_PUBLIC_*",
+        "GITHUB_TOKEN"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
     },
-   
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "deploy-infra:provision": {
+      "outputs": []
+    },
+    "deploy-infra:configure": {
+      "dependsOn": ["deploy-infra-provision"],
+      "outputs": []
+    },
+    "deploy-infra": {
+      "dependsOn": ["deploy-infra:provision", "deploy-infra:configure"],
+      "outputs": []
+    },
+    "deploy-docs": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },

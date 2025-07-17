@@ -1,15 +1,11 @@
 
 
 
-locals {
-  # Construct FQDN: if domain_name is provided, append it; otherwise, use the VM name.
-  fqdn = var.domain_name != null ? "${proxmox_virtual_environment_vm.ubuntu_vm.name}.${var.domain_name}" : proxmox_virtual_environment_vm.ubuntu_vm.name
-}
 
 ## Ubuntu VM Module
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   name        = "${var.instance_name}-${var.env_name}"
-  node_name   = var.node_name
+  node_name   = var.proxmox_node_name
   description = var.description
   tags        = ["ubuntu"]
 
@@ -28,11 +24,12 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
   disk {
     datastore_id = "local-lvm"
-    file_id      = var.image_id# proxmox_virtual_environment_download_file.ubuntu_image.id
+    file_id      = var.image_id # proxmox_virtual_environment_download_file.ubuntu_image.id
     interface    = "virtio0"
-    size         = 30
+    size         = var.disk_size
     iothread     = true
     discard      = "on"
+    file_format = "raw"
   }
 
   network_device {
@@ -50,8 +47,9 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     user_data_file_id = proxmox_virtual_environment_file.user_data_cloud_config.id
     ip_config {
       ipv4 {
-        address = "${var.ip_address}/24"
-        gateway = var.gateway
+        address = "dhcp"
+        #address = "${var.ip_address}/24"
+        #gateway = var.gateway
       }
     }
     dns {
@@ -65,7 +63,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
   content_type = "snippets"
   datastore_id = "local"
-  node_name    = var.node_name
+  node_name    = var.proxmox_node_name
 
   source_raw {
     data = <<-EOT
@@ -149,16 +147,18 @@ resource "vault_kv_secret_v2" "machine_credentials" {
 }
 
 resource "ansible_host" "host" {
-  name   = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1][0]
+  name   = "${var.instance_name}-${var.env_name}" # Use hostname for inventory name
   groups = var.ansible_groups
 
   variables = merge(
     {
       instance_name             = proxmox_virtual_environment_vm.ubuntu_vm.name
+      fqdn                    = var.fqdn
       ansible_python_interpreter = "/usr/bin/python3.12"
       vault_ssh_ca_signing_role = var.vault_ssh_engine_signing_role
       vault_ssh_ca_principal     = var.user_name
-
+      ansible_host              = proxmox_virtual_environment_vm.ubuntu_vm.ipv4_addresses[1][0] # Explicitly set ansible_host to IP
+      
       
     },
     var.ansible_variables
